@@ -41,5 +41,10 @@ sont marquées « Ajout Mordheim Ledger ».
   sur la page, `TryGet` retient le plus haut à l'écran plutôt que le plus récent - une carte de guerrier
   répétée par son gabarit désigne ainsi la première du roster, pas la dernière, souvent hors écran.
 
+- `OnboardingCoordinator.cs` (Mordheim Ledger) : paramètre `canShow` de `StartTourIfNotCompletedAsync`, vérifié une
+  fois le premier segment résolu, juste avant d'afficher l'overlay - faux abandonne la visite sans la marquer vue.
+  La résolution peut prendre plusieurs secondes : la visite d'une fiche démarrait sinon par-dessus un formulaire
+  ouvert entre-temps.
+
 Garder ce fichier à jour à chaque nouvelle modification, pour pouvoir reporter facilement une
 version plus récente du projet d'origine.

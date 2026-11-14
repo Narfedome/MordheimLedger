@@ -10,7 +10,8 @@ public partial class ChipItemView : ContentView
             nameof(HeaderText),
             typeof(string),
             typeof(ChipItemView),
-            string.Empty);
+            string.Empty,
+            propertyChanged: (bindable, _, _) => ((ChipItemView)bindable).RecomputeHeader());
 
     public string HeaderText
     {
@@ -34,7 +35,8 @@ public partial class ChipItemView : ContentView
             nameof(IsMandatory),
             typeof(bool),
             typeof(ChipItemView),
-            false);
+            false,
+            propertyChanged: (bindable, _, _) => ((ChipItemView)bindable).RecomputeHeader());
 
     public bool IsMandatory
     {
@@ -178,6 +180,18 @@ public partial class ChipItemView : ContentView
         get => (bool)GetValue(ShowSectionProperty);
         private set => SetValue(ShowSectionProperty, value);
     }
+
+    /// <summary>Titre simple (section facultative) : le titre obligatoire, lui, porte son « * » rouge.</summary>
+    public static readonly BindableProperty ShowPlainHeaderProperty =
+        BindableProperty.Create(nameof(ShowPlainHeader), typeof(bool), typeof(ChipItemView), false);
+
+    public bool ShowPlainHeader
+    {
+        get => (bool)GetValue(ShowPlainHeaderProperty);
+        private set => SetValue(ShowPlainHeaderProperty, value);
+    }
+
+    private void RecomputeHeader() => ShowPlainHeader = !IsMandatory && !string.IsNullOrEmpty(HeaderText);
 
     private FaIconButtonView? _addButton;
 

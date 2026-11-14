@@ -11,10 +11,10 @@
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.WarriorEditForm"
                x:DataType="local:WarriorEditDialogViewModel">
-    <!-- Page plein écran de modification d'un guerrier (autrefois WarriorEditDialog) : onglets fixes sous
-         l'en-tête, contenu en cartes qui seul défile, Annuler / Enregistrer dans le pied, Supprimer en icône
-         dans l'en-tête. -->
-    <form:FormPageLayout Title="{Binding Title}"
+    <!-- « Corriger la fiche » (2026-11-14) : formulaire de correction, ouvert depuis la page légère du crayon
+         (WarriorQuickEditForm). Rien n'y coûte ni n'y rapporte d'or (bandeau ambre) ; onglets fixes sous l'en-tête,
+         contenu en cartes qui seul défile, Annuler / Enregistrer dans le pied, Retirer en icône dans l'en-tête. -->
+    <form:FormPageLayout Title="{loc:Loc WarriorCorrectTitle}"
                          Subtitle="{Binding Item.Name}"
                          CloseCommand="{Binding CancelCommand}"
                          SecondaryText="{loc:Loc BtnCancel}"
@@ -53,6 +53,15 @@
         </form:FormPageLayout.TopContent>
 
         <VerticalStackLayout Spacing="12">
+            <Border StrokeShape="RoundRectangle 8" StrokeThickness="1" Stroke="{DynamicResource AppWarning}"
+                    BackgroundColor="Transparent" Padding="12,10">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                           FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                    <Label Grid.Column="1" Text="{loc:Loc WarriorCorrectionBanner}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                </Grid>
+            </Border>
+
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsProfilTab}">
                 <!-- Photo de la figurine (Warrior.PhotoPath) : aperçu + appareil photo/galerie/retrait, soumis à
                      Enregistrer/Annuler comme le reste du profil (WarriorEditDialogViewModel.FinalizePhoto). -->

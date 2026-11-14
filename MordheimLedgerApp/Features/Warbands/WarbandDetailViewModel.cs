@@ -458,36 +458,37 @@ public partial class WarbandDetailViewModel : BaseViewModel
         // mélangées, un Franc-Tireur n'a pas accès aux écoles de la bande qui l'engage.
         var magicSchools = hiredSword?.MagicSchool is { } hiredSwordSchool ? new List<MagicSchool> { hiredSwordSchool } : _bandMagicSchools;
 
-        var dialogViewModel = new WarriorEditDialogViewModel(warrior, Loc["WarriorEditTitle"], Warband, _warbandService,
+        WarriorEditDialogViewModel NewViewModel() => new(warrior, Loc["WarriorEditTitle"], Warband, _warbandService,
             _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, magicSchools,
             _mutationPicker, isMutant, specialRules);
-        var saved = await ShowFormAsync(new WarriorEditForm(dialogViewModel));
 
-        // Recharger dès que quelque chose a été écrit, même si le formulaire a été annulé : l'ajout/retrait de
-        // blessure suivie (AddInjury/RemoveInjury) persiste immédiatement, indépendamment du bouton
-        // Enregistrer/Annuler. Rien d'écrit (consultation, annulation sans effet) : pas de rechargement.
-        await Loading.RunAsync(async () =>
+        // Crayon (2026-11-14) : d'abord la page légère, photo et nom ; « Corriger la fiche » l'enregistre puis ouvre la
+        // correction complète, sur le même guerrier. Ni l'une ni l'autre ne touche à la trésorerie.
+        var quick = NewViewModel();
+        var saved = await ShowFormAsync(new WarriorQuickEditForm(quick));
+        await ApplyWarriorEditAsync(warrior, quick, saved == true);
+
+        if (quick.WantsCorrection)
         {
-            // WasDeleted : le guerrier n'existe plus en base (supprimé depuis le dialog) - le
-            // ré-enregistrer écraserait rien puisqu'il n'y a plus de ligne à mettre à jour. Rembourse ce
-            // qu'il a payé, pour chaque modèle d'un groupe (RefundRules) : recrutement + équipement porté au
-            // moment de la suppression (achats faits dans ce même formulaire compris, débités à l'ajout ; un
-            // objet retiré avant n'est pas remboursé, comme son retrait). Pas les mutations : ce formulaire les
-            // ajoute sans les faire payer, on ne sait plus lesquelles l'ont été à la création de la bande.
-            if (dialogViewModel.WasDeleted)
-            {
-                var refund = RefundRules.DeletionRefund(warrior, dialogViewModel.Equipment, []);
-                Warband.Treasury += refund;
-                await _warbandService.SaveWarbandAsync(Warband);
-            }
-            else if (saved == true)
-            {
-                await _warbandService.SaveWarriorAsync(warrior);
-            }
-            dialogViewModel.FinalizePhoto(saved == true && !dialogViewModel.WasDeleted);
+            var correction = NewViewModel();
+            var corrected = await ShowFormAsync(new WarriorEditForm(correction));
+            await ApplyWarriorEditAsync(warrior, correction, corrected == true);
+        }
 
-            if (!IsUpToDate) await LoadAsync(Warband.Id);
-        });
+        // Recharger dès que quelque chose a été écrit, même si le formulaire a été annulé : équipement, compétences,
+        // blessures... de la correction sont écrits immédiatement, indépendamment d'Enregistrer/Annuler. Rien
+        // d'écrit (consultation, annulation sans effet) : pas de rechargement.
+        if (!IsUpToDate) await Loading.RunAsync(() => LoadAsync(Warband.Id));
+    }
+
+    /// <summary>Enregistre le profil (nom, photo, caractéristiques) si le formulaire l'a été, et range les fichiers
+    /// photo. Un guerrier retiré (WasDeleted) n'existe plus en base : rien à enregistrer, et rien n'est remboursé -
+    /// c'est une correction, la mort d'un guerrier passe par la Fin de partie.</summary>
+    private async Task ApplyWarriorEditAsync(Warrior warrior, WarriorEditDialogViewModel viewModel, bool saved)
+    {
+        if (saved && !viewModel.WasDeleted)
+            await Loading.RunAsync(() => _warbandService.SaveWarriorAsync(warrior));
+        viewModel.FinalizePhoto(saved && !viewModel.WasDeleted);
     }
 
     // Puces de la carte guerrier (Règles spéciales/Blessures/Sorts/Mutations/Monture/Équipement/

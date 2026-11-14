@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.WarriorQuickEditForm"
+               x:DataType="local:WarriorEditDialogViewModel">
+    <!-- Crayon de la carte guerrier (2026-11-14, maquette « Fiche guerrier : modifier ou corriger ») : ce qu'on change
+         normalement, photo et nom. Le reste (profil, XP, équipement...) passe par « Corriger la fiche »
+         (WarriorEditForm, même ViewModel), volontairement en second plan : les achats, ventes et progressions se
+         jouent en Fin de partie. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         Subtitle="{Binding Item.Name}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc BtnSave}"
+                         PrimaryCommand="{Binding SaveCommand}">
+        <VerticalStackLayout Spacing="12">
+            <!-- Photo de la figurine : même bloc que l'onglet Profil de WarriorEditForm. -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Border Grid.Column="0" WidthRequest="96" HeightRequest="96" StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                            Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppBackground}">
+                        <Grid>
+                            <Label Text="{x:Static icons:SolidFont.User}" FontFamily="FontSolid" FontSize="34" Opacity="0.5"
+                                   TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}"/>
+                        </Grid>
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                        <Label Text="{loc:Loc WarriorPhotoHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:IconTextButton Icon="{x:Static icons:SolidFont.Camera}" IconSize="13" FontSize="13"
+                                                    Text="{Binding CapturePhotoLabel}" TextColor="{DynamicResource AppAccent}"
+                                                    IsVisible="{Binding IsCaptureSupported}"
+                                                    Command="{Binding CapturePhotoCommand}"/>
+                        <components:IconTextButton Icon="{x:Static icons:SolidFont.Image}" IconSize="13" FontSize="13"
+                                                    Text="{Binding PickPhotoLabel}" TextColor="{DynamicResource AppAccent}"
+                                                    Command="{Binding PickPhotoCommand}"/>
+                        <components:IconTextButton Icon="{x:Static icons:SolidFont.Trash}" IconSize="13" FontSize="13"
+                                                    Text="{loc:Loc WarriorPhotoRemove}" TextColor="{DynamicResource AppDanger}"
+                                                    IsVisible="{Binding HasPhoto}"
+                                                    Command="{Binding RemovePhotoCommand}"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{loc:Loc PromptName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Name}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- « Corriger la fiche » : enregistre nom et photo, puis ouvre la correction complète (voir
+                 WarriorEditDialogViewModel.OpenCorrection / WarbandDetailViewModel.OpenWarriorEditDialogAsync). -->
+            <Border Style="{StaticResource SectionCardBorderStyle}" AutomationId="WarriorCorrectButton">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenCorrectionCommand}"/>
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border Grid.Column="0" WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0"
+                            BackgroundColor="{DynamicResource AppBackground}" VerticalOptions="Center">
+                        <Label Text="{x:Static icons:SolidFont.Wrench}" FontFamily="FontSolid" FontSize="16"
+                               TextColor="{DynamicResource AppAccent}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                        <Label Text="{loc:Loc WarriorCorrectTitle}" FontSize="15" FontAttributes="Bold"/>
+                        <Label Text="{loc:Loc WarriorCorrectHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2" Text="{x:Static icons:SolidFont.ChevronRight}" FontFamily="FontSolid" FontSize="14"
+                           TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                </Grid>
+            </Border>
+
+            <Label Text="{loc:Loc WarriorQuickEditPlayHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" Margin="4,0"/>
+        </VerticalStackLayout>
+    </form:FormPageLayout>
+</form:FormContent>

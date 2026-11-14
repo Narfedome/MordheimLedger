@@ -105,7 +105,11 @@ en lecture seule sur ce dépôt, permet à `Website/scripts/fetch-downloads.js` 
 4. Lire le bilan dans la fenêtre, qui reste ouverte jusqu'à Entrée. Chercher les lignes jaunes
    (avertissements) : un store non soumis laisse son fichier dans `Deploy\MicrosoftStore\` ou
    `Deploy\PlayStore\`.
-5. Suivre l'examen dans la Play Console et Partner Center. Les deux stores mettent en ligne après leur
+5. **Partner Center, à la main** : quelques minutes après l'envoi, la soumission peut s'arrêter sur la
+   question de la fonctionnalité restreinte `runFullTrust` (voir « Justification de `runFullTrust` »).
+   Ouvrir la soumission dans Partner Center, coller la justification et valider : sans ça, elle ne passe
+   jamais en certification.
+6. Suivre l'examen dans la Play Console et Partner Center. Les deux stores mettent en ligne après leur
    propre validation.
 
 Les commentaires du bot Netlify « deploy preview canceled » sur les PR sont normaux : `netlify.toml`
@@ -142,6 +146,18 @@ Points à connaître :
   supprimant puis en rajoutant l'appli. `msstore publish` reçoit un **dossier** (`-i`) qui ne contient que le
   MSIX de cette version. `-StoreDraft` crée la soumission en brouillon, pour tester les identifiants : la
   supprimer ensuite dans Partner Center.
+- **Justification de `runFullTrust`** : Partner Center détecte cette fonctionnalité restreinte dans le MSIX
+  et demande pourquoi l'appli en a besoin. Elle est indispensable (une appli MAUI sous Windows est une appli
+  de bureau WinUI 3 empaquetée, qui ne démarre pas sans elle) : ne pas la retirer du manifeste. L'API ne
+  permet pas de répondre, d'où l'étape à la main du déroulé. Demandée pour la 1.5 (novembre 2026) ;
+  vérifier à la release suivante si elle revient à chaque MSIX. Texte à coller :
+
+  > Mordheim Ledger is a .NET MAUI application. On Windows, .NET MAUI apps are packaged WinUI 3 desktop
+  > (Win32) applications, and the runFullTrust capability is required for any packaged desktop app to
+  > launch its executable. The app does not use it to access anything beyond what a standard desktop
+  > application needs: it stores the user's warband data in a local SQLite database in its own app data
+  > folder and reads image files the user explicitly picks (warrior photos). It does not install drivers
+  > or services, does not modify system settings, and does not access other applications' data.
 - **Android** : build toujours reparti de zéro (un `obj` laissé par un build Debug a déjà donné un AAB sans
   polices d'icônes). Le script vérifie ensuite que chaque police de `Resources\Fonts` est dans l'AAB et
   refuse de publier sinon. R8 est actif en Release : le `mapping.txt` est envoyé à Google Play avec l'AAB.
@@ -221,4 +237,6 @@ l'API de Partner Center, puis la valide. En cas d'échec, la soumission reste en
 | Google Play : pas de notes de version | section `<h2>majeure.mineure</h2>` absente d'un des changelogs |
 | « Polices absentes dans l'AAB » | relancer : le build repart de zéro |
 | Plantage au démarrage en Release Android | règle R8 manquante, voir [R8-Obfuscation.md](R8-Obfuscation.md) |
+| Microsoft Store : soumission bloquée avant la certification | justification de `runFullTrust` à donner dans Partner Center (voir plus haut) |
+| Microsoft Store : aucune soumission récente dans Partner Center | lire l'avertissement jaune « Echec de la soumission Microsoft Store » de la release ; le MSIX reste dans `Deploy\MicrosoftStore\` |
 | Le site garde l'ancien installeur | Build Hook non défini ou en échec : relancer le déploiement depuis Netlify |

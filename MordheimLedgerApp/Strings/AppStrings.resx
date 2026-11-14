@@ -147,6 +147,11 @@
   <data name="ErrorTitle" xml:space="preserve">
     <value>Erreur</value>
   </data>
+  <data name="EndOfGameSaveFailed" xml:space="preserve">
+    <value>La fin de partie n'a pas pu être enregistrée. Rien n'a été modifié : la bande est telle qu'avant, vous pouvez refaire la fin de partie.
+
+Détail : {0}</value>
+  </data>
   <data name="TabWarbands" xml:space="preserve">
     <value>Bandes</value>
   </data>

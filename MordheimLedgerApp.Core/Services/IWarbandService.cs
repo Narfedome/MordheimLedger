@@ -10,6 +10,10 @@ public interface IWarbandService
     /// à son chargement sait, en revenant dessus, s'il doit relire.</summary>
     int DataVersion { get; }
 
+    /// <summary>Exécute toutes les écritures de work (tous services confondus, même connexion) en une seule
+    /// transaction : une exception annule tout. Ne pas en imbriquer, ni lancer d'autres écritures en parallèle.</summary>
+    Task RunInTransactionAsync(Func<Task> work);
+
     Task<List<Warband>> GetWarbandsAsync();
     Task<Warband?> GetWarbandAsync(int id);
     Task<string> GetWarbandArchetypeNameAsync(int id, string languageCode);

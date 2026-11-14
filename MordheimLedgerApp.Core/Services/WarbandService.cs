@@ -81,6 +81,10 @@ public class WarbandService : IWarbandService
         foreach (var warrior in warriors)
             await DeleteWarriorAsync(warrior.Id);
 
+        // Tout ce qui est rattaché à la bande elle-même (voir AppDatabase.RemoveOrphanedPlayedDataAsync pour les
+        // bases d'avant ce correctif, qui gardaient ces lignes après la suppression de la bande).
+        foreach (var table in AppDatabase.WarbandChildTables)
+            await _db.Connection.ExecuteAsync($"DELETE FROM {table} WHERE WarbandId = ?", warbandId);
         await _db.Connection.DeleteAsync<WarbandEntity>(warbandId);
     }
 
@@ -317,12 +321,8 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         var photoPath = (await _db.Connection.FindAsync<WarriorEntity>(warriorId))?.PhotoPath;
-        await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
-        await _db.Connection.ExecuteAsync("DELETE FROM WarriorSkillEntity WHERE WarriorId = ?", warriorId);
-        await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ?", warriorId);
-        await _db.Connection.ExecuteAsync("DELETE FROM WarriorHatredEntity WHERE WarriorId = ?", warriorId);
-        await _db.Connection.ExecuteAsync("DELETE FROM WarriorSpellEntity WHERE WarriorId = ?", warriorId);
-        await _db.Connection.ExecuteAsync("DELETE FROM WarriorMutationEntity WHERE WarriorId = ?", warriorId);
+        foreach (var table in AppDatabase.WarriorChildTables)
+            await _db.Connection.ExecuteAsync($"DELETE FROM {table} WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
         if (_photos is { } photos) _db.RunAfterCommit(() => photos.Delete(photoPath));
     }

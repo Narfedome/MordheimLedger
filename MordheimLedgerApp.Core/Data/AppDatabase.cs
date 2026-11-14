@@ -167,10 +167,33 @@ public partial class AppDatabase
         await BackfillWarriorRacialMaxesAsync();
         await BackfillWarriorStartingStatsAsync();
         await RemoveHenchmanInjuryChipsAsync();
+        await RemoveOrphanedPlayedDataAsync();
 
         // Contrairement au reste du catalogue, reconstruite à chaque lancement (voir sa doc) - n'a pas de
         // meilleur endroit que celui-ci depuis que la synchro a remplacé les Backfill* du catalogue.
         await ResyncExplorationResultsAsync();
+    }
+
+    /// <summary>Tables rattachées à une bande jouée par WarbandId (hors WarriorEntity, supprimée guerrier par
+    /// guerrier pour emporter aussi ses lignes et sa photo).</summary>
+    internal static readonly string[] WarbandChildTables =
+        [nameof(HistoryEntryEntity), nameof(WarbandEquipmentEntity), nameof(WarbandDramatisPersonaCooldownEntity)];
+
+    /// <summary>Tables rattachées à un guerrier par WarriorId (voir WarbandService.DeleteWarriorAsync).</summary>
+    internal static readonly string[] WarriorChildTables =
+        [nameof(WarriorEquipmentEntity), nameof(WarriorSkillEntity), nameof(WarriorInjuryEntity),
+         nameof(WarriorHatredEntity), nameof(WarriorSpellEntity), nameof(WarriorMutationEntity)];
+
+    /// <summary>Jusqu'au 2026-11-14, supprimer une bande laissait son Historique, sa Réserve et ses délais de
+    /// Dramatis Personae en base (WarbandService.DeleteWarbandAsync ne supprimait que les guerriers). Sans effet
+    /// visible (les id ne sont jamais réutilisés), juste des lignes mortes : retirées ici, ainsi que d'éventuelles
+    /// lignes de guerrier sans guerrier ; no-op ensuite.</summary>
+    internal async Task RemoveOrphanedPlayedDataAsync()
+    {
+        foreach (var table in WarbandChildTables)
+            await _db.ExecuteAsync($"DELETE FROM {table} WHERE WarbandId NOT IN (SELECT Id FROM {nameof(WarbandEntity)})");
+        foreach (var table in WarriorChildTables)
+            await _db.ExecuteAsync($"DELETE FROM {table} WHERE WarriorId NOT IN (SELECT Id FROM {nameof(WarriorEntity)})");
     }
 
     /// <summary>Jusqu'au 2026-11-11, chaque figurine d'un groupe d'Hommes de main hors de combat laissait une

@@ -62,7 +62,7 @@ public partial class EndOfGamePageViewModel : IHaggleHost
                 EnsureHaggleUsages();
                 break;
             case StepKind.EquipmentReallocation:
-                _ = RefreshReallocationAfterListsLoadAsync();
+                _ = Services.UiErrors.RunAsync(RefreshReallocationAfterListsLoadAsync, nameof(EndOfGamePageViewModel));
                 break;
         }
     }

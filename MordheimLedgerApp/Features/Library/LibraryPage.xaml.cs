@@ -24,7 +24,7 @@ public partial class LibraryPage : ContentPage
             return;
 
         if (BindingContext is not LibraryViewModel vm) return;
-        await vm.InitializeAsync();
+        await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
 
         // Visite de cet écran, la première fois qu'on y arrive (cf. AppTourService) - seulement sur la
         // section Bandes, celle que montrent ses étapes.

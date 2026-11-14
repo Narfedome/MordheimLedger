@@ -388,7 +388,7 @@ public partial class EndOfGamePageViewModel
             OnPropertyChanged(nameof(WarbandBranchWarning));
             OnPropertyChanged(nameof(HasWarbandBranchWarning));
             if (value.Outcome.GrantsFreeHenchmanArchetypeOfficialId is { } henchmanId && ResolvedFreeHenchman is null)
-                _ = LoadFreeHenchmanFromOtherWarbandAsync(henchmanId);
+                _ = Services.UiErrors.RunAsync(() => LoadFreeHenchmanFromOtherWarbandAsync(henchmanId), nameof(EndOfGamePageViewModel));
         }
     }
 

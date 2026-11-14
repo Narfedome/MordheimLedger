@@ -144,6 +144,11 @@
   <data name="WarriorDeleteConfirm" xml:space="preserve">
     <value>Supprimer {0} du roster ? Ce n'est pas une mort du personnage (voir Fin de partie pour ça) — son coût de recrutement et son équipement seront remboursés au trésor de la bande.</value>
   </data>
+  <data name="UnexpectedErrorMessage" xml:space="preserve">
+    <value>Une erreur inattendue est survenue : l'écran n'a peut-être pas fini de se charger. Quittez cet écran puis revenez pour réessayer.
+
+Détail : {0}</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Erreur</value>
   </data>

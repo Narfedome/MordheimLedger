@@ -181,7 +181,8 @@ public partial class ScrollableTabStripView : ContentView
                 // TotalX = déplacement cumulé depuis le début du drag (pas incrémental) - glisser vers la
                 // droite doit faire défiler le contenu vers la droite aussi (paradigme "on tire la page"),
                 // donc on soustrait plutôt qu'on additionne.
-                await _tabScrollView.ScrollToAsync(_panStartScrollX - e.TotalX, 0, animated: false);
+                await Services.UiErrors.RunAsync(() => _tabScrollView.ScrollToAsync(_panStartScrollX - e.TotalX, 0, animated: false),
+                    nameof(ScrollableTabStripView), showMessage: false);
                 break;
         }
     }

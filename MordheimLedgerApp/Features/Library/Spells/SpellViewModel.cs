@@ -78,7 +78,7 @@ public partial class SpellViewModel : BaseViewModel
     {
         OnPropertyChanged(nameof(ShowGroupHeaders));
         if (_suppressFilterReload) return;
-        _ = LoadData();
+        _ = Services.UiErrors.RunAsync(LoadData, nameof(SpellViewModel));
     }
 
     private async Task LoadData()

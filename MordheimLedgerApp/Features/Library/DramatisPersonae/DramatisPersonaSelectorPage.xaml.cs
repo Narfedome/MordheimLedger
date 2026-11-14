@@ -17,6 +17,6 @@ public partial class DramatisPersonaSelectorPage : ContentPage
         if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
 
         if (BindingContext is DramatisPersonaViewModel vm)
-            await vm.InitializeAsync();
+            await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
     }
 }

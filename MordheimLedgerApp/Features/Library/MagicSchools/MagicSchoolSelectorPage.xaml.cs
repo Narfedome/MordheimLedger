@@ -16,6 +16,6 @@ public partial class MagicSchoolSelectorPage : ContentPage
         if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
 
         if (BindingContext is MagicSchoolViewModel vm)
-            await vm.InitializeAsync();
+            await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
     }
 }

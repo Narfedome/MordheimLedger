@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -280,14 +281,14 @@ public partial class EndOfGamePageViewModel
     /// <summary>Automatique : la réserve de la bande, à elle seule, couvre le montant dû -> elle cède du
     /// matériel plutôt que de risquer son meneur en duel. Faux si aucun paiement n'est dû
     /// (PairPaymentTargetAmount == 0) ou si la réserve ne suffit pas (voir WantsDuel, l'autre branche).</summary>
-    public bool WantsEquipmentSeizure => PairPaymentTargetAmount > 0 && WarbandInventoryTotalValue >= PairPaymentTargetAmount;
+    public bool WantsEquipmentSeizure => PairDebtRules.Settle(PairPaymentTargetAmount, WarbandInventoryTotalValue) == PairDebtSettlement.SeizeEquipment;
 
     /// <summary>Automatique : la réserve ne suffit pas à couvrir le montant dû -> seule alternative qui
     /// reste, un duel avec le meneur de bande (voir WantsEquipmentSeizure, l'autre branche - les deux
     /// sont mutuellement exclusives et ne couvrent jamais PairPaymentTargetAmount == 0 à la fois).</summary>
-    public bool WantsDuel => PairPaymentTargetAmount > 0 && WarbandInventoryTotalValue < PairPaymentTargetAmount;
+    public bool WantsDuel => PairDebtRules.Settle(PairPaymentTargetAmount, WarbandInventoryTotalValue) == PairDebtSettlement.Duel;
 
-    /// <summary>"Céder du matériel" : sélection automatique dans la réserve de bande, du PLUS VALEUREUX
+    /// <summary>"Céder du matériel" (règle : Core.Rules.PairDebtRules.SelectSeizedLines, testée) : sélection automatique dans la réserve de bande, du PLUS VALEUREUX
     /// objet au moins valeureux ("on prend les équipements les plus valuable d'abord jusqu'à atteindre la
     /// somme", ex. une Épée en Gromril à 60 CO + 3 Épées classiques à 10 CO chacune pour une rançon de
     /// 50 CO -> on ne perd QUE l'Épée en Gromril, jamais les 3 armes bon marché en plus). Perdre un
@@ -297,24 +298,8 @@ public partial class EndOfGamePageViewModel
     /// AlternativePaymentItemId's own doc). N'est en pratique appelée que quand WantsEquipmentSeizure est
     /// vrai (la réserve suffit), donc n'a normalement jamais besoin de vider toute la réserve sans atteindre
     /// la cible - conservé quand même en repli défensif.</summary>
-    public List<ReserveLine> SeizedEquipmentItems
-    {
-        get
-        {
-            var target = PairPaymentTargetAmount;
-            if (target <= 0) return new List<ReserveLine>();
-
-            var seized = new List<ReserveLine>();
-            var sum = 0;
-            foreach (var item in _originalReserveSnapshot.OrderByDescending(w => w.SellValue))
-            {
-                if (sum >= target) break;
-                seized.Add(item);
-                sum += item.SellValue;
-            }
-            return seized;
-        }
-    }
+    public List<ReserveLine> SeizedEquipmentItems =>
+        PairDebtRules.SelectSeizedLines(_originalReserveSnapshot, line => line.SellValue, PairPaymentTargetAmount);
 
     public int SeizedEquipmentTotalValue => SeizedEquipmentItems.Sum(w => w.SellValue);
 

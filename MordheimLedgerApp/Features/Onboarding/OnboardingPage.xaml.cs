@@ -17,6 +17,6 @@ public partial class OnboardingPage : ContentPage
         if (e.PropertyName != nameof(OnboardingViewModel.CurrentStep)) return;
 
         StepsHost.Opacity = 0;
-        await StepsHost.FadeToAsync(1, 200, Easing.CubicOut);
+        await Services.UiErrors.RunAsync(() => StepsHost.FadeToAsync(1, 200, Easing.CubicOut), GetType().Name, showMessage: false);
     }
 }

@@ -149,6 +149,11 @@
 
 Details: {0}</value>
   </data>
+  <data name="UnexpectedErrorMessage" xml:space="preserve">
+    <value>An unexpected error occurred: the screen may not have finished loading. Leave this screen and come back to try again.
+
+Details: {0}</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Error</value>
   </data>

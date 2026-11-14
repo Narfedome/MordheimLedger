@@ -16,6 +16,6 @@ public partial class InjurySelectorPage : ContentPage
         if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
 
         if (BindingContext is InjuryViewModel vm)
-            await vm.InitializeAsync();
+            await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
     }
 }

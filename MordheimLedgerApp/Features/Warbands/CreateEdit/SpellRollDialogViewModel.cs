@@ -65,7 +65,7 @@ public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
     {
         RollError = null;
         if (!int.TryParse(value, out var roll) || roll < 1 || roll > 6) return;
-        _ = ResolveSpellAsync(roll);
+        _ = Services.UiErrors.RunAsync(() => ResolveSpellAsync(roll), nameof(SpellRollDialogViewModel));
     }
 
     private async Task ResolveSpellAsync(int roll)

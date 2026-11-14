@@ -16,6 +16,6 @@ public partial class SpecialRuleSelectorPage : ContentPage
         if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
 
         if (BindingContext is SpecialRuleViewModel vm)
-            await vm.InitializeAsync();
+            await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
     }
 }

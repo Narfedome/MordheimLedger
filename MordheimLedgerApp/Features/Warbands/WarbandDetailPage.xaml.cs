@@ -84,6 +84,6 @@ public partial class WarbandDetailPage : ContentPage
         // enregistrée...) : un formulaire annulé, une Fin de partie abandonnée ou une simple consultation ne
         // relisent plus toute la fiche (refonte de novembre 2026).
         if (BindingContext is WarbandDetailViewModel vm && !vm.IsUpToDate)
-            await vm.LoadAsync(vm.WarbandId);
+            await Services.UiErrors.RunAsync(() => vm.LoadAsync(vm.WarbandId), GetType().Name);
     }
 }

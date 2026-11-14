@@ -38,6 +38,6 @@ public partial class HiredSwordSelectorPage : ContentPage
         if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
 
         if (BindingContext is HiredSwordViewModel vm)
-            await vm.InitializeAsync();
+            await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
     }
 }

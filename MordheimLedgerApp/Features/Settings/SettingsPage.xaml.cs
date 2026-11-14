@@ -26,6 +26,6 @@ public partial class SettingsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await ((SettingsViewModel)BindingContext).LoadWhatsNewAsync();
+        await Services.UiErrors.RunAsync(((SettingsViewModel)BindingContext).LoadWhatsNewAsync, GetType().Name, showMessage: false);
     }
 }

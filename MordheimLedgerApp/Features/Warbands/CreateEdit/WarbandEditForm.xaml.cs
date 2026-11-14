@@ -43,7 +43,7 @@ public partial class WarbandEditForm : FormContent<bool>
     private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(WarbandEditDialogViewModel.SelectedTab))
-            await FormLayout.ScrollToTopAsync();
+            await Services.UiErrors.RunAsync(FormLayout.ScrollToTopAsync, GetType().Name, showMessage: false);
 
         if (!_viewModel.IsWizardMode || TourService is not { } tourService) return;
 

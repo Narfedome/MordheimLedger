@@ -218,7 +218,7 @@ namespace MordheimLedgerApp.Features.Settings
             _officialContent = officialContent;
             _sampleWarbandService = sampleWarbandService;
             _tourService = tourService;
-            _ = RefreshOfficialContentStatusAsync();
+            _ = Services.UiErrors.RunAsync(RefreshOfficialContentStatusAsync, nameof(SettingsViewModel), showMessage: false);
             selectedLanguage = Loc.Language;
             selectedPalette = _theme.Palette;
             RebuildThemeOptions();

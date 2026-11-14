@@ -95,17 +95,20 @@ public partial class ChipView : ContentView
     }
 
     private void SyncMoveButton(ICommand? command) =>
-        LazyIconButton.Sync(ref _moveButton, command, () => AddActionButton(SolidFont.RightLeft, 2, nameof(MoveCommand)));
+        LazyIconButton.Sync(ref _moveButton, command, () => AddActionButton(SolidFont.RightLeft, 2, nameof(MoveCommand), "A11yMoveNamed"));
 
     private void SyncRemoveButton(ICommand? command) =>
-        LazyIconButton.Sync(ref _removeButton, command, () => AddActionButton(SolidFont.Xmark, 3, nameof(RemoveCommand)));
+        LazyIconButton.Sync(ref _removeButton, command, () => AddActionButton(SolidFont.Xmark, 3, nameof(RemoveCommand), "A11yRemoveNamed"));
 
-    private FaIconButtonView AddActionButton(string icon, int column, string commandPropertyName)
+    private FaIconButtonView AddActionButton(string icon, int column, string commandPropertyName, string accessibleNameKey)
     {
         var button = LazyIconButton.CreateGhost(icon, 10);
         button.Padding = new Thickness(0, 0, -8, 0);
         button.SetBinding(FaIconButtonView.CommandProperty, new Binding(commandPropertyName, source: this));
         button.SetBinding(FaIconButtonView.CommandParameterProperty, new Binding(nameof(Item), source: this));
+        // « Retirer Épée » plutôt qu'un « Fermer » générique (le ✕ d'une puce retire cette puce).
+        button.SetBinding(FaIconButtonView.AccessibleNameProperty,
+            new Binding("Item.Name", source: this, stringFormat: Services.LocalizationService.Instance[accessibleNameKey]));
         ChipGrid.Add(button, column);
         return button;
     }

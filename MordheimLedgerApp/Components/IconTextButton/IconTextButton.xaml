@@ -9,7 +9,15 @@
          MinimumHeightRequest/Width=44 et le pulse au tap (cf. code-behind) rejouent ce que le style
          Button implicite (Styles.xaml) donnait gratuitement aux anciens Button "transparents" : taille
          de cible tactile correcte + retour visuel au tap, perdus en passant à des Label nus. -->
-    <HorizontalStackLayout x:Name="RootLayout" VerticalOptions="Center"
+    <!-- Grille : la mise en page dessine, le bouton transparent posé dessus reçoit le toucher, le clavier et
+         Narrateur/TalkBack (2026-11-14, accessibilité - un geste sur une mise en page n'était actionnable ni au
+         clavier ni par un lecteur d'écran), et porte le nom accessible (Text). -->
+    <Grid>
+        <!-- Survol sur la grille, pas sur le bouton : sous Android, un geste posé sur un Button avale son clic. -->
+        <Grid.GestureRecognizers>
+            <PointerGestureRecognizer PointerEntered="OnPointerEntered" PointerExited="OnPointerExited"/>
+        </Grid.GestureRecognizers>
+    <HorizontalStackLayout x:Name="RootLayout" VerticalOptions="Center" InputTransparent="True"
                             Spacing="{Binding Source={x:Reference root}, Path=Spacing}">
         <!-- États gérés en code-behind (VisualStateManager.GoToState) plutôt qu'en DataTrigger : Normal/
              PointerOver/Disabled se marchaient dessus sur la même propriété Opacity une fois le survol
@@ -31,10 +39,6 @@
                 </VisualStateGroup>
             </VisualStateGroupList>
         </VisualStateManager.VisualStateGroups>
-        <HorizontalStackLayout.GestureRecognizers>
-            <TapGestureRecognizer Tapped="OnTapped"/>
-            <PointerGestureRecognizer PointerEntered="OnPointerEntered" PointerExited="OnPointerExited"/>
-        </HorizontalStackLayout.GestureRecognizers>
 
         <Label Text="{Binding Source={x:Reference root}, Path=Icon}"
                FontFamily="{Binding Source={x:Reference root}, Path=IconFont}"
@@ -49,4 +53,8 @@
                MaximumWidthRequest="{Binding Source={x:Reference root}, Path=TextMaximumWidth}"
                VerticalOptions="Center"/>
     </HorizontalStackLayout>
+    <Button BackgroundColor="Transparent" BorderWidth="0" Padding="0" CornerRadius="0"
+            SemanticProperties.Description="{Binding Source={x:Reference root}, Path=Text}"
+            Clicked="OnTapped"/>
+    </Grid>
 </ContentView>

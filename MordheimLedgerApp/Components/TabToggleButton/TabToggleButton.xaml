@@ -11,11 +11,14 @@
          référence explicite. -->
     <!-- PointerGestureRecognizer (Desktop uniquement - no-op sur mobile, pas de souris) plutôt qu'un
          VisualStateManager PointerOver : ce n'est pas un Button, pas d'état PointerOver natif ici. -->
-    <VerticalStackLayout Spacing="4" BindingContext="{x:Reference root}" HorizontalOptions="Center" Opacity="1">
-        <VerticalStackLayout.GestureRecognizers>
-            <TapGestureRecognizer Command="{Binding Command}"/>
+    <!-- Bouton transparent posé sur l'onglet (2026-11-14, accessibilité) : toucher, clavier et Narrateur/TalkBack ;
+         un geste sur une mise en page n'était actionnable ni au clavier ni par un lecteur d'écran. -->
+    <Grid HorizontalOptions="Center">
+        <!-- Survol sur la grille, pas sur le bouton : sous Android, un geste posé sur un Button avale son clic. -->
+        <Grid.GestureRecognizers>
             <PointerGestureRecognizer PointerEntered="OnPointerEntered" PointerExited="OnPointerExited"/>
-        </VerticalStackLayout.GestureRecognizers>
+        </Grid.GestureRecognizers>
+    <VerticalStackLayout Spacing="4" BindingContext="{x:Reference root}" HorizontalOptions="Center" Opacity="1" InputTransparent="True">
         <VerticalStackLayout.Triggers>
             <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding IsHovered}" Value="True">
                 <Setter Property="Opacity" Value="0.7"/>
@@ -38,4 +41,8 @@
             </BoxView.Triggers>
         </BoxView>
     </VerticalStackLayout>
+    <Button BackgroundColor="Transparent" BorderWidth="0" Padding="0" CornerRadius="0"
+            SemanticProperties.Description="{Binding Source={x:Reference root}, Path=Text}"
+            Command="{Binding Source={x:Reference root}, Path=Command}"/>
+    </Grid>
 </ContentView>

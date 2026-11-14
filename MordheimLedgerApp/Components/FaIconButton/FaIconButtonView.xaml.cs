@@ -1,6 +1,7 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using System.Windows.Input;
+using MordheimLedgerApp.Resources.Icons;
 
 namespace MordheimLedgerApp.Components;
 
@@ -35,7 +36,56 @@ public partial class FaIconButtonView : ContentView
 
     // ICON (glyph)
     public static readonly BindableProperty IconProperty =
-        BindableProperty.Create(nameof(Icon), typeof(string), typeof(FaIconButtonView), default(string));
+        BindableProperty.Create(nameof(Icon), typeof(string), typeof(FaIconButtonView), default(string),
+            propertyChanged: (b, _, _) => ((FaIconButtonView)b).UpdateAccessibleName());
+
+    // NOM ACCESSIBLE (2026-11-14) : un bouton icône n'a pas de texte - sans ceci, Narrateur (UI Automation) et
+    // TalkBack l'annonçaient vide ou par son glyphe. Priorité : AccessibleName explicite, puis Tooltip, puis un
+    // nom par défaut selon l'icône (DefaultAccessibleName) - ce qui couvre la plupart des boutons sans rien
+    // déclarer. Posé sur le Button interne via SemanticProperties.Description (Name UIA sous Windows,
+    // contentDescription sous Android).
+    public static readonly BindableProperty AccessibleNameProperty =
+        BindableProperty.Create(nameof(AccessibleName), typeof(string), typeof(FaIconButtonView), default(string),
+            propertyChanged: (b, _, _) => ((FaIconButtonView)b).UpdateAccessibleName());
+
+    public string? AccessibleName
+    {
+        get => (string?)GetValue(AccessibleNameProperty);
+        set => SetValue(AccessibleNameProperty, value);
+    }
+
+    private void UpdateAccessibleName()
+    {
+        var name = !string.IsNullOrWhiteSpace(AccessibleName) ? AccessibleName
+            : !string.IsNullOrWhiteSpace(Tooltip) ? Tooltip
+            : DefaultAccessibleName(Icon);
+        SemanticProperties.SetDescription(IconButton, name ?? string.Empty);
+    }
+
+    /// <summary>Nom par défaut des glyphes courants (un glyphe = un concept dans toute l'appli, voir CLAUDE.md) ;
+    /// les autres doivent renseigner AccessibleName ou Tooltip.</summary>
+    private static string? DefaultAccessibleName(string? icon)
+    {
+        var key = icon switch
+        {
+            SolidFont.Plus => "A11yAdd",
+            SolidFont.Minus => "A11yRemoveOne",
+            SolidFont.Trash or SolidFont.TrashCan => "A11yDelete",
+            SolidFont.Pen => "A11yEdit",
+            SolidFont.Xmark => "A11yClose",
+            SolidFont.CircleXmark => "A11yCancel",
+            SolidFont.CircleCheck => "A11yConfirm",
+            SolidFont.Dice => "A11yRollDie",
+            SolidFont.CircleInfo => "A11yDetails",
+            SolidFont.MagnifyingGlass => "A11ySearch",
+            SolidFont.ChevronLeft => "A11yBack",
+            SolidFont.ChevronUp => "A11yCollapse",
+            SolidFont.ChevronDown => "A11yExpand",
+            SolidFont.RightLeft => "A11yMove",
+            _ => null
+        };
+        return key is null ? null : Services.LocalizationService.Instance[key];
+    }
 
     public string Icon
     {
@@ -53,7 +103,8 @@ public partial class FaIconButtonView : ContentView
     }
     // TOOLTIP
     public static readonly BindableProperty TooltipProperty =
-        BindableProperty.Create(nameof(Tooltip), typeof(string), typeof(FaIconButtonView));
+        BindableProperty.Create(nameof(Tooltip), typeof(string), typeof(FaIconButtonView),
+            propertyChanged: (b, _, _) => ((FaIconButtonView)b).UpdateAccessibleName());
     public string Tooltip
     {
         get => (string)GetValue(TooltipProperty);

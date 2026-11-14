@@ -14,6 +14,10 @@ public partial class WarbandRow : ObservableObject
     public Warband Warband { get; }
     public string Name => Warband.Name;
 
+    /// <summary>Nom accessible du bouton Jouer de la ligne : « Jouer, Les Roses Sanglantes » (un simple « Jouer »
+    /// répété sur chaque ligne ne dit pas laquelle).</summary>
+    public string PlayAccessibleName => string.Format(LocalizationService.Instance["A11yPlayWarband"], Name);
+
     [ObservableProperty]
     private string archetypeName = string.Empty;
 

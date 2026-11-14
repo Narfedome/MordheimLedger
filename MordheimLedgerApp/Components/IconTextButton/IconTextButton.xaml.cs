@@ -118,7 +118,7 @@ public partial class IconTextButton : ContentView
     // IsEnabled cascade normalement l'input aux enfants, mais un TapGestureRecognizer nu (pas un
     // vrai Button) n'est pas toujours bloqué en pratique selon la plateforme — on vérifie donc
     // explicitement plutôt que de compter dessus.
-    void OnTapped(object? sender, TappedEventArgs e)
+    void OnTapped(object? sender, EventArgs e)
     {
         if (!IsEnabled) return;
 

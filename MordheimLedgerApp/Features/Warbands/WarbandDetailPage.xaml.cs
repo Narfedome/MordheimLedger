@@ -45,11 +45,14 @@ public partial class WarbandDetailPage : ContentPage
             if (vm.Warband is null) return;
             var hasHeroes = vm.Heroes.Count > 0;
             if (!_tourService.IsDetailTourPending && !hasHeroes) return;
+            // Un formulaire ouvert pendant le chargement (crayon touché tout de suite) : la visite ne démarre pas par-
+            // dessus, elle reste en attente et reviendra au retour sur la fiche (OnNavigatedTo).
+            if (Shell.Current?.CurrentPage != this) return;
             await RosterScroll.ScrollToAsync(0, 0, false);
             if (_tourService.IsDetailTourPending)
-                await _tourService.StartDetailTourAsync(hasHeroes, vm.HasInventory);
+                await _tourService.StartDetailTourAsync(hasHeroes, vm.HasInventory, this);
             else
-                await _tourService.StartDetailPhotoTourAsync();
+                await _tourService.StartDetailPhotoTourAsync(this);
         }
         catch (Exception ex)
         {

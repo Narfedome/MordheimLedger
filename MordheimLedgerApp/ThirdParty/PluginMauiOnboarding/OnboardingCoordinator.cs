@@ -100,8 +100,10 @@ public sealed class OnboardingCoordinator
         set => _host.GlowColor = value;
     }
 
-    /// <summary>No-ops if a tour is already active or this one's already been completed.</summary>
-    public async Task StartTourIfNotCompletedAsync(OnboardingTour tour, CancellationToken ct = default)
+    /// <summary>No-ops if a tour is already active or this one's already been completed. <paramref name="canShow"/>
+    /// (Mordheim Ledger) is checked once the first segment is resolved, right before the overlay is pushed: false
+    /// abandons the tour without marking it completed (its page is no longer the one displayed).</summary>
+    public async Task StartTourIfNotCompletedAsync(OnboardingTour tour, CancellationToken ct = default, Func<bool>? canShow = null)
     {
         await _gate.WaitAsync(ct);
         try
@@ -109,7 +111,7 @@ public sealed class OnboardingCoordinator
             if (IsTourActive || tour.Steps.Count == 0 || OnboardingCompletionStore.IsCompleted(tour.Key))
                 return;
 
-            await BeginAsync(tour, ct);
+            await BeginAsync(tour, ct, canShow);
         }
         finally
         {
@@ -173,7 +175,7 @@ public sealed class OnboardingCoordinator
         }
     }
 
-    private async Task BeginAsync(OnboardingTour tour, CancellationToken ct)
+    private async Task BeginAsync(OnboardingTour tour, CancellationToken ct, Func<bool>? canShow = null)
     {
         if (tour.Steps.Count == 0)
             return;
@@ -183,6 +185,13 @@ public sealed class OnboardingCoordinator
         _resolvedGeometries = new SpotlightGeometry?[tour.Steps.Count];
         // Resolve the first segment before the overlay is ever shown — see ResolveSegmentOrAbandonAsync.
         _resolvedThroughExclusive = await ResolveSegmentOrAbandonAsync(0, ct);
+
+        // Resolving can take seconds; the user may have left the tour's page meanwhile (Mordheim Ledger).
+        if (canShow is not null && !canShow())
+        {
+            await EndTourAsync(markCompleted: false);
+            return;
+        }
 
         if (!_isSubscribed)
         {

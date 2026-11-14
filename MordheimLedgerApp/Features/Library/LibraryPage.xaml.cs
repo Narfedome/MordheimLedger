@@ -28,11 +28,12 @@ public partial class LibraryPage : ContentPage
 
         // Visite de cet écran, la première fois qu'on y arrive (cf. AppTourService) - seulement sur la
         // section Bandes, celle que montrent ses étapes.
-        if (_tourService.IsCodexTourPending && vm.IsWarbandsTab)
+        // Page quittée pendant le chargement : la visite attend le prochain retour plutôt que de couvrir l'autre écran.
+        if (_tourService.IsCodexTourPending && vm.IsWarbandsTab && Shell.Current?.CurrentPage == this)
         {
             try
             {
-                await _tourService.StartCodexTourAsync(vm.WarbandArchetypes.WarbandArchetypeGroups.Count > 0);
+                await _tourService.StartCodexTourAsync(vm.WarbandArchetypes.WarbandArchetypeGroups.Count > 0, this);
             }
             catch (Exception ex)
             {

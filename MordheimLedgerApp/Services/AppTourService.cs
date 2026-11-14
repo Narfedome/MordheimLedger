@@ -95,7 +95,7 @@ namespace MordheimLedgerApp.Services
 
         // Lancée seulement avec au moins une bande (cf. WarbandListPage) : sur une liste vide, l'état vide
         // dit déjà quoi faire, et la visite attend la première bande.
-        public Task StartWarbandsTourAsync() => StartAsync(OnboardingTourBuilder.Create(WarbandsTourKey)
+        public Task StartWarbandsTourAsync(Page? owner = null) => StartAsync(owner, OnboardingTourBuilder.Create(WarbandsTourKey)
             .AddStep(Intro("TourWarbandsIntroTitle", "TourWarbandsIntroBody"))
             .AddStep(Step(WarbandRowKey, "TourWarbandRowTitle", "TourWarbandRowBody"))
             .AddStep(Step(WarbandPlayKey, "TourWarbandPlayTitle", "TourWarbandPlayBody"))
@@ -107,7 +107,7 @@ namespace MordheimLedgerApp.Services
         /// <param name="hasHeroes">Faux sur une bande sans héros vivant : les étapes sur la carte d'un
         /// guerrier sont alors sautées (le plugin attendrait sinon 10 s une cible absente).</param>
         /// <param name="hasInventory">Le bouton Réserve n'apparaît qu'une fois un objet mis de côté.</param>
-        public Task StartDetailTourAsync(bool hasHeroes, bool hasInventory)
+        public Task StartDetailTourAsync(bool hasHeroes, bool hasInventory, Page? owner = null)
         {
             var builder = OnboardingTourBuilder.Create(DetailTourKey)
                 .AddStep(Intro("TourDetailIntroTitle", "TourDetailIntroBody"))
@@ -129,12 +129,12 @@ namespace MordheimLedgerApp.Services
                 OnboardingCompletionStore.SetCompleted(DetailPhotoTourKey, true);
             }
 
-            return StartAsync(builder.Build());
+            return StartAsync(owner, builder.Build());
         }
 
         /// <summary>Rattrapage pour qui a terminé la visite de la fiche avant l'arrivée de l'étape photo
         /// (à lancer seulement sur une bande avec au moins un héros, la miniature visée étant sur sa carte).</summary>
-        public Task StartDetailPhotoTourAsync() => StartAsync(OnboardingTourBuilder.Create(DetailPhotoTourKey)
+        public Task StartDetailPhotoTourAsync(Page? owner = null) => StartAsync(owner, OnboardingTourBuilder.Create(DetailPhotoTourKey)
             .AddStep(PhotoStep())
             .Build());
 
@@ -142,7 +142,7 @@ namespace MordheimLedgerApp.Services
 
         /// <param name="hasTiles">Faux tant que les types de bande ne sont pas chargés : les étapes sur
         /// une tuile sont alors sautées.</param>
-        public Task StartCodexTourAsync(bool hasTiles)
+        public Task StartCodexTourAsync(bool hasTiles, Page? owner = null)
         {
             var builder = OnboardingTourBuilder.Create(CodexTourKey)
                 .AddStep(Intro("TourCodexIntroTitle", "TourCodexIntroBody"))
@@ -160,12 +160,12 @@ namespace MordheimLedgerApp.Services
                     });
             }
 
-            return StartAsync(builder
+            return StartAsync(owner, builder
                 .AddStep(Step(CodexActionsKey, "TourCodexActionsTitle", "TourCodexActionsBody"))
                 .Build());
         }
 
-        public Task StartWizardGeneralTourAsync() => StartAsync(OnboardingTourBuilder.Create(WizardGeneralTourKey)
+        public Task StartWizardGeneralTourAsync() => StartAsync(null, OnboardingTourBuilder.Create(WizardGeneralTourKey)
             .AddStep(Intro("TourWizardIntroTitle", "TourWizardIntroBody"))
             .AddStep(Step(WizardStepKey, "TourWizardStepTitle", "TourWizardStepBody"))
             .AddStep(Step(WizardNameKey, "TourWizardNameTitle", "TourWizardNameBody"))
@@ -174,12 +174,12 @@ namespace MordheimLedgerApp.Services
             .AddStep(Step(WizardNavKey, "TourWizardNavTitle", "TourWizardNavBody"))
             .Build());
 
-        public Task StartWizardWarriorsTourAsync() => StartAsync(OnboardingTourBuilder.Create(WizardWarriorsTourKey)
+        public Task StartWizardWarriorsTourAsync() => StartAsync(null, OnboardingTourBuilder.Create(WizardWarriorsTourKey)
             .AddStep(Step(WizardBudgetKey, "TourWizardBudgetTitle", "TourWizardBudgetBody"))
             .AddStep(Step(WizardRecruitsKey, "TourWizardRecruitsTitle", "TourWizardRecruitsBody"))
             .Build());
 
-        public Task StartWizardEquipmentTourAsync() => StartAsync(OnboardingTourBuilder.Create(WizardEquipmentTourKey)
+        public Task StartWizardEquipmentTourAsync() => StartAsync(null, OnboardingTourBuilder.Create(WizardEquipmentTourKey)
             .AddStep(Step(WizardEquipmentKey, "TourWizardEquipmentTitle", "TourWizardEquipmentBody"))
             .Build());
 
@@ -197,20 +197,25 @@ namespace MordheimLedgerApp.Services
 
         // Sans effet si une autre visite est déjà en cours : celle-ci reste en attente et reviendra à la
         // prochaine arrivée sur son écran.
-        private async Task StartAsync(OnboardingTour tour)
+        // owner : la page dont la visite présente les contrôles (liste, fiche, Codex). Si elle n'est plus celle
+        // affichée au moment de lancer (formulaire ouvert pendant le chargement de la fiche...), la visite ne
+        // démarre pas par-dessus un autre écran : elle reste en attente et reviendra au retour sur sa page.
+        private async Task StartAsync(Page? owner, OnboardingTour tour)
         {
             if (!IsSupported) return;
 
             // L'overlay est lui-même une page modale : attendre qu'aucun dialog ne soit en train d'être
             // empilé/dépilé (cf. DialogNavigationGate) avant de le pousser par-dessus.
             await DialogNavigationGate.RunAsync(() => Task.CompletedTask, "AppTourService.Start");
+            if (owner is not null && Shell.Current?.CurrentPage != owner) return;
 
             OnboardingTooltipCard.NextLabel = Loc["TourNext"];
             OnboardingTooltipCard.DoneLabel = Loc["TourDone"];
             OnboardingTooltipCard.SkipLabel = Loc["TourSkip"];
             ApplyThemeColors();
 
-            await _coordinator.StartTourIfNotCompletedAsync(tour);
+            await _coordinator.StartTourIfNotCompletedAsync(tour,
+                canShow: owner is null ? null : () => Shell.Current?.CurrentPage == owner);
         }
 
         // Relu à chaque lancement : la palette a pu changer entre deux visites. La bulle et la lueur

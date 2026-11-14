@@ -49,11 +49,12 @@ public partial class WarbandListPage : ContentPage
 
         // Visite de cet écran, la première fois qu'on y arrive avec au moins une bande (cf.
         // AppTourService) - la bande d'exemple quand elle vient d'être chargée depuis l'accueil.
-        if (_tourService.IsWarbandsTourPending && vm.HasWarbands)
+        // Page quittée pendant le chargement : la visite attend le prochain retour plutôt que de couvrir l'autre écran.
+        if (_tourService.IsWarbandsTourPending && vm.HasWarbands && Shell.Current?.CurrentPage == this)
         {
             try
             {
-                await _tourService.StartWarbandsTourAsync();
+                await _tourService.StartWarbandsTourAsync(this);
             }
             catch (Exception ex)
             {

@@ -3,6 +3,7 @@ using System.Text.Json;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
+using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using SQLite;
@@ -33,14 +34,20 @@ public enum CatalogImportStatus
     Conflict,
 }
 
-public sealed record CatalogImportItem(string Table, string Key, string Name, ContentSource Source, CatalogImportStatus Status, bool IsShared)
+/// <param name="Differences">Pour un conflit : les champs qui diffèrent, déjà en texte (comme ContentConflict) -
+/// Official = la version reçue, Mine = celle de cet appareil. Vide sinon.</param>
+public sealed record CatalogImportItem(string Table, string Key, string Name, ContentSource Source, CatalogImportStatus Status, bool IsShared,
+    IReadOnlyList<ContentFieldDifference> Differences)
 {
     public string EntryId => ExchangePackage.EntryId(Table, Key);
 }
 
+/// <param name="ArchetypeName">Type de bande, dans la langue demandée.</param>
+/// <param name="WarriorCount">Figurines (effectif des groupes compris), hors morts et retraités.</param>
 /// <param name="ExistingWarbandId">Bande de cet appareil qui porte le même identifiant d'échange (déjà importée,
 /// ou exportée d'ici), sinon null.</param>
-public sealed record WarbandImportItem(string? ShareId, string Name, int? ExistingWarbandId, string? ExistingName);
+public sealed record WarbandImportItem(string? ShareId, string Name, string ArchetypeName, int WarriorCount,
+    int? ExistingWarbandId, string? ExistingName);
 
 /// <param name="MissingReferences">Références (« Table|Key ») introuvables, ni dans le paquet ni sur cet
 /// appareil : l'import est impossible (contenu officiel d'une version plus récente, partagé sans secours).</param>
@@ -341,11 +348,20 @@ public sealed class ExchangeService
         var plan = await ImportPlan.CreateAsync(Connection, package);
         return new ImportPreview(
             plan.Items.Select(i => new CatalogImportItem(i.Entry.Table, i.Entry.Key, NameOf(i.Entry, languageCode), i.Entry.Source, i.Status,
-                package.SharedEntries.Contains(ExchangePackage.EntryId(i.Entry.Table, i.Entry.Key)))).ToList(),
-            plan.Warbands.Select(w => new WarbandImportItem(w.ShareId, w.Row.Values.TryGetValue("Name", out var name) ? name.GetString() ?? "" : "",
-                w.Existing?.Id, w.Existing?.Name)).ToList(),
+                package.SharedEntries.Contains(ExchangePackage.EntryId(i.Entry.Table, i.Entry.Key)),
+                i.Status == CatalogImportStatus.Conflict ? plan.Differences(i.Table, i.Entry, i.LocalId!.Value, languageCode) : [])).ToList(),
+            plan.Warbands.Select(w => new WarbandImportItem(w.ShareId,
+                w.Row.Values.TryGetValue("Name", out var name) && name.ValueKind == JsonValueKind.String ? name.GetString() ?? "" : "",
+                w.Row.References.TryGetValue("WarbandArchetypeId", out var archetype) ? plan.NameOfKey(typeof(WarbandArchetypeEntity), archetype, languageCode) : "",
+                WarriorCount(w.Row), w.Existing?.Id, w.Existing?.Name)).ToList(),
             plan.Missing);
     }
+
+    private static int WarriorCount(PlayedRow warband) =>
+        (warband.Children.GetValueOrDefault(nameof(WarriorEntity)) ?? [])
+            .Where(w => !w.Values.TryGetValue(nameof(WarriorEntity.Status), out var status) || status.ValueKind != JsonValueKind.Number
+                        || (WarriorStatus)status.GetInt32() is not (WarriorStatus.Dead or WarriorStatus.Retired))
+            .Sum(w => w.Values.TryGetValue(nameof(WarriorEntity.HeadCount), out var count) && count.ValueKind == JsonValueKind.Number ? count.GetInt32() : 1);
 
     /// <summary>Importe le paquet en une transaction (tout ou rien). Lève ExchangeFormatException si une référence
     /// est introuvable (voir ImportPreview.MissingReferences).</summary>
@@ -559,7 +575,7 @@ public sealed class ExchangeService
     {
         public required AppDatabase.ContentSnapshot Snapshot { get; init; }
         public required ShareIdentities Identities { get; init; }
-        private readonly HashSet<string> _packaged = new(StringComparer.Ordinal);
+        public Dictionary<string, CatalogEntry> Entries { get; } = new(StringComparer.Ordinal);
         public List<(CatalogTable Table, CatalogEntry Entry, int? LocalId, CatalogImportStatus Status)> Items { get; } = [];
         public List<(PlayedRow Row, string? ShareId, WarbandEntity? Existing)> Warbands { get; } = [];
         public List<string> Missing { get; } = [];
@@ -582,7 +598,7 @@ public sealed class ExchangeService
                 if (!entry.Key.StartsWith(CatalogEntry.OfficialPrefix, StringComparison.Ordinal)
                     && !entry.Key.StartsWith(CatalogEntry.SharedPrefix, StringComparison.Ordinal))
                     throw new ExchangeFormatException($"Clé invalide : {entry.Key}");
-                if (!plan._packaged.Add(ExchangePackage.EntryId(entry.Table, entry.Key)))
+                if (!plan.Entries.TryAdd(ExchangePackage.EntryId(entry.Table, entry.Key), entry))
                     throw new ExchangeFormatException($"Entrée en double : {entry.Table}|{entry.Key}");
 
                 var localId = plan.Resolve(table.Type, entry.Key);
@@ -642,7 +658,7 @@ public sealed class ExchangeService
         {
             if (target is null) throw new ExchangeFormatException($"Référence inconnue : {key}");
             var entryId = ExchangePackage.EntryId(target.Name, key);
-            if (!_packaged.Contains(entryId) && Resolve(target, key) is null && !Missing.Contains(entryId)) Missing.Add(entryId);
+            if (!Entries.ContainsKey(entryId) && Resolve(target, key) is null && !Missing.Contains(entryId)) Missing.Add(entryId);
         }
 
         private void CheckPlayed(PlayedTable table, PlayedRow row)
@@ -663,6 +679,72 @@ public sealed class ExchangeService
                 (type, refId) => Snapshot.Rows[type].TryGetValue(refId, out var row)
                     ? LocalKey(Snapshot, Identities, type, refId, row) ?? $"#{refId}"
                     : $"#missing{refId}");
+
+        /// <summary>Nom d'une ligne désignée par sa clé : celle du paquet si elle y est, sinon celle de cet appareil
+        /// (y compris une clé locale « #Id » d'une entrée Personnalisée jamais exportée).</summary>
+        public string NameOfKey(Type type, string key, string languageCode)
+        {
+            if (Entries.TryGetValue(ExchangePackage.EntryId(type.Name, key), out var entry)) return NameOf(entry, languageCode);
+            int? localId = key.StartsWith('#') && int.TryParse(key[1..], out var parsed) ? parsed : Resolve(type, key);
+            return localId is { } id && Snapshot.Rows[type].TryGetValue(id, out var row)
+                ? Snapshot.Text(Snapshot.Mappings[type].FindColumn("NameKey").GetValue(row) as string, languageCode)
+                : string.Empty;
+        }
+
+        /// <summary>Champs où la version reçue et celle de cet appareil diffèrent, en texte (même présentation que les
+        /// conflits du contenu officiel : texte traduit, nom des lignes visées, ✓/✗).</summary>
+        public IReadOnlyList<ContentFieldDifference> Differences(CatalogTable table, CatalogEntry incoming, int localId, string languageCode)
+        {
+            var local = LocalEntry(table, localId, incoming.Key);
+            var differences = new List<ContentFieldDifference>();
+            void Compare(string field, string received, string mine)
+            {
+                if (received != mine) differences.Add(new ContentFieldDifference(field, received, mine));
+            }
+            string Names(Type type, IEnumerable<string>? keys) => string.Join(", ",
+                (keys ?? []).Select(k => NameOfKey(type, k, languageCode)).Order(StringComparer.CurrentCulture));
+
+            var mapping = Snapshot.Mappings[table.Type];
+            foreach (var column in mapping.Columns.Where(c => !c.IsPK && !NotTransported.Contains(c.Name)))
+            {
+                var name = column.Name;
+                if (table.TranslationColumns.Contains(name))
+                    Compare(name, Text(incoming.Translations.GetValueOrDefault(name), languageCode), Text(local.Translations.GetValueOrDefault(name), languageCode));
+                else if (table.ForeignKeys.FirstOrDefault(f => f.Column == name) is { Target: { } target })
+                    Compare(name, incoming.References.TryGetValue(name, out var a) ? NameOfKey(target, a, languageCode) : "",
+                        local.References.TryGetValue(name, out var b) ? NameOfKey(target, b, languageCode) : "");
+                else if (table.CsvForeignKeys.FirstOrDefault(f => f.Column == name) is { Target: { } csvTarget })
+                    Compare(name, Names(csvTarget, incoming.ListReferences.GetValueOrDefault(name)), Names(csvTarget, local.ListReferences.GetValueOrDefault(name)));
+                else
+                    Compare(name, ValueText(incoming.Values, name, table.Type, column), ValueText(local.Values, name, table.Type, column));
+            }
+            foreach (var join in OfficialContentSchema.Joins.Where(j => j.Owner == table.Type))
+                Compare(join.Type.Name, Names(join.Other, incoming.Joins.GetValueOrDefault(join.Type.Name)), Names(join.Other, local.Joins.GetValueOrDefault(join.Type.Name)));
+            return differences;
+        }
+
+        private static string Text(IReadOnlyDictionary<string, string>? texts, string languageCode) =>
+            texts is null ? string.Empty : texts.GetValueOrDefault(languageCode) ?? texts.GetValueOrDefault("en") ?? texts.Values.FirstOrDefault() ?? string.Empty;
+
+        private static string ValueText(IReadOnlyDictionary<string, JsonElement> values, string name, Type entity, TableMapping.Column column)
+        {
+            if (!values.TryGetValue(name, out var element)) return string.Empty;
+            object? value;
+            try
+            {
+                value = element.Deserialize(PropertyType(entity, column), ValueOptions);
+            }
+            catch (JsonException)
+            {
+                return element.GetRawText();
+            }
+            return value switch
+            {
+                null => string.Empty,
+                bool flag => flag ? "✓" : "✗",
+                _ => Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty,
+            };
+        }
     }
 
     private static string Canonical(CatalogEntry entry) => JsonSerializer.Serialize(

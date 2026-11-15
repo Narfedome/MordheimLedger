@@ -130,6 +130,10 @@
                     <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WarbandDeleteKey}"/>
                 </components:FaIconButtonView.Behaviors>
             </components:FaIconButtonView>
+            <!-- Importer un fichier .mordheim reçu (v2, lot 2) : bande ou entrées du Codex. -->
+            <components:FaIconButtonView AutomationId="ImportFileButton" Icon="{x:Static icons:SolidFont.FileImport}"
+                                 Command="{Binding ImportFileCommand}"
+                                 Tooltip="{loc:Loc ImportButton}"/>
         </HorizontalStackLayout>
     </Grid>
     </components:WatermarkedLayout>

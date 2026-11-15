@@ -270,6 +270,22 @@ Sauvegarde Google d'Android (déjà active, `allowBackup`) : `Platforms/Android/
 `data_extraction_rules.xml` excluent les photos (plafond de 25 Mo, au-delà Google ne sauvegarde plus rien) et la copie de
 secours ; le transfert d'appareil à appareil garde les photos. Vérifié avec le transport local (`bmgr`).
 
+**Partage par fichier (v2 lot 2, branche `feature/share-file`, 2026-11-15)** : choix de l'utilisateur - partager depuis la fiche de
+bande (en-tête) et la barre de chaque section du Codex (`BaseViewModel.ShareCatalogEntryAsync`), par la feuille de partage du
+système (`Services/ExchangeFiles.ShareAsync`, fichier `.mordheim` dans le cache) ; recevoir par le bouton Importer de la liste des
+bandes, « Ouvrir avec »/« Partager vers » sous Android (filtres d'Intent VIEW/SEND sur `application/octet-stream`, les applis ne
+connaissent pas l'extension) et double-clic sous Windows (association dans `Package.appxmanifest`, appli installée seulement).
+Écran d'import = maquette « Importer un fichier reçu », variante A (`Features/Exchange/ImportPreviewForm`, page plein écran) :
+une carte par bande (déjà présente : Remplacer pré-coché / Ajouter une copie), une pour les nouveautés du Codex, une par conflit
+(Reçue / La vôtre par champ, Garder la mienne pré-coché) ; libellés de champs partagés avec « Versions à départager »
+(`ContentFieldText`). Fichier sans rien de nouveau : simple message, pas d'écran vide. Constats de recette Android, corrigés :
+**`MainActivity` en `LaunchMode.SingleTask`** (en SingleTop, l'appli qui envoie lançait une seconde activité = seconde fenêtre
+MAUI sur la même base, et `Shell.Current` levait une exception) ; un fichier reçu ramène à la liste **sauf** si un formulaire ou
+un dialog est ouvert (jamais fermer une Fin de partie en cours), et l'écran d'import ne s'ouvre qu'une fois la liste affichée
+(sinon plantage de Shell) ; les sections du Codex autres que Bandes, chargées une seule fois, se rechargent après un import qui
+touche le Codex (`CatalogImportedMessage`). Windows : instance unique (`AppInstance.FindOrRegisterForKey` dans `App.xaml.cs`,
+un second lancement confie son fichier à la première instance et s'arrête).
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

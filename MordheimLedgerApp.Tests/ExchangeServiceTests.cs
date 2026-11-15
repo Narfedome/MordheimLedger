@@ -96,7 +96,10 @@ public class ExchangeServiceTests : IDisposable
 
         var preview = await _bob.Exchange.PreviewAsync(package, "fr");
         Assert.True(preview.CanImport);
-        Assert.Null(Assert.Single(preview.Warbands).ExistingWarbandId);
+        var warbandPreview = Assert.Single(preview.Warbands);
+        Assert.Null(warbandPreview.ExistingWarbandId);
+        Assert.Equal("Mercenaires Reiklander", warbandPreview.ArchetypeName);
+        Assert.Equal(warriors.Sum(w => w.HeadCount), warbandPreview.WarriorCount);
         var bladePreview = Assert.Single(preview.Catalog, c => c.Status == CatalogImportStatus.New);
         Assert.Equal("Lame de Wyrd", bladePreview.Name);
         Assert.All(preview.Catalog.Where(c => c != bladePreview), c => Assert.Equal(CatalogImportStatus.Existing, c.Status));
@@ -171,6 +174,8 @@ public class ExchangeServiceTests : IDisposable
         var edited = await _alice.Exchange.ExportCatalogAsync([new CatalogItemRef(typeof(EquipmentItemEntity), blade.Id)]);
         var conflict = (await _bob.Exchange.PreviewAsync(edited)).Catalog.Single(c => c.IsShared);
         Assert.Equal(CatalogImportStatus.Conflict, conflict.Status);
+        var difference = Assert.Single(conflict.Differences);
+        Assert.Equal(("Cost", "50", "42"), (difference.Field, difference.Official, difference.Mine));
 
         await _bob.Exchange.ImportAsync(edited);
         Assert.Equal(42, (await _bob.Library.GetEquipmentItemsAsync("fr")).Single(i => i.Name == "Lame de Wyrd").Cost);

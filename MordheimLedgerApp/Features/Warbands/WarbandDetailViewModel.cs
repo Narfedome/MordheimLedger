@@ -145,8 +145,10 @@ public partial class WarbandDetailViewModel : BaseViewModel
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
         ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker,
-        IDramatisPersonaPickerService dramatisPersonaPicker, ISellEquipmentPickerService sellEquipmentPicker)
+        IDramatisPersonaPickerService dramatisPersonaPicker, ISellEquipmentPickerService sellEquipmentPicker,
+        Core.Exchange.ExchangeService exchange)
     {
+        _exchange = exchange;
         _warbandService = warbandService;
         _libraryService = libraryService;
         _detailDialogs = detailDialogs;
@@ -295,6 +297,26 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
         return new RosterData(warband, recruitableArchetypes, recruitableHiredSwords, recruitableDramatisPersonae,
             bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, rows, inventory, history);
+    }
+
+    private readonly Core.Exchange.ExchangeService _exchange;
+
+    /// <summary>Partage de la bande (v2, lot 2) : fichier .mordheim (bande, photos, contenu du Codex qu'elle
+    /// utilise) envoyé par la feuille de partage du système.</summary>
+    [RelayCommand]
+    private async Task ShareWarband()
+    {
+        if (Warband is not { } warband) return;
+        try
+        {
+            Core.Exchange.ExchangePackage package = null!;
+            await Loading.RunAsync(async () => package = await _exchange.ExportWarbandsAsync(new[] { warband.Id }));
+            await ExchangeFiles.ShareAsync(package, warband.Name);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync(ex);
+        }
     }
 
     /// <summary>Ouvre l'inventaire de bande dans un dialog dédié (WarbandInventoryDialog) où chaque objet

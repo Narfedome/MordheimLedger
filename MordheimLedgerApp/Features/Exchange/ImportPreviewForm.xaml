@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:exchange="clr-namespace:MordheimLedgerApp.Core.Exchange;assembly=MordheimLedgerApp.Core"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Exchange"
+               xmlns:conflicts="clr-namespace:MordheimLedgerApp.Features.Settings.ContentConflicts"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               x:TypeArguments="exchange:ImportDecisions"
+               x:Class="MordheimLedgerApp.Features.Exchange.ImportPreviewForm"
+               x:DataType="local:ImportPreviewViewModel">
+    <!-- Maquette « Importer un fichier reçu », variante A (2026-11-15) : une carte par bande, une pour les nouveautés,
+         une par conflit, choix par boutons radio. Texte des RadioButton en Label FRÈRE tapable (Content mal rendu
+         sous WinUI, voir ExplorationResultStepView). -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         Subtitle="{Binding FileName}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc ImportAction}"
+                         PrimaryCommand="{Binding ImportCommand}">
+        <VerticalStackLayout Spacing="12">
+
+            <!-- Bandes reçues -->
+            <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Warbands}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="local:ImportWarbandRow">
+                        <Border Style="{StaticResource SectionCardBorderStyle}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{loc:Loc ImportWarbandHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.Users}" FontFamily="FontSolid" FontSize="18"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Detail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                                <VerticalStackLayout Spacing="4" IsVisible="{Binding IsExisting}">
+                                    <Label Text="{Binding ExistingNote}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                        <RadioButton Grid.Column="0" GroupName="{Binding GroupName}" IsChecked="{Binding Replace}" VerticalOptions="Start"/>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="0" Padding="0,4">
+                                            <Label Text="{loc:Loc ImportReplace}"/>
+                                            <Label Text="{loc:Loc ImportReplaceHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <VerticalStackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:ImportPreviewViewModel}}, Path=SetReplaceCommand}"/>
+                                            </VerticalStackLayout.GestureRecognizers>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                        <RadioButton Grid.Column="0" GroupName="{Binding GroupName}" IsChecked="{Binding AddCopy}" VerticalOptions="Start"/>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="0" Padding="0,4">
+                                            <Label Text="{loc:Loc ImportAddCopy}"/>
+                                            <Label Text="{loc:Loc ImportAddCopyHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <VerticalStackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:ImportPreviewViewModel}}, Path=SetAddCopyCommand}"/>
+                                            </VerticalStackLayout.GestureRecognizers>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <!-- Nouveautés du Codex -->
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasNewEntries}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{loc:Loc ImportNewHeading}" FontAttributes="Bold"/>
+                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding NewEntries}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:ImportNewRow">
+                                <VerticalStackLayout Spacing="0">
+                                    <Label Text="{Binding Name}"/>
+                                    <Label Text="{Binding Detail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Entrées en conflit -->
+            <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Conflicts}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="local:ImportConflictRow">
+                        <Border Style="{StaticResource SectionCardBorderStyle}">
+                            <VerticalStackLayout Spacing="8">
+                                <VerticalStackLayout Spacing="0">
+                                    <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding TypeLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <Label Text="{loc:Loc ImportConflictNote}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                                </VerticalStackLayout>
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <Label Grid.Column="0" Text="{loc:Loc ImportReceived}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <Label Grid.Column="1" Text="{loc:Loc ContentConflictMine}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                </Grid>
+                                <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Differences}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="conflicts:ContentDifferenceRow">
+                                            <VerticalStackLayout Spacing="0">
+                                                <Label Text="{Binding Label}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                                    <Label Grid.Column="0" Text="{Binding Official}" FontSize="13"/>
+                                                    <Label Grid.Column="1" Text="{Binding Mine}" FontSize="13"/>
+                                                </Grid>
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                    <RadioButton Grid.Column="0" GroupName="{Binding GroupName}" IsChecked="{Binding KeepMine}" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{loc:Loc ContentConflictKeepMine}" VerticalOptions="Center" Padding="0,4">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:ImportPreviewViewModel}}, Path=SetKeepMineCommand}"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                    <RadioButton Grid.Column="0" GroupName="{Binding GroupName}" IsChecked="{Binding TakeIncoming}" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{loc:Loc ImportTakeIncoming}" VerticalOptions="Center" Padding="0,4">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:ImportPreviewViewModel}}, Path=SetTakeIncomingCommand}"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Label Text="{Binding UnchangedNote}" IsVisible="{Binding HasUnchangedNote}" FontSize="12"
+                   TextColor="{DynamicResource AppTextMuted}" Margin="4,0"/>
+        </VerticalStackLayout>
+    </form:FormPageLayout>
+</form:FormContent>

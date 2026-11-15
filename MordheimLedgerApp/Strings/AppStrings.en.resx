@@ -3311,4 +3311,70 @@ All the current data on this device will be replaced. A copy is kept: you can un
   <data name="BackupFromNewerApp" xml:space="preserve">
     <value>This backup comes from a newer version of the app: update it to restore the backup.</value>
   </data>
+  <data name="ShareButton" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="ImportButton" xml:space="preserve">
+    <value>Import a file</value>
+  </data>
+  <data name="ImportPick" xml:space="preserve">
+    <value>Choose a Mordheim Ledger file</value>
+  </data>
+  <data name="ImportTitle" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="ImportAction" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="ImportWarbandHeading" xml:space="preserve">
+    <value>Warband</value>
+  </data>
+  <data name="ImportWarbandDetail" xml:space="preserve">
+    <value>{0} · {1} model(s)</value>
+  </data>
+  <data name="ImportWarbandExisting" xml:space="preserve">
+    <value>Already on this device ("{0}").</value>
+  </data>
+  <data name="ImportReplace" xml:space="preserve">
+    <value>Replace my version</value>
+  </data>
+  <data name="ImportReplaceHint" xml:space="preserve">
+    <value>It becomes the one from the file.</value>
+  </data>
+  <data name="ImportAddCopy" xml:space="preserve">
+    <value>Add a copy</value>
+  </data>
+  <data name="ImportAddCopyHint" xml:space="preserve">
+    <value>Both warbands are kept.</value>
+  </data>
+  <data name="ImportNewHeading" xml:space="preserve">
+    <value>New in your Codex</value>
+  </data>
+  <data name="ImportNewOfficial" xml:space="preserve">
+    <value>{0} · official, from a newer version of the app</value>
+  </data>
+  <data name="ImportConflictNote" xml:space="preserve">
+    <value>Different from yours.</value>
+  </data>
+  <data name="ImportReceived" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="ImportTakeIncoming" xml:space="preserve">
+    <value>Take the received one</value>
+  </data>
+  <data name="ImportUnchanged" xml:space="preserve">
+    <value>{0} Codex entr(y/ies) already present: nothing to do.</value>
+  </data>
+  <data name="ImportMissingContent" xml:space="preserve">
+    <value>This file uses content this device doesn't know: update the app, then try again.</value>
+  </data>
+  <data name="ImportUnreadable" xml:space="preserve">
+    <value>This file is not a Mordheim Ledger file, or it comes from a newer version of the app.</value>
+  </data>
+  <data name="ImportDone" xml:space="preserve">
+    <value>Import done: {0} warband(s), {1} entr(y/ies) added to the Codex, {2} replaced.</value>
+  </data>
+  <data name="ImportNothing" xml:space="preserve">
+    <value>Everything in this file is already on this device: nothing to import.</value>
+  </data>
 </root>

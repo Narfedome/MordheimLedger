@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Core.Exchange;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
@@ -51,9 +53,13 @@ public partial class WarbandListViewModel : BaseViewModel
         ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPickerService,
         ISkillPickerService skillPickerService, ISpellPickerService spellPickerService, IInjuryPickerService injuryPickerService,
         IMutationPickerService mutationPickerService, IHiredSwordPickerService hiredSwordPickerService,
-        OfficialContentService officialContent)
+        OfficialContentService officialContent, ExchangeService exchange)
     {
+        _exchange = exchange;
         _officialContent = officialContent;
+        // Fichier .mordheim ouvert depuis une autre appli pendant que l'appli tourne (voir ExchangeFiles.Receive).
+        WeakReferenceMessenger.Default.Register<IncomingExchangeFileMessage>(this,
+            (r, m) => { _ = Services.UiErrors.RunAsync(((WarbandListViewModel)r).ImportPendingFileAsync, nameof(WarbandListViewModel)); });
         _pickerNavigation = pickerNavigation;
         _warbandService = warbandService;
         _warbandArchetypePickerService = warbandArchetypePickerService;
@@ -114,6 +120,79 @@ public partial class WarbandListViewModel : BaseViewModel
 
     [RelayCommand]
     private void Select(WarbandRow row) => SelectedRow = row;
+
+    // --- Import d'un fichier .mordheim (v2, lot 2) ------------------------------------------------------------
+
+    private readonly ExchangeService _exchange;
+
+    private static readonly FilePickerFileType ExchangeFileType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
+    {
+        // Android ne connaît pas l'extension : tout fichier proposé, la lecture refuse ce qui n'est pas un fichier de l'appli.
+        [DevicePlatform.Android] = new[] { "*/*" },
+        [DevicePlatform.WinUI] = new[] { ExchangeArchive.FileExtension },
+    });
+
+    [RelayCommand]
+    private async Task ImportFileAsync()
+    {
+        var picked = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = Loc["ImportPick"], FileTypes = ExchangeFileType });
+        if (picked is null) return;
+        await ImportAsync(picked.OpenReadAsync, picked.FileName);
+    }
+
+    /// <summary>Fichier reçu d'une autre appli (ExchangeFiles.Receive) : appelé au retour sur la liste et à l'arrivée
+    /// du fichier si l'appli tournait déjà.</summary>
+    public async Task ImportPendingFileAsync()
+    {
+        if (ExchangeFiles.TakePending() is not { } pending) return;
+        try
+        {
+            await ImportAsync(() => Task.FromResult<Stream>(File.OpenRead(pending.Path)), pending.Name);
+        }
+        finally
+        {
+            if (pending.IsTemporary) File.Delete(pending.Path);
+        }
+    }
+
+    private async Task ImportAsync(Func<Task<Stream>> open, string fileName)
+    {
+        try
+        {
+            ExchangePackage package;
+            await using (var stream = await open())
+                package = await ExchangeArchive.ReadAsync(stream);
+            var preview = await _exchange.PreviewAsync(package, Loc.Language);
+            if (!preview.CanImport)
+            {
+                await ShowInfoAsync(Loc["ImportTitle"], Loc["ImportMissingContent"]);
+                return;
+            }
+            // Rien de nouveau ni de différent (fichier déjà importé tel quel) : pas d'écran sans choix à faire.
+            if (preview.Warbands.Count == 0 && preview.Catalog.All(c => c.Status is CatalogImportStatus.Existing or CatalogImportStatus.Identical))
+            {
+                await ShowInfoAsync(Loc["ImportTitle"], Loc["ImportNothing"]);
+                return;
+            }
+            if (await ShowFormAsync(new Exchange.ImportPreviewForm(new Exchange.ImportPreviewViewModel(preview, fileName))) is not { } decisions)
+                return;
+
+            ImportResult result = null!;
+            await Loading.RunAsync(async () => result = await _exchange.ImportAsync(package, decisions));
+            if (result.CatalogCreated + result.CatalogReplaced > 0)
+                WeakReferenceMessenger.Default.Send(new CatalogImportedMessage());
+            await InitializeAsync();
+            await ShowInfoAsync(Loc["ImportTitle"], string.Format(Loc["ImportDone"], result.WarbandIds.Count, result.CatalogCreated, result.CatalogReplaced));
+        }
+        catch (ExchangeFormatException)
+        {
+            await ShowInfoAsync(Loc["ImportTitle"], Loc["ImportUnreadable"]);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync(ex);
+        }
+    }
 
     [RelayCommand]
     private async Task CreateWarbandAsync()

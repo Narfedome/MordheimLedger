@@ -47,6 +47,10 @@ public partial class WarbandListPage : ContentPage
         else if (!vm.IsUpToDate)
             await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
 
+        // Fichier .mordheim ouvert depuis une autre appli avant que la liste soit prête (démarrage par « Ouvrir avec »).
+        if (Shell.Current?.CurrentPage == this)
+            await Services.UiErrors.RunAsync(vm.ImportPendingFileAsync, GetType().Name);
+
         // Visite de cet écran, la première fois qu'on y arrive avec au moins une bande (cf.
         // AppTourService) - la bande d'exemple quand elle vient d'être chargée depuis l'accueil.
         // Page quittée pendant le chargement : la visite attend le prochain retour plutôt que de couvrir l'autre écran.

@@ -69,6 +69,24 @@ public abstract partial class BaseViewModel : ObservableObject
 
     /// <summary>Ouvre un formulaire de création/modification en page plein écran (voir FormNavigator) -
     /// même contrat que ShowDialogAsync.</summary>
+    /// <summary>Partage d'une entrée du Codex (v2, lot 2) : fichier .mordheim par la feuille de partage du système.
+    /// entityType : table du catalogue (ex. typeof(EquipmentItemEntity)) ; un type de bande emmène ses types de guerrier
+    /// et ses listes d'équipement (ExchangeService.ExportCatalogAsync).</summary>
+    protected async Task ShareCatalogEntryAsync(Type entityType, int id, string name)
+    {
+        try
+        {
+            var exchange = IPlatformApplication.Current!.Services.GetRequiredService<Core.Exchange.ExchangeService>();
+            Core.Exchange.ExchangePackage package = null!;
+            await Loading.RunAsync(async () => package = await exchange.ExportCatalogAsync(new[] { new Core.Exchange.CatalogItemRef(entityType, id) }));
+            await Services.ExchangeFiles.ShareAsync(package, name);
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync(ex);
+        }
+    }
+
     protected Task<TResult?> ShowFormAsync<TResult>(Components.FormPage.FormContent<TResult> content) =>
         Components.FormPage.FormNavigator.PushAsync(content);
 

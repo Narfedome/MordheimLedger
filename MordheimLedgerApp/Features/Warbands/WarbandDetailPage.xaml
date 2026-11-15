@@ -293,6 +293,13 @@
                      trouvé (ex. étape Exploration du wizard Fin de Partie). -->
                 <!-- Icône seule sur téléphone : avec "Lancer la partie" à côté, le libellé laissait si peu
                      de place au titre qu'un nom de bande ordinaire se coupait en plein mot. -->
+                <!-- Partager la bande (v2, lot 2) : fichier .mordheim par la feuille de partage du système. -->
+                <components:IconTextButton AutomationId="ShareWarbandButton"
+                                            Icon="{x:Static icons:SolidFont.ShareNodes}"
+                                            Text="{loc:Loc ShareButton}"
+                                            ShowText="{OnIdiom Phone=False, Default=True}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding ShareWarbandCommand}"/>
                 <components:IconTextButton IsVisible="{Binding HasInventory}"
                                             Icon="{x:Static icons:SolidFont.BoxOpen}"
                                             Text="{loc:Loc InventoryHeading}"

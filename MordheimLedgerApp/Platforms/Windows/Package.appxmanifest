@@ -36,6 +36,17 @@
         <uap:DefaultTile Square71x71Logo="$placeholder$.png" Wide310x150Logo="$placeholder$.png" Square310x310Logo="$placeholder$.png" />
         <uap:SplashScreen Image="$placeholder$.png" />
       </uap:VisualElements>
+      <!-- Fichier .mordheim (v2, lot 2) : double-clic ou « Ouvrir avec » - voir App.xaml.cs et Services/ExchangeFiles. -->
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="mordheimledger">
+            <uap:DisplayName>Mordheim Ledger</uap:DisplayName>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.mordheim</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

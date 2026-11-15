@@ -244,6 +244,12 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [RelayCommand]
     private static async Task ManageRacialProfiles() => await Shell.Current.GoToAsync(nameof(RacialProfileListPage));
 
+    /// <summary>Partage de l'entrée sélectionnée (v2, lot 2), voir BaseViewModel.ShareCatalogEntryAsync.</summary>
+    [RelayCommand]
+    private Task Share() => SelectedRow is { } row
+        ? ShareCatalogEntryAsync(typeof(MordheimLedgerApp.Core.Data.Entities.Library.WarbandArchetypeEntity), row.Item.Id, row.Item.Name)
+        : Task.CompletedTask;
+
     [RelayCommand]
     private async Task Delete()
     {

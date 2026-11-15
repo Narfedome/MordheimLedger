@@ -208,6 +208,12 @@ public partial class SpellViewModel : BaseViewModel
         await LoadData();
     }
 
+    /// <summary>Partage de l'entrée sélectionnée (v2, lot 2), voir BaseViewModel.ShareCatalogEntryAsync.</summary>
+    [RelayCommand]
+    private Task Share() => SelectedRow is { } row
+        ? ShareCatalogEntryAsync(typeof(MordheimLedgerApp.Core.Data.Entities.Library.SpellEntity), row.Item.Id, row.Item.Name)
+        : Task.CompletedTask;
+
     [RelayCommand]
     private async Task Delete()
     {

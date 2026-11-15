@@ -29,6 +29,28 @@ namespace MordheimLedgerApp.WinUI
             // changer le comportement (l'app crashe quand même après log) - juste observer, pas masquer.
             this.UnhandledException += (_, e) =>
                 MordheimLedgerApp.Services.CrashLogger.LogException("WinUI Application.UnhandledException", e.Exception);
+
+            // Fichier .mordheim ouvert par double-clic (v2, lot 2, association dans Package.appxmanifest). Une seule
+            // instance : si l'appli tourne déjà, le fichier lui est confié et ce second lancement s'arrête - deux
+            // fenêtres écriraient dans la même base.
+            var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey("main");
+            var activation = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+            if (!mainInstance.IsCurrent)
+            {
+                Task.Run(() => mainInstance.RedirectActivationToAsync(activation).AsTask()).Wait();
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+                return;
+            }
+            mainInstance.Activated += (_, e) => ReceiveFile(e);
+            ReceiveFile(activation);
+        }
+
+        private static void ReceiveFile(Microsoft.Windows.AppLifecycle.AppActivationArguments activation)
+        {
+            if (activation.Kind == Microsoft.Windows.AppLifecycle.ExtendedActivationKind.File
+                && activation.Data is global::Windows.ApplicationModel.Activation.IFileActivatedEventArgs file
+                && file.Files.FirstOrDefault() is { } item)
+                MordheimLedgerApp.Services.ExchangeFiles.Receive(item.Path, item.Name, isTemporary: false);
         }
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();

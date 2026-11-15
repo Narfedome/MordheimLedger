@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
 using MordheimLedgerApp.Features.Library.Injuries;
 using MordheimLedgerApp.Features.Library.Skills;
@@ -101,7 +102,13 @@ public partial class LibraryViewModel : BaseViewModel
         HiredSwords = hiredSwords;
         DramatisPersonae = dramatisPersonae;
         RefreshSelectedTabLabel();
+        // Import d'un fichier qui a ajouté ou remplacé des entrées (v2, lot 2) : les sections déjà chargées (une
+        // seule fois, voir EnsureTabLoadedAsync) se rechargeront au prochain affichage du Codex.
+        WeakReferenceMessenger.Default.Register<Services.CatalogImportedMessage>(this,
+            (r, m) => ((LibraryViewModel)r)._catalogImported = true);
     }
+
+    private bool _catalogImported;
 
     private void RefreshSelectedTabLabel() => SelectedTabLabel = Loc[TabKeys[SelectedTab]];
 
@@ -130,6 +137,13 @@ public partial class LibraryViewModel : BaseViewModel
     public async Task InitializeAsync()
     {
         await WarbandArchetypes.InitializeAsync();
+        if (_catalogImported)
+        {
+            _catalogImported = false;
+            _equipmentItemsLoaded = _skillsLoaded = _injuriesLoaded = _spellsLoaded = _specialRulesLoaded =
+                _mutationsLoaded = _hiredSwordsLoaded = _dramatisPersonaeLoaded = false;
+            await EnsureTabLoadedAsync(SelectedTab);
+        }
         RefreshSelectedTabLabel();
     }
 

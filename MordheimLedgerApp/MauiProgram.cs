@@ -143,6 +143,10 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<LoadingService>();
             builder.Services.AddSingleton<ILibraryService, LibraryService>();
             builder.Services.AddSingleton(WarriorPhotos.Store);
+            // Copie de secours d'avant la dernière restauration : exclue de la sauvegarde Google d'Android
+            // (Platforms/Android/Resources/xml/*backup*.xml).
+            builder.Services.AddSingleton(sp => new BackupService(sp.GetRequiredService<AppDatabase>(), WarriorPhotos.Store,
+                Path.Combine(FileSystem.AppDataDirectory, "restore-undo" + BackupService.FileExtension)));
             builder.Services.AddSingleton<IWarbandService, WarbandService>();
             builder.Services.AddSingleton<IDetailDialogService, DetailDialogService>();
             builder.Services.AddSingleton<SampleWarbandService>();

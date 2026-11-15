@@ -64,6 +64,25 @@ public class WarriorPhotoStore
     }
 
     /// <summary>Settings' full database reset - every warrior is gone, so are all their photos.</summary>
+    /// <summary>Chemins relatifs (« warrior-photos/xxx.jpg ») de toutes les photos présentes, pour la sauvegarde.</summary>
+    public IEnumerable<string> EnumerateRelativePaths() =>
+        Directory.Exists(FolderPath)
+            ? Directory.EnumerateFiles(FolderPath).Select(f => $"{FolderName}/{Path.GetFileName(f)}")
+            : [];
+
+    /// <summary>Écrit une photo à un chemin relatif donné (restauration d'une sauvegarde). Refuse tout chemin hors du
+    /// dossier des photos.</summary>
+    public async Task WriteAsync(string relativePath, Stream source)
+    {
+        var full = GetFullPath(relativePath) ?? throw new ArgumentException("Chemin vide", nameof(relativePath));
+        var folder = Path.GetFullPath(FolderPath) + Path.DirectorySeparatorChar;
+        if (!Path.GetFullPath(full).StartsWith(folder, StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException($"Chemin hors du dossier des photos : {relativePath}", nameof(relativePath));
+        Directory.CreateDirectory(FolderPath);
+        await using var target = File.Create(full);
+        await source.CopyToAsync(target);
+    }
+
     public void DeleteAll()
     {
         try

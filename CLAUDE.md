@@ -256,6 +256,20 @@ jouées par `Exchange/PlayedDataSchema` - **toute nouvelle table rattachée à u
 au catalogue s'y déclare** (garde-fou `ExchangeServiceTests.PlayedSchema_CoversEveryIdColumn`). `ImagePath` du catalogue et
 `CampaignId` ne voyagent pas. La sauvegarde complète (lot 1) n'utilise pas ce format : copie de la base + photos (décision).
 
+**Sauvegarde et restauration (v2 lot 1, branche `feature/backup-restore`, 2026-11-15)** : carte « Sauvegarde » des Paramètres.
+`Core/Services/BackupService` : archive `.mordheimbackup` = `manifest.json` (version de l'appli, date, nombre de bandes, réglages
+`app_lang`/`app_theme`/`app_palette` - pas les repères accueil/nouveautés/visites, propres à l'appareil) + `database.db3`
+(`AppDatabase.CopyToAsync`, `VACUUM INTO`) + `warrior-photos/`. Restauration **en place, connexion ouverte** :
+`AppDatabase.RestoreFromAsync` copie la base par l'API de sauvegarde SQLite (`SQLiteConnection.Backup`) puis rejoue la préparation
+du lancement (tables, synchro officielle si l'empreinte diffère, réparations) ; les écrans se rechargent via `DataVersion`, le
+message demande quand même un redémarrage (réglages, écrans ouverts), comme la réinitialisation. Avant chaque restauration, copie
+de secours des données remplacées (`restore-undo.mordheimbackup` dans les données de l'appli, une seule), que « Annuler » remet
+en place puis supprime. Sauvegarde d'une version plus récente de l'appli refusée. Export par « Enregistrer sous… » (`FileSaver`) :
+sous Android il écrit le fichier mais renvoie « Unable to resolve absolute path » pour Téléchargements - compté comme réussi.
+Sauvegarde Google d'Android (déjà active, `allowBackup`) : `Platforms/Android/Resources/xml/backup_rules.xml` +
+`data_extraction_rules.xml` excluent les photos (plafond de 25 Mo, au-delà Google ne sauvegarde plus rien) et la copie de
+secours ; le transfert d'appareil à appareil garde les photos. Vérifié avec le transport local (`bmgr`).
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

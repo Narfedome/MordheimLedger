@@ -85,6 +85,155 @@ namespace MordheimLedgerApp.Features.Settings
             await ShowInfoAsync(Loc["SettingsResetTitle"], Loc["SettingsResetDone"]);
         }
 
+        // --- Sauvegarde (v2, lot 1) --------------------------------------------------------------------------
+        // Fichier .mordheimbackup = base + photos + réglages (BackupService). Choix de l'utilisateur : « Enregistrer
+        // sous… » du système (FileSaver) ; avant chaque restauration, copie de secours des données remplacées, que
+        // « Annuler la dernière restauration » remet en place. Même avertissement de redémarrage que ResetDatabase.
+
+        private readonly BackupService _backup;
+
+        /// <summary>Réglages repris par la sauvegarde, avec leur type de préférence (les repères « accueil vu »,
+        /// « nouveautés vues », visites restent propres à l'appareil). Clés de LocalizationService/ThemeService.</summary>
+        private static readonly (string Key, bool IsInt)[] BackedUpSettings = [("app_lang", false), ("app_theme", true), ("app_palette", true)];
+
+        public bool CanUndoRestore => _backup.CanUndoRestore;
+
+        public string UndoRestoreDescription => _backup.UndoCreatedAtUtc is { } date
+            ? string.Format(Loc["BackupUndoDesc"], date.ToLocalTime().ToString("g", Loc.Culture))
+            : string.Empty;
+
+        private static Dictionary<string, string> ReadBackedUpSettings()
+        {
+            var settings = new Dictionary<string, string>();
+            foreach (var (key, isInt) in BackedUpSettings)
+                if (Preferences.Default.ContainsKey(key))
+                    settings[key] = isInt
+                        ? Preferences.Default.Get(key, 0).ToString(System.Globalization.CultureInfo.InvariantCulture)
+                        : Preferences.Default.Get(key, string.Empty);
+            return settings;
+        }
+
+        private static void ApplyBackedUpSettings(IReadOnlyDictionary<string, string> settings)
+        {
+            foreach (var (key, isInt) in BackedUpSettings)
+            {
+                if (!settings.TryGetValue(key, out var value)) continue;
+                if (!isInt) Preferences.Default.Set(key, value);
+                else if (int.TryParse(value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var number))
+                    Preferences.Default.Set(key, number);
+            }
+        }
+
+        private static readonly FilePickerFileType BackupFileType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
+        {
+            // Android ne connaît pas l'extension : tout fichier proposé, la lecture refuse ce qui n'est pas une sauvegarde.
+            [DevicePlatform.Android] = new[] { "*/*" },
+            [DevicePlatform.WinUI] = new[] { BackupService.FileExtension },
+        });
+
+        private string BackupProblemMessage(BackupFormatException ex) => Loc[ex.Problem switch
+        {
+            BackupProblem.FromNewerApp => "BackupFromNewerApp",
+            BackupProblem.Damaged => "BackupDamaged",
+            _ => "BackupNotABackup",
+        }];
+
+        private void RefreshUndoRestore()
+        {
+            OnPropertyChanged(nameof(CanUndoRestore));
+            OnPropertyChanged(nameof(UndoRestoreDescription));
+        }
+
+        [RelayCommand]
+        public async Task ExportBackup()
+        {
+            var fileName = $"MordheimLedger-{DateTime.Now:yyyy-MM-dd}{BackupService.FileExtension}";
+            var tempPath = Path.Combine(FileSystem.CacheDirectory, fileName);
+            try
+            {
+                await Loading.RunAsync(async () =>
+                {
+                    await using var file = File.Create(tempPath);
+                    await _backup.WriteAsync(file, AppVersion, ReadBackedUpSettings());
+                });
+                CommunityToolkit.Maui.Storage.FileSaverResult result;
+                await using (var stream = File.OpenRead(tempPath))
+                    result = await CommunityToolkit.Maui.Storage.FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+                // Android : le fichier est bien écrit, mais le Toolkit ne sait pas retrouver le chemin absolu d'un
+                // document de certains fournisseurs (Téléchargements) et renvoie un échec - vu en recette le 2026-11-15.
+                // D'où le nom du fichier dans le message plutôt que son chemin, et ce cas compté comme réussi.
+                if (result.IsSuccessful || result.Exception?.Message.Contains("absolute path", StringComparison.OrdinalIgnoreCase) == true)
+                    await ShowInfoAsync(Loc["BackupTitle"], string.Format(Loc["BackupExportDone"], fileName));
+                else if (result.Exception is { } error && error is not OperationCanceledException
+                         && !error.Message.Contains("cancel", StringComparison.OrdinalIgnoreCase))
+                    await ShowErrorAsync(error);
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync(ex);
+            }
+            finally
+            {
+                File.Delete(tempPath);
+            }
+        }
+
+        [RelayCommand]
+        public async Task RestoreBackup()
+        {
+            var picked = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = Loc["BackupRestorePick"], FileTypes = BackupFileType });
+            if (picked is null) return;
+
+            try
+            {
+                BackupManifest manifest;
+                await using (var stream = await picked.OpenReadAsync())
+                    manifest = await BackupService.ReadManifestAsync(stream, AppVersion);
+                var message = string.Format(Loc["BackupRestoreConfirm"],
+                    manifest.CreatedAtUtc.ToLocalTime().ToString("g", Loc.Culture), manifest.WarbandCount);
+                if (!await ConfirmAsync(Loc["BackupRestoreTitle"], message, Loc["BackupRestoreAction"], Loc["BtnCancel"], destructive: true)) return;
+
+                BackupManifest restored = null!;
+                await Loading.RunAsync(async () =>
+                {
+                    await using var stream = await picked.OpenReadAsync();
+                    restored = await _backup.RestoreAsync(stream, AppVersion, ReadBackedUpSettings());
+                });
+                ApplyBackedUpSettings(restored.Settings);
+                RefreshUndoRestore();
+                await RefreshOfficialContentStatusAsync();
+                await ShowInfoAsync(Loc["BackupRestoreTitle"], Loc["BackupRestoreDone"]);
+            }
+            catch (BackupFormatException ex)
+            {
+                await ShowInfoAsync(Loc["BackupRestoreTitle"], BackupProblemMessage(ex));
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync(ex);
+            }
+        }
+
+        [RelayCommand]
+        public async Task UndoRestore()
+        {
+            if (!_backup.CanUndoRestore) return;
+            if (!await ConfirmAsync(Loc["BackupUndoTitle"], Loc["BackupUndoConfirm"], Loc["BackupUndoAction"], Loc["BtnCancel"], destructive: true)) return;
+            try
+            {
+                BackupManifest restored = null!;
+                await Loading.RunAsync(async () => restored = await _backup.UndoRestoreAsync(AppVersion));
+                ApplyBackedUpSettings(restored.Settings);
+                RefreshUndoRestore();
+                await RefreshOfficialContentStatusAsync();
+                await ShowInfoAsync(Loc["BackupUndoTitle"], Loc["BackupUndoDone"]);
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync(ex);
+            }
+        }
+
         /// <summary>Synchro manuelle du contenu officiel depuis la seed.db3 embarquée - même si la version est
         /// déjà à jour (répare un catalogue qui aurait dérivé). Même avertissement de redémarrage que
         /// ResetDatabase si quelque chose a changé.</summary>
@@ -211,9 +360,11 @@ namespace MordheimLedgerApp.Features.Settings
         private readonly WarriorPhotoStore _warriorPhotos;
 
         public SettingsViewModel(AppDatabase db, OfficialContentService officialContent,
-            SampleWarbandService sampleWarbandService, AppTourService tourService, WarriorPhotoStore warriorPhotos)
+            SampleWarbandService sampleWarbandService, AppTourService tourService, WarriorPhotoStore warriorPhotos,
+            BackupService backup)
         {
             _db = db;
+            _backup = backup;
             _warriorPhotos = warriorPhotos;
             _officialContent = officialContent;
             _sampleWarbandService = sampleWarbandService;

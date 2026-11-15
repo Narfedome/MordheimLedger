@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sauvegarde Google d'Android jusqu'à Android 11 (android:fullBackupContent). Google abandonne toute la sauvegarde
+     au-delà de 25 Mo : les photos des figurines n'y vont pas (elles sont dans le fichier de sauvegarde manuel des
+     Paramètres), ni la copie de secours d'avant la dernière restauration. La base et les préférences y vont. -->
+<full-backup-content>
+	<exclude domain="file" path="warrior-photos/" />
+	<exclude domain="file" path="restore-undo.mordheimbackup" />
+</full-backup-content>

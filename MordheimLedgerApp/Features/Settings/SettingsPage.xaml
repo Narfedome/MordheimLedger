@@ -210,6 +210,63 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Sauvegarde (v2, lot 1) : fichier .mordheimbackup (base + photos + réglages) via « Enregistrer
+                 sous… », restauration, et annulation de la dernière restauration (copie de secours). -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{loc:Loc BackupTitle}" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+
+                    <Grid ColumnDefinitions="*,auto">
+                        <Label Grid.Column="0" Text="{loc:Loc BackupExportDesc}"
+                               VerticalOptions="Center" FontSize="{OnIdiom Default=13, Desktop=11}"
+                               TextColor="{DynamicResource AppTextMuted}"/>
+                        <Button Grid.Column="1"
+                                Text="{loc:Loc BackupExportButton}"
+                                Command="{Binding ExportBackupCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{DynamicResource AppAccent}"
+                                FontSize="{OnIdiom Default=15, Desktop=13}"
+                                Padding="8,4"
+                                MinimumHeightRequest="{DynamicResource AppInlineButtonMinSize}"
+                                MinimumWidthRequest="{DynamicResource AppInlineButtonMinSize}"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}"/>
+
+                    <Grid ColumnDefinitions="*,auto">
+                        <Label Grid.Column="0" Text="{loc:Loc BackupRestoreDesc}"
+                               VerticalOptions="Center" FontSize="{OnIdiom Default=13, Desktop=11}"
+                               TextColor="{DynamicResource AppTextMuted}"/>
+                        <Button Grid.Column="1"
+                                Text="{loc:Loc BackupRestoreButton}"
+                                Command="{Binding RestoreBackupCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{DynamicResource AppAccent}"
+                                FontSize="{OnIdiom Default=15, Desktop=13}"
+                                Padding="8,4"
+                                MinimumHeightRequest="{DynamicResource AppInlineButtonMinSize}"
+                                MinimumWidthRequest="{DynamicResource AppInlineButtonMinSize}"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}" IsVisible="{Binding CanUndoRestore}"/>
+
+                    <Grid ColumnDefinitions="*,auto" IsVisible="{Binding CanUndoRestore}">
+                        <Label Grid.Column="0" Text="{Binding UndoRestoreDescription}"
+                               VerticalOptions="Center" FontSize="{OnIdiom Default=13, Desktop=11}"
+                               TextColor="{DynamicResource AppTextMuted}"/>
+                        <Button Grid.Column="1"
+                                Text="{loc:Loc BackupUndoButton}"
+                                Command="{Binding UndoRestoreCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{DynamicResource AppDanger}"
+                                FontSize="{OnIdiom Default=15, Desktop=13}"
+                                Padding="8,4"
+                                MinimumHeightRequest="{DynamicResource AppInlineButtonMinSize}"
+                                MinimumWidthRequest="{DynamicResource AppInlineButtonMinSize}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Contenu officiel : version en base + synchro manuelle depuis la seed.db3 embarquée (la
                  synchro automatique a déjà lieu au lancement quand la version de l'appli est plus récente). -->
             <Border Style="{StaticResource SectionCardBorderStyle}">

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 et plus (android:dataExtractionRules), mêmes règles que backup_rules.xml pour la sauvegarde Google
+     (plafond de 25 Mo : pas les photos). Le transfert direct d'un téléphone à l'autre n'a pas ce plafond : les photos
+     y vont. La copie de secours d'avant la dernière restauration reste sur l'appareil. -->
+<data-extraction-rules>
+	<cloud-backup>
+		<exclude domain="file" path="warrior-photos/" />
+		<exclude domain="file" path="restore-undo.mordheimbackup" />
+	</cloud-backup>
+	<device-transfer>
+		<exclude domain="file" path="restore-undo.mordheimbackup" />
+	</device-transfer>
+</data-extraction-rules>

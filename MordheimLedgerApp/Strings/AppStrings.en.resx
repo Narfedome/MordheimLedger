@@ -3249,4 +3249,66 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="SettingsWhatsNewButton" xml:space="preserve">
     <value>View</value>
   </data>
+  <data name="BackupTitle" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="BackupExportDesc" xml:space="preserve">
+    <value>Saves all your warbands, the Codex, photos and settings to a file, to keep or to open on another device.</value>
+  </data>
+  <data name="BackupExportButton" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="BackupExportDone" xml:space="preserve">
+    <value>Backup saved: {0}</value>
+  </data>
+  <data name="BackupRestoreDesc" xml:space="preserve">
+    <value>Replaces all the data on this device with the content of a backup file.</value>
+  </data>
+  <data name="BackupRestoreButton" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="BackupRestorePick" xml:space="preserve">
+    <value>Choose a backup</value>
+  </data>
+  <data name="BackupRestoreTitle" xml:space="preserve">
+    <value>Restore a backup</value>
+  </data>
+  <data name="BackupRestoreConfirm" xml:space="preserve">
+    <value>Backup from {0} ({1} warband(s)).
+
+All the current data on this device will be replaced. A copy is kept: you can undo this restore from the Settings.</value>
+  </data>
+  <data name="BackupRestoreAction" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="BackupRestoreDone" xml:space="preserve">
+    <value>Backup restored. Restart the app to refresh the screens already open and apply the settings.</value>
+  </data>
+  <data name="BackupUndoDesc" xml:space="preserve">
+    <value>Go back to the data from before the restore of {0}.</value>
+  </data>
+  <data name="BackupUndoButton" xml:space="preserve">
+    <value>Undo</value>
+  </data>
+  <data name="BackupUndoTitle" xml:space="preserve">
+    <value>Undo the restore</value>
+  </data>
+  <data name="BackupUndoConfirm" xml:space="preserve">
+    <value>The data from before the last restore will replace the current data.</value>
+  </data>
+  <data name="BackupUndoAction" xml:space="preserve">
+    <value>Go back</value>
+  </data>
+  <data name="BackupUndoDone" xml:space="preserve">
+    <value>Restore undone. Restart the app to refresh the screens already open.</value>
+  </data>
+  <data name="BackupNotABackup" xml:space="preserve">
+    <value>This file is not a Mordheim Ledger backup.</value>
+  </data>
+  <data name="BackupDamaged" xml:space="preserve">
+    <value>This backup is damaged: nothing was changed.</value>
+  </data>
+  <data name="BackupFromNewerApp" xml:space="preserve">
+    <value>This backup comes from a newer version of the app: update it to restore the backup.</value>
+  </data>
 </root>

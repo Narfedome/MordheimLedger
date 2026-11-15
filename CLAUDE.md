@@ -239,6 +239,23 @@ première installation (`OnboardingViewModel.FinishAsync` marque la version vue)
 les deux changelogs avant chaque release**, sinon rien ne s'affiche. Extraction et règle d'affichage dans `Core/Services/WhatsNew`
 (`WhatsNewTests`), préférence `whats_new_seen` dans `Services/WhatsNewService`. À relire depuis Paramètres › Découvrir.
 
+**Format d'échange (v2 lot 0, branche `feature/exchange-format`, 2026-11-15)** : socle du partage par fichier, du QR et du
+lobby (voir ROADMAP.md § V2), Core seulement, pas d'UI. `Core/Exchange/` : `ExchangePackage` (JSON : lignes du catalogue +
+bandes jouées, photos à côté), `ExchangeService` (`ExportWarbandsAsync`/`ExportCatalogAsync` → `PreviewAsync` → `ImportAsync`
+avec `ImportDecisions`), `ExchangeArchive` (.zip `.mordheim` = `package.json` + `photos/` ; texte compact `MLX1:` zlib+base64url
+pour le QR). Décisions de l'utilisateur : archive .zip ; contenu officiel référencé **et** embarqué en secours (créé s'il
+manque chez le destinataire ; option `EmbedOfficialContent: false` pour le QR) ; identité partagée. Une ligne du catalogue y
+est désignée par sa clé, jamais par son Id : `o:<OfficialId>` (Officiel/Modifié) ou `s:<GUID>` (Personnalisé). Le GUID d'une
+entrée Personnalisée ou d'une bande vit dans **`ShareIdentityEntity`** (table, Id local, GUID), attribué au premier export et
+gardé par qui importe - **pas** dans une colonne des entités : les `SaveXxxAsync` réécrivent la ligne entière depuis le
+modèle et l'effaçaient (essayé, deux tests l'ont montré). Import : Officiel présent = version locale ; Modifié/Personnalisé
+identique = réutilisé, différent = conflit (garder la sienne par défaut, `TakeIncoming`) ; bande déjà présente = nouvelle
+copie par défaut ou `Replace` ; référence introuvable = import refusé (`MissingReferences`), tout en une transaction.
+Parcours générique : catalogue par `OfficialContentSchema` (d'où `AppDatabase.ContentSnapshot` passé `internal`), parties
+jouées par `Exchange/PlayedDataSchema` - **toute nouvelle table rattachée à une bande/un guerrier ou colonne de référence
+au catalogue s'y déclare** (garde-fou `ExchangeServiceTests.PlayedSchema_CoversEveryIdColumn`). `ImagePath` du catalogue et
+`CampaignId` ne voyagent pas. La sauvegarde complète (lot 1) n'utilise pas ce format : copie de la base + photos (décision).
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

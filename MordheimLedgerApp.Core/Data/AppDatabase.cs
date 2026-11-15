@@ -451,6 +451,7 @@ public partial class AppDatabase
         await _db.CreateTableAsync<ContentMetaEntity>();
         await _db.CreateTableAsync<OfficialContentHashEntity>();
         await _db.CreateTableAsync<ContentConflictEntity>();
+        await _db.CreateTableAsync<ShareIdentityEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -504,6 +505,7 @@ public partial class AppDatabase
         await _db.DropTableAsync<ContentMetaEntity>();
         await _db.DropTableAsync<OfficialContentHashEntity>();
         await _db.DropTableAsync<ContentConflictEntity>();
+        await _db.DropTableAsync<ShareIdentityEntity>();
         // Oubliée jusqu'au 2026-09-28 (masqué par l'ancien seed des races, qui réutilisait une race existante
         // par nom) - une réinitialisation dupliquait alors chaque race et échouait.
         await _db.DropTableAsync<RaceEntity>();

@@ -521,15 +521,7 @@ public partial class AppDatabase
         await Initialization;
         await DropAllTablesAsync();
         InvalidateAllCachedTables();
-        _specialRuleIdsByOfficialId.Clear();
-        _mutationIdsByOfficialId.Clear();
-        _magicSchoolIdsByOfficialId.Clear();
-        _equipmentIdsByOfficialId.Clear();
-        _skillIdsByOfficialId.Clear();
-        _racialProfileIdsByOfficialId.Clear();
-        _raceIdsByOfficialId.Clear();
-        _warbandArchetypeIdsByOfficialId.Clear();
-        _pendingSharedRestrictions.Clear();
+        ClearSeedLookups();
         await CreateAllTablesAsync();
         await RunInTransactionAsync(async () =>
         {
@@ -541,6 +533,21 @@ public partial class AppDatabase
             // nettoyage préalable que fait ResyncExplorationResultsAsync sur une base déjà peuplée).
             await SeedExplorationResultsAsync();
         });
+    }
+
+    /// <summary>Caches find-or-create du seed : un id résolu contre d'anciennes tables n'a plus de sens après
+    /// une réinitialisation ou une restauration.</summary>
+    private void ClearSeedLookups()
+    {
+        _specialRuleIdsByOfficialId.Clear();
+        _mutationIdsByOfficialId.Clear();
+        _magicSchoolIdsByOfficialId.Clear();
+        _equipmentIdsByOfficialId.Clear();
+        _skillIdsByOfficialId.Clear();
+        _racialProfileIdsByOfficialId.Clear();
+        _raceIdsByOfficialId.Clear();
+        _warbandArchetypeIdsByOfficialId.Clear();
+        _pendingSharedRestrictions.Clear();
     }
 
     private async Task SeedOfficialContentAsync()

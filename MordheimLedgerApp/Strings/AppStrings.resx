@@ -3249,4 +3249,66 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="SettingsWhatsNewButton" xml:space="preserve">
     <value>Voir</value>
   </data>
+  <data name="BackupTitle" xml:space="preserve">
+    <value>Sauvegarde</value>
+  </data>
+  <data name="BackupExportDesc" xml:space="preserve">
+    <value>Enregistre toutes vos bandes, le Codex, les photos et vos réglages dans un fichier, à garder ou à ouvrir sur un autre appareil.</value>
+  </data>
+  <data name="BackupExportButton" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="BackupExportDone" xml:space="preserve">
+    <value>Sauvegarde enregistrée : {0}</value>
+  </data>
+  <data name="BackupRestoreDesc" xml:space="preserve">
+    <value>Remplace toutes les données de cet appareil par celles d'un fichier de sauvegarde.</value>
+  </data>
+  <data name="BackupRestoreButton" xml:space="preserve">
+    <value>Restaurer</value>
+  </data>
+  <data name="BackupRestorePick" xml:space="preserve">
+    <value>Choisir une sauvegarde</value>
+  </data>
+  <data name="BackupRestoreTitle" xml:space="preserve">
+    <value>Restaurer une sauvegarde</value>
+  </data>
+  <data name="BackupRestoreConfirm" xml:space="preserve">
+    <value>Sauvegarde du {0} ({1} bande(s)).
+
+Toutes les données actuelles de cet appareil seront remplacées. Une copie en est gardée : vous pourrez annuler cette restauration depuis les Paramètres.</value>
+  </data>
+  <data name="BackupRestoreAction" xml:space="preserve">
+    <value>Restaurer</value>
+  </data>
+  <data name="BackupRestoreDone" xml:space="preserve">
+    <value>Sauvegarde restaurée. Redémarrez l'application pour rafraîchir les écrans déjà ouverts et appliquer les réglages.</value>
+  </data>
+  <data name="BackupUndoDesc" xml:space="preserve">
+    <value>Revenir aux données d'avant la restauration du {0}.</value>
+  </data>
+  <data name="BackupUndoButton" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="BackupUndoTitle" xml:space="preserve">
+    <value>Annuler la restauration</value>
+  </data>
+  <data name="BackupUndoConfirm" xml:space="preserve">
+    <value>Les données d'avant la dernière restauration remplaceront les données actuelles.</value>
+  </data>
+  <data name="BackupUndoAction" xml:space="preserve">
+    <value>Revenir en arrière</value>
+  </data>
+  <data name="BackupUndoDone" xml:space="preserve">
+    <value>Restauration annulée. Redémarrez l'application pour rafraîchir les écrans déjà ouverts.</value>
+  </data>
+  <data name="BackupNotABackup" xml:space="preserve">
+    <value>Ce fichier n'est pas une sauvegarde Mordheim Ledger.</value>
+  </data>
+  <data name="BackupDamaged" xml:space="preserve">
+    <value>Cette sauvegarde est endommagée : rien n'a été modifié.</value>
+  </data>
+  <data name="BackupFromNewerApp" xml:space="preserve">
+    <value>Cette sauvegarde vient d'une version plus récente de l'application : mettez-la à jour pour la restaurer.</value>
+  </data>
 </root>

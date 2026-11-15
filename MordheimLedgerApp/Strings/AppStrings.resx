@@ -3428,4 +3428,145 @@ Toutes les données actuelles de cet appareil seront remplacées. Une copie en e
   <data name="ImportMissingCustom" xml:space="preserve">
     <value>Cette bande utilise {0} entrée(s) du Codex qui ne sont pas sur cet appareil. Faites-les d'abord partager (QR ou fichier), puis réessayez.</value>
   </data>
+  <data name="StartGameSolo" xml:space="preserve">
+    <value>Partie seule</value>
+  </data>
+  <data name="StartGameConnected" xml:space="preserve">
+    <value>Partie connectée (autres joueurs sur le même Wi-Fi)</value>
+  </data>
+  <data name="LobbyTitle" xml:space="preserve">
+    <value>Partie connectée</value>
+  </data>
+  <data name="LobbySubtitleHost" xml:space="preserve">
+    <value>Vous êtes l'hôte</value>
+  </data>
+  <data name="LobbySubtitleGuest" xml:space="preserve">
+    <value>En attente du lancement par l'hôte</value>
+  </data>
+  <data name="LobbyAddress" xml:space="preserve">
+    <value>Réseau local · {0}</value>
+  </data>
+  <data name="LobbyOrCode" xml:space="preserve">
+    <value>Scannez le QR, ou saisissez le code :</value>
+  </data>
+  <data name="LobbyHostHint" xml:space="preserve">
+    <value>Les autres joueurs : Bandes › Rejoindre une partie. Tout le monde doit être sur le même Wi-Fi, ou sur le point d'accès d'un des téléphones.</value>
+  </data>
+  <data name="LobbyStart" xml:space="preserve">
+    <value>Commencer</value>
+  </data>
+  <data name="LobbyWaitingHost" xml:space="preserve">
+    <value>En attente…</value>
+  </data>
+  <data name="LobbyCloseGame" xml:space="preserve">
+    <value>Fermer la partie</value>
+  </data>
+  <data name="LobbyLeave" xml:space="preserve">
+    <value>Quitter la partie</value>
+  </data>
+  <data name="LobbyLeaveTitle" xml:space="preserve">
+    <value>Quitter la partie connectée</value>
+  </data>
+  <data name="LobbyLeaveConfirm" xml:space="preserve">
+    <value>Les bandes adverses ne seront plus consultables. Si vous êtes l'hôte, la partie se ferme pour tous.</value>
+  </data>
+  <data name="LobbyYou" xml:space="preserve">
+    <value>{0} (vous)</value>
+  </data>
+  <data name="LobbyPlayerWarband" xml:space="preserve">
+    <value>{0} · {1} · Valeur {2}</value>
+  </data>
+  <data name="LobbyChoosingWarband" xml:space="preserve">
+    <value>choisit sa bande…</value>
+  </data>
+  <data name="LobbyPlayers" xml:space="preserve">
+    <value>Joueurs ({0}/{1})</value>
+  </data>
+  <data name="LobbyWrongCode" xml:space="preserve">
+    <value>Code incorrect, ou appareil d'une autre version de l'application.</value>
+  </data>
+  <data name="LobbyFull" xml:space="preserve">
+    <value>La partie est complète (4 joueurs).</value>
+  </data>
+  <data name="LobbyAlreadyStarted" xml:space="preserve">
+    <value>La partie a déjà commencé.</value>
+  </data>
+  <data name="LobbyHostClosed" xml:space="preserve">
+    <value>L'hôte a fermé la partie.</value>
+  </data>
+  <data name="LobbyConnectionLost" xml:space="preserve">
+    <value>La connexion avec la partie est perdue. Vérifiez que vous êtes sur le même Wi-Fi que l'hôte.</value>
+  </data>
+  <data name="LobbyNoNetworkTitle" xml:space="preserve">
+    <value>Aucun réseau local</value>
+  </data>
+  <data name="LobbyNoNetwork" xml:space="preserve">
+    <value>Les appareils doivent être sur le même Wi-Fi. Sans Wi-Fi, un joueur active le partage de connexion (point d'accès) de son téléphone et les autres s'y connectent : la partie ne consomme pas de données. Hors réseau, vous pouvez toujours échanger les bandes par QR code ou par fichier.</value>
+  </data>
+  <data name="LobbyJoinTitle" xml:space="preserve">
+    <value>Rejoindre une partie</value>
+  </data>
+  <data name="LobbyJoinAction" xml:space="preserve">
+    <value>Rejoindre</value>
+  </data>
+  <data name="LobbyYourName" xml:space="preserve">
+    <value>Votre nom</value>
+  </data>
+  <data name="LobbyNearbyGames" xml:space="preserve">
+    <value>Parties à proximité</value>
+  </data>
+  <data name="LobbySearching" xml:space="preserve">
+    <value>Recherche des parties ouvertes sur ce réseau…</value>
+  </data>
+  <data name="LobbyGameOf" xml:space="preserve">
+    <value>Partie de {0}</value>
+  </data>
+  <data name="LobbyGamePlayers" xml:space="preserve">
+    <value>{0}/{1} joueurs</value>
+  </data>
+  <data name="LobbyScanQr" xml:space="preserve">
+    <value>Scanner le QR</value>
+  </data>
+  <data name="LobbyEnterCode" xml:space="preserve">
+    <value>Saisir le code</value>
+  </data>
+  <data name="LobbyEnterCodeTitle" xml:space="preserve">
+    <value>Code de la partie</value>
+  </data>
+  <data name="LobbyEnterCodeMessage" xml:space="preserve">
+    <value>Le code affiché dans la salle d'attente de l'hôte (6 caractères).</value>
+  </data>
+  <data name="LobbyCodeInvalid" xml:space="preserve">
+    <value>Ce code n'a pas la bonne forme : 6 lettres et chiffres.</value>
+  </data>
+  <data name="LobbyCodeNotFound" xml:space="preserve">
+    <value>Aucune partie avec ce code sur ce réseau. Vérifiez le code et que vous êtes sur le même Wi-Fi que l'hôte, ou scannez son QR.</value>
+  </data>
+  <data name="LobbyYourWarband" xml:space="preserve">
+    <value>Votre bande</value>
+  </data>
+  <data name="LobbyNoWarband" xml:space="preserve">
+    <value>Aucune bande disponible (une bande déjà en partie ne peut pas en rejoindre une autre).</value>
+  </data>
+  <data name="LobbyWarbandChoiceDetail" xml:space="preserve">
+    <value>{0} · Valeur {1}</value>
+  </data>
+  <data name="LobbyScanHint" xml:space="preserve">
+    <value>Visez le QR de la salle d'attente de l'hôte.</value>
+  </data>
+  <data name="LobbyScanForeign" xml:space="preserve">
+    <value>Ce QR n'est pas celui d'une partie connectée.</value>
+  </data>
+  <data name="TabOpponents" xml:space="preserve">
+    <value>Adversaires</value>
+  </data>
+  <data name="OpponentSubtitle" xml:space="preserve">
+    <value>Bande de {0} · lecture seule</value>
+  </data>
+  <data name="OpponentSummary" xml:space="preserve">
+    <value>{0} · Trésorerie : {1} CO · Pierres magiques : {2} · Valeur {3}</value>
+  </data>
+  <data name="OpponentInjuries" xml:space="preserve">
+    <value>Blessures</value>
+  </data>
 </root>

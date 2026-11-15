@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Lobby"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Lobby.JoinLobbyForm"
+               x:DataType="local:JoinLobbyViewModel">
+    <!-- Rejoindre une partie (maquette « Partie connectée ») : parties à proximité, QR ou code, bande engagée. Texte des
+         RadioButton en Label FRÈRE tapable (Content mal rendu sous WinUI, voir ExplorationResultStepView). -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc LobbyJoinAction}"
+                         PrimaryCommand="{Binding JoinSelectedCommand}">
+        <VerticalStackLayout Spacing="12">
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasNetwork, Converter={StaticResource InverseBoolConverter}}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{loc:Loc LobbyNoNetworkTitle}" FontAttributes="Bold" TextColor="{DynamicResource AppWarning}"/>
+                    <Label Text="{loc:Loc LobbyNoNetwork}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{loc:Loc LobbyYourName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding PlayerName}" MaxLength="30"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasNetwork}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{loc:Loc LobbyNearbyGames}" FontAttributes="Bold"/>
+                    <Label Text="{loc:Loc LobbySearching}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                           IsVisible="{Binding HasGames, Converter={StaticResource InverseBoolConverter}}"/>
+                    <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Games}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:DiscoveredGameRow">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                    <RadioButton Grid.Column="0" GroupName="LobbyGames" IsChecked="{Binding IsSelected}" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="0" Padding="0,4">
+                                        <Label Text="{Binding Title}"/>
+                                        <Label Text="{Binding Detail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <VerticalStackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:JoinLobbyViewModel}}, Path=SelectGameCommand}"/>
+                                        </VerticalStackLayout.GestureRecognizers>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Grid.Column="0" Text="{loc:Loc LobbyScanQr}" Command="{Binding ScanQrCommand}"
+                                Style="{StaticResource DialogSecondaryButtonStyle}" IsVisible="{Binding CanScan}"/>
+                        <Button Grid.Column="1" Text="{loc:Loc LobbyEnterCode}" Command="{Binding EnterCodeCommand}"
+                                Style="{StaticResource DialogSecondaryButtonStyle}"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{loc:Loc LobbyYourWarband}" FontAttributes="Bold"/>
+                    <Label Text="{loc:Loc LobbyNoWarband}" FontSize="12" TextColor="{DynamicResource AppWarning}"
+                           IsVisible="{Binding HasWarbands, Converter={StaticResource InverseBoolConverter}}"/>
+                    <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Warbands}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:WarbandChoiceRow">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                    <RadioButton Grid.Column="0" GroupName="LobbyWarbands" IsChecked="{Binding IsSelected}" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="0" Padding="0,4">
+                                        <Label Text="{Binding Name}"/>
+                                        <Label Text="{Binding Detail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <VerticalStackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:JoinLobbyViewModel}}, Path=SelectWarbandCommand}"/>
+                                        </VerticalStackLayout.GestureRecognizers>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </form:FormPageLayout>
+</form:FormContent>

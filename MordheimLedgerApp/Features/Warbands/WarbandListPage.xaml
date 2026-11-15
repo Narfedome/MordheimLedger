@@ -134,6 +134,10 @@
             <components:FaIconButtonView AutomationId="ImportFileButton" Icon="{x:Static icons:SolidFont.FileImport}"
                                  Command="{Binding ImportFileCommand}"
                                  Tooltip="{loc:Loc ImportButton}"/>
+            <!-- Rejoindre une partie connectée (v2, lot 4a) ; la créer se fait depuis « Lancer la partie » de la fiche. -->
+            <components:FaIconButtonView AutomationId="JoinGameButton" Icon="{x:Static icons:SolidFont.Wifi}"
+                                 Command="{Binding JoinConnectedGameCommand}"
+                                 Tooltip="{loc:Loc LobbyJoinTitle}"/>
         </HorizontalStackLayout>
     </Grid>
     </components:WatermarkedLayout>

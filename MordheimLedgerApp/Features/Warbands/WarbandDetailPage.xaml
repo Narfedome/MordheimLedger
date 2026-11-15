@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MordheimLedgerApp.Features.Warbands"
+             xmlns:lobby="clr-namespace:MordheimLedgerApp.Features.Lobby"
              xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
              xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
              xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
@@ -386,9 +387,12 @@
                 </components:ScrollableTabStripView.Behaviors>
                 <HorizontalStackLayout Spacing="16">
                     <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
-                                                 IsActive="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"/>
+                                                 IsActive="{Binding ShowRosterTab}"/>
                     <components:TabToggleButton AutomationId="HistoryTabButton" Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
                                                  IsActive="{Binding ShowHistory}"/>
+                    <!-- Partie connectée en cours avec cette bande (v2, lot 4a - maquette, variante 3A). -->
+                    <components:TabToggleButton AutomationId="OpponentsTabButton" Text="{loc:Loc TabOpponents}" Command="{Binding ShowOpponentsTabCommand}"
+                                                 IsActive="{Binding ShowOpponents}" IsVisible="{Binding HasConnectedGame}"/>
                 </HorizontalStackLayout>
             </components:ScrollableTabStripView>
         </Grid>
@@ -396,7 +400,7 @@
         <!-- Pas de CollectionView ici (virtualisation inutile pour un roster de quelques dizaines de
              guerriers max, et une CollectionView imbriquée dans un ScrollView pose des soucis de
              hauteur) : un simple ScrollView + BindableLayout par groupe. -->
-        <components:ScrollHintHost Grid.Row="2" IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
+        <components:ScrollHintHost Grid.Row="2" IsVisible="{Binding ShowRosterTab}">
         <ScrollView x:Name="RosterScroll">
             <VerticalStackLayout Spacing="0" Margin="0,8">
 
@@ -567,6 +571,37 @@
             </CollectionView>
             </components:ScrollHintHost>
         </Grid>
+
+        <!-- Adversaires de la partie connectée : leurs bandes en lecture seule (OpponentWarbandPage), et quitter la partie. -->
+        <ScrollView Grid.Row="2" IsVisible="{Binding ShowOpponents}">
+            <VerticalStackLayout Spacing="12" Padding="16,8,16,16">
+                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Opponents}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="lobby:OpponentRow">
+                            <Grid>
+                                <Border Style="{StaticResource SectionCardBorderStyle}" InputTransparent="True"
+                                        AutomationProperties.IsInAccessibleTree="False">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding WarbandName}" FontAttributes="Bold"/>
+                                            <Label Text="{Binding Detail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1" Text="{x:Static icons:SolidFont.ChevronRight}" FontFamily="FontSolid" FontSize="14"
+                                               TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                    </Grid>
+                                </Border>
+                                <Button BackgroundColor="Transparent" BorderWidth="0" CornerRadius="8" Padding="0"
+                                        SemanticProperties.Description="{Binding WarbandName}"
+                                        CommandParameter="{Binding .}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=OpenOpponentCommand}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <Button Text="{loc:Loc LobbyLeave}" Command="{Binding LeaveConnectedGameCommand}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </ScrollView>
         </Grid>
 
         <!-- Même emplacement (Grid.Row="1") que le contenu qu'il remplace pendant le chargement - même

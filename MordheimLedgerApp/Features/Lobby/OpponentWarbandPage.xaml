@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Lobby"
+             xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Lobby.OpponentWarbandPage"
+             x:DataType="local:OpponentWarbandViewModel"
+             Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
+    <!-- Fiche adverse en lecture seule (maquette « Partie connectée ») : même en-tête que la fiche de bande, profils par
+         StatRowView, le reste en texte - rien à toucher. -->
+    <components:WatermarkedLayout>
+    <Grid RowDefinitions="Auto,Auto,*">
+        <header:DetailPageHeaderView Grid.Row="0" Title="{Binding Title}" BackCommand="{Binding BackCommand}"/>
+        <VerticalStackLayout Grid.Row="1" Spacing="2" Padding="16,0,16,8">
+            <Label Text="{Binding Subtitle}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+            <Label Text="{Binding Summary}" TextColor="{DynamicResource AppTextMuted}"/>
+        </VerticalStackLayout>
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Spacing="12" Padding="16,0,16,16" BindableLayout.ItemsSource="{Binding Warriors}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="local:OpponentWarriorRow">
+                        <Border Style="{StaticResource SectionCardBorderStyle}">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="16"/>
+                                <Label Text="{Binding RoleName}" FontSize="13" TextColor="{DynamicResource AppAccent}"/>
+                                <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}"
+                                                        Margin="0,6" AbbrFontSize="10" ValueFontSize="13"/>
+                                <Label FontSize="12" IsVisible="{Binding HasEquipment}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{loc:Loc WarriorsEquipmentHeading}" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Span Text=" : " TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Span Text="{Binding Equipment}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label FontSize="12" IsVisible="{Binding HasSkills}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{loc:Loc WarriorsSkillsHeading}" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Span Text=" : " TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Span Text="{Binding Skills}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label FontSize="12" IsVisible="{Binding HasInjuries}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{loc:Loc OpponentInjuries}" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Span Text=" : " TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Span Text="{Binding Injuries}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+    </components:WatermarkedLayout>
+</ContentPage>

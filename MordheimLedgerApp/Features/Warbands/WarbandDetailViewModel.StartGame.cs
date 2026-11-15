@@ -16,8 +16,43 @@ namespace MordheimLedgerApp.Features.Warbands;
 /// partie plutôt qu'une fois à la Fin de Partie précédente).</summary>
 public partial class WarbandDetailViewModel
 {
+    /// <summary>« Lancer la partie » (v2, lot 4a - maquette « Partie connectée », variante 1A) : partie seule comme avant,
+    /// ou partie connectée - l'appareil en devient l'hôte, et le lancement suit quand l'hôte commence.</summary>
     [RelayCommand]
     private async Task StartGame()
+    {
+        if (Warband is null) return;
+        var choice = await ShowActionSheetAsync(Loc["StartGameButtonText"], Loc["StartGameSolo"], Loc["StartGameConnected"]);
+        if (choice is null) return;
+        if (choice == Loc["StartGameConnected"] && !await HostConnectedGameAsync()) return;
+        await RunStartGameAsync();
+    }
+
+    /// <summary>Salle d'attente de l'hôte ; vrai quand la partie a commencé.</summary>
+    private async Task<bool> HostConnectedGameAsync()
+    {
+        if (Core.Lobby.LobbyAddress.LocalNetworks().Count == 0)
+        {
+            await ShowInfoAsync(Loc["LobbyNoNetworkTitle"], Loc["LobbyNoNetwork"]);
+            return false;
+        }
+        Core.Lobby.LobbyHost host = null!;
+        try
+        {
+            await Loading.RunAsync(async () => host = await _lobby.HostAsync(Warband!.Id));
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync(ex);
+            return false;
+        }
+        if (await ShowFormAsync(new Lobby.LobbyForm(new Lobby.LobbyViewModel(_lobby, host))) == true) return true;
+        await _lobby.LeaveAsync();
+        return false;
+    }
+
+    /// <summary>Lancement proprement dit : rappels, Vieilles blessures, aide des Dramatis Personae, puis partie en cours.</summary>
+    private async Task RunStartGameAsync()
     {
         if (Warband is null) return;
 
@@ -97,6 +132,7 @@ public partial class WarbandDetailViewModel
 
             Warband.GameInProgress = true;
             await _warbandService.SaveWarbandAsync(Warband);
+            _lobby.MarkLocalGameStarted(Warband.Id);
             await LoadAsync(Warband.Id);
         });
     }

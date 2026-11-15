@@ -14,7 +14,17 @@ namespace MordheimLedgerApp.Core.Exchange;
 /// destinataire a une version plus ancienne de l'appli). Faux pour un QR code : l'officiel n'y voyage que par
 /// son OfficialId.</param>
 /// <param name="IncludePhotos">Joindre les photos des guerriers (archive .zip seulement).</param>
-public sealed record ExchangeExportOptions(bool EmbedOfficialContent = true, bool IncludePhotos = true);
+/// <param name="IncludeReferencedCatalog">Embarquer le contenu du Codex que les bandes ou les entrées choisies
+/// référencent. Faux pour le QR d'une bande (choix de l'utilisateur, v2 lot 3) : la bande voyage seule, ses entrées
+/// Personnalisées ou Modifiées se partagent par leurs propres QR - à défaut, l'import les signale manquantes.</param>
+public sealed record ExchangeExportOptions(bool EmbedOfficialContent = true, bool IncludePhotos = true, bool IncludeReferencedCatalog = true)
+{
+    /// <summary>QR d'une entrée du Codex : le contenu officiel par son id seulement, pas de photo.</summary>
+    public static ExchangeExportOptions QrCatalog { get; } = new(EmbedOfficialContent: false, IncludePhotos: false);
+
+    /// <summary>QR d'une bande : la bande seule (ni photo, ni contenu du Codex).</summary>
+    public static ExchangeExportOptions QrWarband { get; } = new(EmbedOfficialContent: false, IncludePhotos: false, IncludeReferencedCatalog: false);
+}
 
 /// <summary>Une ligne du catalogue à partager : type d'entité (ex. typeof(EquipmentItemEntity)) et Id local.</summary>
 public sealed record CatalogItemRef(Type EntityType, int Id);
@@ -222,7 +232,7 @@ public sealed class ExchangeService
                 throw new InvalidOperationException($"{type.Name}#{id} introuvable");
             var key = KeyOf(type, id, row);
             var source = (ContentSource)snapshot.Mappings[type].FindColumn("Source").GetValue(row)!;
-            if ((force || options.EmbedOfficialContent || source != ContentSource.Official)
+            if ((force || (options.IncludeReferencedCatalog && (options.EmbedOfficialContent || source != ContentSource.Official)))
                 && _queued.Add(ExchangePackage.EntryId(type.Name, key)))
                 _pending.Enqueue((type, id));
             return key;

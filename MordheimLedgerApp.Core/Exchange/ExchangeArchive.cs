@@ -17,7 +17,7 @@ public static class ExchangeArchive
     private const string PhotoFolder = "photos/";
 
     /// <summary>Préfixe du texte compact (format + version du codage), pour reconnaître un QR qui n'est pas à nous.</summary>
-    private const string CompactPrefix = "MLX1:";
+    internal const string CompactPrefix = "MLX1:";
 
     /// <summary>Plafonds de lecture : une archive reçue d'ailleurs ne doit pas pouvoir remplir la mémoire.</summary>
     private const long MaxManifestBytes = 32L * 1024 * 1024;

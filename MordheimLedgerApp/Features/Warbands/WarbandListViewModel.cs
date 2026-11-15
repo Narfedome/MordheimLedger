@@ -135,9 +135,43 @@ public partial class WarbandListViewModel : BaseViewModel
     [RelayCommand]
     private async Task ImportFileAsync()
     {
+        // QR code (v2, lot 3) : Android seulement - pas de webcam sous Windows (décision 1.3), le fichier .mordheim y tient
+        // lieu de QR.
+        if (DeviceInfo.Current.Platform == DevicePlatform.Android)
+        {
+            var choice = await ShowActionSheetAsync(Loc["ImportTitle"], Loc["ImportChooseFile"], Loc["ImportScanQr"]);
+            if (choice is null) return;
+            if (choice == Loc["ImportScanQr"] && !await ScanQrWantsFileAsync()) return;
+        }
+        await PickAndImportFileAsync();
+    }
+
+    private async Task PickAndImportFileAsync()
+    {
         var picked = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = Loc["ImportPick"], FileTypes = ExchangeFileType });
         if (picked is null) return;
-        await ImportAsync(picked.OpenReadAsync, picked.FileName);
+        await ImportAsync(() => ReadArchiveAsync(picked.OpenReadAsync), picked.FileName);
+    }
+
+    /// <summary>Scan d'un ou plusieurs QR, puis import. Vrai si le joueur préfère finalement choisir un fichier
+    /// (bouton du pied de la page de scan).</summary>
+    private async Task<bool> ScanQrWantsFileAsync()
+    {
+        if (await Permissions.RequestAsync<Permissions.Camera>() != PermissionStatus.Granted)
+        {
+            await ShowInfoAsync(Loc["QrScanTitle"], Loc["QrScanNoCamera"]);
+            return false;
+        }
+        var result = await ShowFormAsync(new Exchange.QrScanForm(new Exchange.QrScanViewModel()));
+        if (result is { PickFile: true }) return true;
+        if (result?.Package is { } package) await ImportAsync(() => Task.FromResult(package), Loc["QrCodeName"]);
+        return false;
+    }
+
+    private static async Task<ExchangePackage> ReadArchiveAsync(Func<Task<Stream>> open)
+    {
+        await using var stream = await open();
+        return await ExchangeArchive.ReadAsync(stream);
     }
 
     /// <summary>Fichier reçu d'une autre appli (ExchangeFiles.Receive) : appelé au retour sur la liste et à l'arrivée
@@ -147,7 +181,7 @@ public partial class WarbandListViewModel : BaseViewModel
         if (ExchangeFiles.TakePending() is not { } pending) return;
         try
         {
-            await ImportAsync(() => Task.FromResult<Stream>(File.OpenRead(pending.Path)), pending.Name);
+            await ImportAsync(() => ReadArchiveAsync(() => Task.FromResult<Stream>(File.OpenRead(pending.Path))), pending.Name);
         }
         finally
         {
@@ -155,17 +189,20 @@ public partial class WarbandListViewModel : BaseViewModel
         }
     }
 
-    private async Task ImportAsync(Func<Task<Stream>> open, string fileName)
+    private async Task ImportAsync(Func<Task<ExchangePackage>> read, string fileName)
     {
         try
         {
-            ExchangePackage package;
-            await using (var stream = await open())
-                package = await ExchangeArchive.ReadAsync(stream);
+            var package = await read();
             var preview = await _exchange.PreviewAsync(package, Loc.Language);
             if (!preview.CanImport)
             {
-                await ShowInfoAsync(Loc["ImportTitle"], Loc["ImportMissingContent"]);
+                // Entrée Personnalisée absente (QR d'une bande, qui voyage sans son Codex) : à partager d'abord ; sinon
+                // contenu officiel d'une version plus récente de l'appli.
+                var missingCustom = preview.MissingReferences.Any(r => r.Contains("|" + CatalogEntry.SharedPrefix, StringComparison.Ordinal));
+                await ShowInfoAsync(Loc["ImportTitle"], missingCustom
+                    ? string.Format(Loc["ImportMissingCustom"], preview.MissingReferences.Count)
+                    : Loc["ImportMissingContent"]);
                 return;
             }
             // Rien de nouveau ni de différent (fichier déjà importé tel quel) : pas d'écran sans choix à faire.

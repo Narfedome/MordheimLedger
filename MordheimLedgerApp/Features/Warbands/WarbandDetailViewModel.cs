@@ -301,23 +301,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     private readonly Core.Exchange.ExchangeService _exchange;
 
-    /// <summary>Partage de la bande (v2, lot 2) : fichier .mordheim (bande, photos, contenu du Codex qu'elle
-    /// utilise) envoyé par la feuille de partage du système.</summary>
+    /// <summary>Partage de la bande (v2, lots 2 et 3) : fichier .mordheim (bande, photos, contenu du Codex qu'elle
+    /// utilise) ou QR code(s) de la bande seule, voir BaseViewModel.ShareAsync.</summary>
     [RelayCommand]
-    private async Task ShareWarband()
-    {
-        if (Warband is not { } warband) return;
-        try
-        {
-            Core.Exchange.ExchangePackage package = null!;
-            await Loading.RunAsync(async () => package = await _exchange.ExportWarbandsAsync(new[] { warband.Id }));
-            await ExchangeFiles.ShareAsync(package, warband.Name);
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync(ex);
-        }
-    }
+    private Task ShareWarband() => Warband is { } warband
+        ? ShareAsync(warband.Name, isWarband: true, options => _exchange.ExportWarbandsAsync(new[] { warband.Id }, options))
+        : Task.CompletedTask;
 
     /// <summary>Ouvre l'inventaire de bande dans un dialog dédié (WarbandInventoryDialog) où chaque objet
     /// peut être réattribué à un guerrier via un simple ActionSheet - toujours recharger le roster à la

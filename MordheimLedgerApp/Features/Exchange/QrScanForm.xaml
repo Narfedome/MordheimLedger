@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Exchange"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+               x:TypeArguments="local:QrScanResult"
+               x:Class="MordheimLedgerApp.Features.Exchange.QrScanForm"
+               x:DataType="local:QrScanViewModel">
+    <!-- Lecture de QR codes (v2, lot 3) : caméra en haut, état de la lecture dessous (« QR 1/3 lu »). Pied : Annuler ou
+         repli sur un fichier si la caméra ne lit pas. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc QrScanPickFile}"
+                         PrimaryCommand="{Binding PickFileCommand}">
+        <VerticalStackLayout Spacing="12">
+            <Border StrokeShape="RoundRectangle 12" StrokeThickness="1" Stroke="{DynamicResource AppBorder}"
+                    HeightRequest="420" BackgroundColor="Black">
+                <zxing:CameraBarcodeReaderView x:Name="Reader" BarcodesDetected="OnBarcodesDetected" IsDetecting="True"/>
+            </Border>
+            <Label Text="{Binding Status}" HorizontalTextAlignment="Center">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsWarning}" Value="True">
+                        <Setter Property="TextColor" Value="{DynamicResource AppWarning}"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </VerticalStackLayout>
+    </form:FormPageLayout>
+</form:FormContent>

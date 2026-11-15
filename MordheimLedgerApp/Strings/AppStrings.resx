@@ -3377,4 +3377,55 @@ Toutes les données actuelles de cet appareil seront remplacées. Une copie en e
   <data name="ImportNothing" xml:space="preserve">
     <value>Tout le contenu de ce fichier est déjà sur cet appareil : rien à importer.</value>
   </data>
+  <data name="ShareTitle" xml:space="preserve">
+    <value>Partager</value>
+  </data>
+  <data name="ShareAsFile" xml:space="preserve">
+    <value>Fichier (photos et Codex compris)</value>
+  </data>
+  <data name="ShareAsQr" xml:space="preserve">
+    <value>QR code</value>
+  </data>
+  <data name="QrTooLarge" xml:space="preserve">
+    <value>Trop volumineux pour des QR codes : partagez plutôt le fichier.</value>
+  </data>
+  <data name="QrPosition" xml:space="preserve">
+    <value>QR {0}/{1}</value>
+  </data>
+  <data name="QrWarbandHint" xml:space="preserve">
+    <value>À scanner avec Mordheim Ledger : Bandes › Importer › Scanner un QR code. La bande voyage seule : ses entrées du Codex personnalisées ou modifiées se partagent à part, par leur propre QR.</value>
+  </data>
+  <data name="QrCatalogHint" xml:space="preserve">
+    <value>À scanner avec Mordheim Ledger : Bandes › Importer › Scanner un QR code.</value>
+  </data>
+  <data name="QrScanTitle" xml:space="preserve">
+    <value>Scanner un QR code</value>
+  </data>
+  <data name="QrScanHint" xml:space="preserve">
+    <value>Visez le QR code affiché par l'autre appareil.</value>
+  </data>
+  <data name="QrScanProgress" xml:space="preserve">
+    <value>QR {0}/{1} lu : passez au suivant.</value>
+  </data>
+  <data name="QrScanForeign" xml:space="preserve">
+    <value>Ce QR n'est pas un code Mordheim Ledger.</value>
+  </data>
+  <data name="QrScanPickFile" xml:space="preserve">
+    <value>Choisir un fichier</value>
+  </data>
+  <data name="QrScanNoCamera" xml:space="preserve">
+    <value>Sans accès à la caméra, l'appli ne peut pas lire de QR code. Vous pouvez l'autoriser dans les réglages d'Android, ou importer le fichier.</value>
+  </data>
+  <data name="QrCodeName" xml:space="preserve">
+    <value>QR code</value>
+  </data>
+  <data name="ImportChooseFile" xml:space="preserve">
+    <value>Choisir un fichier</value>
+  </data>
+  <data name="ImportScanQr" xml:space="preserve">
+    <value>Scanner un QR code</value>
+  </data>
+  <data name="ImportMissingCustom" xml:space="preserve">
+    <value>Cette bande utilise {0} entrée(s) du Codex qui ne sont pas sur cet appareil. Faites-les d'abord partager (QR ou fichier), puis réessayez.</value>
+  </data>
 </root>

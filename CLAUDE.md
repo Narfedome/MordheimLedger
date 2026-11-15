@@ -286,6 +286,20 @@ un dialog est ouvert (jamais fermer une Fin de partie en cours), et l'écran d'i
 touche le Codex (`CatalogImportedMessage`). Windows : instance unique (`AppInstance.FindOrRegisterForKey` dans `App.xaml.cs`,
 un second lancement confie son fichier à la première instance et s'arrête).
 
+**QR codes (v2 lot 3, branche `feature/qr-code`, 2026-11-15)** : bibliothèque ZXing.Net.Maui.Controls (`UseBarcodeReader`). Le
+bouton Partager (fiche, Codex) propose « Fichier / QR code » (`BaseViewModel.ShareAsync`) ; le bouton Importer de la liste propose
+« Choisir un fichier / Scanner un QR code » sous Android, fichier seul sous Windows (pas de webcam, décision 1.3 : le `.mordheim`
+y tient lieu de QR). Décisions de l'utilisateur (« bande et Codex mais séparés », « les deux ») : le QR d'une bande ne contient
+**que la bande** (`ExchangeExportOptions.QrWarband`, `IncludeReferencedCatalog: false`) - ses entrées Personnalisées/Modifiées se
+partagent par leur propre QR, sinon l'import le dit (`ImportMissingCustom`) ; le QR d'une entrée du Codex
+(`ExchangeExportOptions.QrCatalog`) désigne l'officiel par son id ; au-delà de `ExchangeQrCodes.CharactersPerCode` (1 200) le
+texte est **découpé en plusieurs QR** (`MLQ1:<lot>:<n°>/<total>:…`, au plus 10, sinon « partagez le fichier »), lus dans
+n'importe quel ordre (`ExchangeQrCodes.Collector`). Après le scan, même écran d'import que pour un fichier (décision). Dialog
+`Features/Exchange/QrCodeDialog` (QR noir sur blanc quel que soit le thème, Précédent/Suivant), page `QrScanForm` (caméra,
+« QR 1/3 lu », repli « Choisir un fichier »). Recette Android : QR affichés puis décodés depuis les captures par ZXing
+(réassemblage dans le désordre vérifié) ; la page de scan et la demande d'accès à la caméra fonctionnent, mais le scan réel n'a
+pas pu être fait sur l'émulateur (caméra virtuelle, QR hors champ).
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

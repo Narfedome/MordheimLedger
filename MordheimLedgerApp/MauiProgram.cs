@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
+using ZXing.Net.Maui.Controls;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library;
@@ -51,6 +52,8 @@ namespace MordheimLedgerApp
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                // QR codes (v2, lot 3) : affichage partout, lecture par la caméra sous Android seulement.
+                .UseBarcodeReader()
                 .UseMauiCommunityToolkit(options =>
                 {
                     // Every popup in the app (themed dialogs) draws its own card (Border): disable

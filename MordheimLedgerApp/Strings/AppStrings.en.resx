@@ -3377,4 +3377,55 @@ All the current data on this device will be replaced. A copy is kept: you can un
   <data name="ImportNothing" xml:space="preserve">
     <value>Everything in this file is already on this device: nothing to import.</value>
   </data>
+  <data name="ShareTitle" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="ShareAsFile" xml:space="preserve">
+    <value>File (photos and Codex included)</value>
+  </data>
+  <data name="ShareAsQr" xml:space="preserve">
+    <value>QR code</value>
+  </data>
+  <data name="QrTooLarge" xml:space="preserve">
+    <value>Too large for QR codes: share the file instead.</value>
+  </data>
+  <data name="QrPosition" xml:space="preserve">
+    <value>QR {0}/{1}</value>
+  </data>
+  <data name="QrWarbandHint" xml:space="preserve">
+    <value>Scan with Mordheim Ledger: Warbands › Import › Scan a QR code. The warband travels alone: its custom or modified Codex entries are shared separately, with their own QR.</value>
+  </data>
+  <data name="QrCatalogHint" xml:space="preserve">
+    <value>Scan with Mordheim Ledger: Warbands › Import › Scan a QR code.</value>
+  </data>
+  <data name="QrScanTitle" xml:space="preserve">
+    <value>Scan a QR code</value>
+  </data>
+  <data name="QrScanHint" xml:space="preserve">
+    <value>Point at the QR code shown on the other device.</value>
+  </data>
+  <data name="QrScanProgress" xml:space="preserve">
+    <value>QR {0}/{1} read: go to the next one.</value>
+  </data>
+  <data name="QrScanForeign" xml:space="preserve">
+    <value>This QR is not a Mordheim Ledger code.</value>
+  </data>
+  <data name="QrScanPickFile" xml:space="preserve">
+    <value>Choose a file</value>
+  </data>
+  <data name="QrScanNoCamera" xml:space="preserve">
+    <value>Without camera access the app can't read QR codes. You can allow it in Android settings, or import the file.</value>
+  </data>
+  <data name="QrCodeName" xml:space="preserve">
+    <value>QR code</value>
+  </data>
+  <data name="ImportChooseFile" xml:space="preserve">
+    <value>Choose a file</value>
+  </data>
+  <data name="ImportScanQr" xml:space="preserve">
+    <value>Scan a QR code</value>
+  </data>
+  <data name="ImportMissingCustom" xml:space="preserve">
+    <value>This warband uses {0} Codex entr(y/ies) that are not on this device. Have them shared first (QR or file), then try again.</value>
+  </data>
 </root>

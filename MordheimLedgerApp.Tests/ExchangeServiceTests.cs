@@ -234,6 +234,62 @@ public class ExchangeServiceTests : IDisposable
         Assert.Equal(ContentSource.Official, bobRule.Source);
     }
 
+    /// <summary>QR d'une bande (v2, lot 3) : la bande seule, découpée en plusieurs QR lus dans le désordre ; son objet
+    /// Personnalisé se partage par son propre QR, sans lequel l'import le signale manquant.</summary>
+    [Fact]
+    public async Task WarbandQr_CarriesTheWarbandOnly_InSeveralCodes_CustomContentSharedSeparately()
+    {
+        var warband = await SampleAsync(_alice);
+        var blade = await CustomItemAsync(_alice, "Lame de Wyrd", 42);
+        var captain = (await _alice.Warbands.GetWarriorsAsync(warband.Id, "en")).First(w => w.IsHero);
+        await _alice.Warbands.AddWarriorEquipmentAsync(captain.Id, blade);
+
+        var package = await _alice.Exchange.ExportWarbandsAsync([warband.Id], ExchangeExportOptions.QrWarband);
+        Assert.Empty(package.Catalog);
+        var codes = ExchangeQrCodes.Encode(package, charactersPerCode: 400);
+        Assert.True(codes.Count > 1);
+        Assert.All(codes, c => Assert.True(c.Length <= 400));
+
+        var collector = new ExchangeQrCodes.Collector();
+        ExchangePackage? scanned = null;
+        foreach (var code in codes.Reverse())
+            scanned = collector.Add(code) ?? scanned;
+        Assert.NotNull(scanned);
+
+        var preview = await _bob.Exchange.PreviewAsync(scanned!);
+        Assert.Equal($"{nameof(EquipmentItemEntity)}|s:", Assert.Single(preview.MissingReferences)[..^32]);
+
+        var bladeCodes = ExchangeQrCodes.Encode(await _alice.Exchange.ExportCatalogAsync(
+            [new CatalogItemRef(typeof(EquipmentItemEntity), blade.Id)], ExchangeExportOptions.QrCatalog));
+        await _bob.Exchange.ImportAsync(new ExchangeQrCodes.Collector().Add(Assert.Single(bladeCodes))!);
+
+        var imported = Assert.Single((await _bob.Exchange.ImportAsync(scanned!)).WarbandIds);
+        var bobCaptain = (await _bob.Warbands.GetWarriorsAsync(imported, "en")).Single(w => w.Name == captain.Name);
+        Assert.Contains(bobCaptain.Equipment, e => e.Item.Name == "Lame de Wyrd");
+    }
+
+    [Fact]
+    public void QrCollector_RestartsOnAnotherSet_RefusesForeignCodes_AndTooManyCodesAreRefused()
+    {
+        var package = new ExchangePackage { SharedEntries = Enumerable.Range(0, 60).Select(i => $"entrée {i} {Guid.NewGuid()}").ToList() };
+        var first = ExchangeQrCodes.Encode(package, charactersPerCode: 600);
+        var second = ExchangeQrCodes.Encode(package, charactersPerCode: 600);
+        Assert.True(first.Count > 1);
+
+        var collector = new ExchangeQrCodes.Collector();
+        Assert.Null(collector.Add(first[0]));
+        Assert.Equal((1, first.Count), (collector.Received, collector.Total));
+        Assert.Null(collector.Add(second[0])); // autre envoi : l'assemblage recommence
+        Assert.Equal(1, collector.Received);
+        ExchangePackage? result = null;
+        foreach (var code in second.Skip(1)) result = collector.Add(code);
+        Assert.Equal(package.SharedEntries, result!.SharedEntries);
+
+        Assert.Throws<ExchangeFormatException>(() => collector.Add("https://example.com"));
+        Assert.Throws<ExchangeFormatException>(() => collector.Add("MLQ1:abcdef:4/3:xyz"));
+        Assert.Throws<ExchangeTooLargeForQrException>(() => ExchangeQrCodes.Encode(package, charactersPerCode: 60));
+    }
+
     [Fact]
     public void Package_FromANewerVersion_OrAnotherApp_IsRefused()
     {

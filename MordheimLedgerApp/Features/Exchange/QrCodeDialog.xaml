@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Exchange"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Exchange.QrCodeDialog"
+               x:DataType="local:QrCodeDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0">
+    <!-- QR toujours noir sur blanc, quel que soit le thème : les lecteurs lisent mal un QR inversé ou peu contrasté. -->
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <VerticalStackLayout Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+            <Border BackgroundColor="White" StrokeThickness="0" Padding="12" HorizontalOptions="Center"
+                    StrokeShape="RoundRectangle 8">
+                <zxing:BarcodeGeneratorView Format="QrCode" Value="{Binding CurrentCode}"
+                                            ForegroundColor="Black" BackgroundColor="White" Margin="0"
+                                            WidthRequest="280" HeightRequest="280"/>
+            </Border>
+            <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding HasSeveralCodes}">
+                <Button Grid.Column="0" Text="{loc:Loc LibBack}" Command="{Binding PreviousCommand}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"/>
+                <Label Grid.Column="1" Text="{Binding PositionText}" HorizontalOptions="Center" VerticalOptions="Center"
+                       FontAttributes="Bold"/>
+                <Button Grid.Column="2" Text="{loc:Loc LibNext}" Command="{Binding NextCommand}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"/>
+            </Grid>
+            <Label Text="{Binding Hint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+        </VerticalStackLayout>
+    </Border>
+</dialogs:DialogContent>

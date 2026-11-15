@@ -67,19 +67,41 @@ public abstract partial class BaseViewModel : ObservableObject
     protected Task<TResult?> ShowDialogAsync<TResult>(DialogContent<TResult> content) =>
         DialogStack.Instance.PushAsync(content, CurrentPage);
 
-    /// <summary>Ouvre un formulaire de création/modification en page plein écran (voir FormNavigator) -
-    /// même contrat que ShowDialogAsync.</summary>
-    /// <summary>Partage d'une entrée du Codex (v2, lot 2) : fichier .mordheim par la feuille de partage du système.
-    /// entityType : table du catalogue (ex. typeof(EquipmentItemEntity)) ; un type de bande emmène ses types de guerrier
-    /// et ses listes d'équipement (ExchangeService.ExportCatalogAsync).</summary>
-    protected async Task ShareCatalogEntryAsync(Type entityType, int id, string name)
+    /// <summary>Partage d'une entrée du Codex (v2, lots 2 et 3), voir ShareAsync. entityType : table du catalogue (ex.
+    /// typeof(EquipmentItemEntity)) ; un type de bande emmène ses types de guerrier et ses listes d'équipement
+    /// (ExchangeService.ExportCatalogAsync).</summary>
+    protected Task ShareCatalogEntryAsync(Type entityType, int id, string name) =>
+        ShareAsync(name, isWarband: false, options => IPlatformApplication.Current!.Services
+            .GetRequiredService<Core.Exchange.ExchangeService>()
+            .ExportCatalogAsync(new[] { new Core.Exchange.CatalogItemRef(entityType, id) }, options));
+
+    /// <summary>Partage d'une bande ou d'une entrée du Codex : le joueur choisit un fichier .mordheim (feuille de partage
+    /// du système, lot 2) ou un QR code (lot 3 ; une bande y voyage sans son contenu du Codex, découpée en plusieurs QR si
+    /// besoin - ExchangeQrCodes). export reçoit les options d'export adaptées au mode choisi.</summary>
+    protected async Task ShareAsync(string name, bool isWarband,
+        Func<Core.Exchange.ExchangeExportOptions, Task<Core.Exchange.ExchangePackage>> export)
     {
+        var choice = await ShowActionSheetAsync(Loc["ShareTitle"], Loc["ShareAsFile"], Loc["ShareAsQr"]);
+        if (choice is null) return;
         try
         {
-            var exchange = IPlatformApplication.Current!.Services.GetRequiredService<Core.Exchange.ExchangeService>();
-            Core.Exchange.ExchangePackage package = null!;
-            await Loading.RunAsync(async () => package = await exchange.ExportCatalogAsync(new[] { new Core.Exchange.CatalogItemRef(entityType, id) }));
-            await Services.ExchangeFiles.ShareAsync(package, name);
+            if (choice == Loc["ShareAsFile"])
+            {
+                Core.Exchange.ExchangePackage package = null!;
+                await Loading.RunAsync(async () => package = await export(new Core.Exchange.ExchangeExportOptions()));
+                await Services.ExchangeFiles.ShareAsync(package, name);
+                return;
+            }
+
+            IReadOnlyList<string> codes = [];
+            await Loading.RunAsync(async () => codes = Core.Exchange.ExchangeQrCodes.Encode(await export(isWarband
+                ? Core.Exchange.ExchangeExportOptions.QrWarband
+                : Core.Exchange.ExchangeExportOptions.QrCatalog)));
+            await ShowDialogAsync(new Features.Exchange.QrCodeDialog(new Features.Exchange.QrCodeDialogViewModel(name, codes, isWarband)));
+        }
+        catch (Core.Exchange.ExchangeTooLargeForQrException)
+        {
+            await ShowInfoAsync(Loc["ShareTitle"], Loc["QrTooLarge"]);
         }
         catch (Exception ex)
         {
@@ -87,6 +109,8 @@ public abstract partial class BaseViewModel : ObservableObject
         }
     }
 
+    /// <summary>Ouvre un formulaire de création/modification en page plein écran (voir FormNavigator) -
+    /// même contrat que ShowDialogAsync.</summary>
     protected Task<TResult?> ShowFormAsync<TResult>(Components.FormPage.FormContent<TResult> content) =>
         Components.FormPage.FormNavigator.PushAsync(content);
 

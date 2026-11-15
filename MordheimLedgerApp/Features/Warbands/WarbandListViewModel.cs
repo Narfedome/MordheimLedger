@@ -53,9 +53,10 @@ public partial class WarbandListViewModel : BaseViewModel
         ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPickerService,
         ISkillPickerService skillPickerService, ISpellPickerService spellPickerService, IInjuryPickerService injuryPickerService,
         IMutationPickerService mutationPickerService, IHiredSwordPickerService hiredSwordPickerService,
-        OfficialContentService officialContent, ExchangeService exchange)
+        OfficialContentService officialContent, ExchangeService exchange, LobbySession lobby)
     {
         _exchange = exchange;
+        _lobby = lobby;
         _officialContent = officialContent;
         // Fichier .mordheim ouvert depuis une autre appli pendant que l'appli tourne (voir ExchangeFiles.Receive).
         WeakReferenceMessenger.Default.Register<IncomingExchangeFileMessage>(this,
@@ -120,6 +121,31 @@ public partial class WarbandListViewModel : BaseViewModel
 
     [RelayCommand]
     private void Select(WarbandRow row) => SelectedRow = row;
+
+    // --- Partie connectée (v2, lot 4a) --------------------------------------------------------------------------
+
+    private readonly LobbySession _lobby;
+
+    /// <summary>Rejoindre une partie connectée (maquette « Partie connectée », variante 1A : créer se fait depuis
+    /// « Lancer la partie » de la fiche) : choix de la partie et de la bande, salle d'attente, puis fiche de la bande, où
+    /// le lancement suit (LobbySession.TakePendingStart).</summary>
+    [RelayCommand]
+    private async Task JoinConnectedGame()
+    {
+        var warbands = (await _warbandService.GetWarbandsAsync()).Where(w => !w.GameInProgress).ToList();
+        var choices = new List<Lobby.WarbandChoiceRow>();
+        foreach (var warband in warbands)
+            choices.Add(new Lobby.WarbandChoiceRow(warband, string.Format(Loc["LobbyWarbandChoiceDetail"],
+                await _warbandService.GetWarbandArchetypeNameAsync(warband.WarbandArchetypeId, Loc.Language),
+                await _warbandService.GetWarbandRatingAsync(warband.Id))));
+        if (await ShowFormAsync(new Lobby.JoinLobbyForm(new Lobby.JoinLobbyViewModel(_lobby, choices))) != true) return;
+
+        if (await ShowFormAsync(new Lobby.LobbyForm(new Lobby.LobbyViewModel(_lobby, host: null))) == true
+            && _lobby.WarbandId is { } warbandId)
+            await Shell.Current.GoToAsync($"{nameof(WarbandDetailPage)}?warbandId={warbandId}");
+        else
+            await _lobby.LeaveAsync();
+    }
 
     // --- Import d'un fichier .mordheim (v2, lot 2) ------------------------------------------------------------
 

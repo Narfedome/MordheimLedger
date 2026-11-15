@@ -300,6 +300,26 @@ n'importe quel ordre (`ExchangeQrCodes.Collector`). Après le scan, même écran
 (réassemblage dans le désordre vérifié) ; la page de scan et la demande d'accès à la caméra fonctionnent, mais le scan réel n'a
 pas pu être fait sur l'émulateur (caméra virtuelle, QR hors champ).
 
+**Partie connectée (v2 lot 4a, branche `feature/lobby`, 2026-11-15)** : maquette « Partie connectée » (claude.ai), variantes **1A**
+(« Lancer la partie » de la fiche demande Partie seule / Partie connectée ; rejoindre = bouton Wi-Fi de la liste des bandes) et
+**3A** (onglet « Adversaires » de la fiche pendant la partie). Réseau local seulement, sans serveur (décision ; en 4G seule les
+téléphones ne se joignent pas, la parade est le point d'accès d'un téléphone, expliquée par l'appli). `Core/Lobby/` :
+`LobbyHost` (TCP, jusqu'à 4 joueurs, code exigé, diffuse l'état complet à chaque changement), `LobbyClient`, `LobbyProtocol`
+(JSON précédé de sa longueur, version de protocole), `LobbyDiscovery` (annonce UDP par seconde sur le port 47821 ; Android
+exige un verrou multicast, `Services/NetworkLocks`), `LobbyAddress` (QR `MLL1:<ip>:<port>:<code>`, code de 6 caractères sans
+ambiguïté, réseaux privés seulement). Rejoindre : parties trouvées sur le réseau, QR (Android), ou « Saisir le code », qui accepte
+aussi l'adresse complète (Wi-Fi qui bloque la diffusion). Chaque joueur envoie le paquet d'échange de sa bande (sans photos) ;
+les bandes adverses **ne vont jamais dans la base du joueur** (décision) : `OpponentRosterLoader` les importe dans une base
+temporaire par adversaire (copie de la seed.db3) et les relit avec les services habituels, `Features/Lobby/OpponentWarbandPage`
+les affiche en lecture seule ; effacées en quittant. `Services/LobbySession` (singleton) tient la partie ; les fiches l'écoutent par
+`WeakReferenceMessenger` (`LobbyChangedMessage`/`LobbyEndedMessage`), pas par événement, pour ne pas garder les anciennes fiches
+en mémoire. Lancement : l'hôte « Commencer » → chacun passe par « Avant la partie » (l'invité est amené sur sa fiche,
+`TakePendingStart`). La partie connectée se termine quand la Fin de partie de la bande est faite (`LocalGameStarted` : avant
+« Avant la partie » validé, un rechargement de fiche n'est pas une fin - défaut trouvé en recette), par « Quitter la partie »,
+ou quand l'hôte la ferme (message chez les invités). Recette Android avec un second joueur simulé sur le PC (programme de test
+sur Core.Lobby, l'émulateur étant isolé : redirection `adb forward`) ; découverte UDP et Windows non testés. Lot 4b (Fin de
+partie connectée : captifs, Poignée d'Or…) à venir.
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

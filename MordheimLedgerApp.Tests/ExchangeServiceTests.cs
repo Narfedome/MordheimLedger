@@ -268,6 +268,37 @@ public class ExchangeServiceTests : IDisposable
         Assert.Contains(bobCaptain.Equipment, e => e.Item.Name == "Lame de Wyrd");
     }
 
+    /// <summary>Bande adverse d'une partie connectée (v2, lot 4a) : lue dans une base temporaire, rien n'arrive dans
+    /// celle du joueur.</summary>
+    [Fact]
+    public async Task OpponentRoster_IsReadFromATemporaryDatabase_WithoutTouchingThePlayersOne()
+    {
+        var warband = await SampleAsync(_alice);
+        var blade = await CustomItemAsync(_alice, "Lame de Wyrd", 42);
+        var captain = (await _alice.Warbands.GetWarriorsAsync(warband.Id, "en")).First(w => w.IsHero);
+        await _alice.Warbands.AddWarriorEquipmentAsync(captain.Id, blade);
+        var package = await _alice.Exchange.ExportWarbandsAsync([warband.Id], new ExchangeExportOptions(IncludePhotos: false));
+
+        var path = Path.Combine(Path.GetTempPath(), $"mordheimledger-opponent-{Guid.NewGuid()}.db3");
+        try
+        {
+            var roster = await Core.Lobby.OpponentRosterLoader.LoadAsync(path, officialSeed: null, package, "en");
+
+            Assert.Equal("Les Roses Sanglantes", roster.Warband.Name);
+            Assert.Equal("Reiklander Mercenaries", roster.ArchetypeName);
+            Assert.True(roster.Rating > 0);
+            var opponentCaptain = roster.Warriors.First();
+            Assert.True(opponentCaptain.Warrior.IsHero);
+            Assert.False(string.IsNullOrEmpty(opponentCaptain.RoleName));
+            Assert.Contains(roster.Warriors, w => w.Warrior.Equipment.Any(e => e.Item.Name == "Lame de Wyrd"));
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+        Assert.Single(await _alice.Warbands.GetWarbandsAsync());
+    }
+
     [Fact]
     public void QrCollector_RestartsOnAnotherSet_RefusesForeignCodes_AndTooManyCodesAreRefused()
     {

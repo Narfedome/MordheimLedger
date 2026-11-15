@@ -51,6 +51,8 @@
   </Applications>
 
   <Capabilities>
+    <!-- Partie connectée (v2, lot 4a) : hôte ou invité sur le réseau local. -->
+    <Capability Name="privateNetworkClientServer" />
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 

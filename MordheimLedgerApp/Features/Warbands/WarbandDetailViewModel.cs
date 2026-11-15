@@ -140,15 +140,34 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private ObservableCollection<HistoryEntry> historyEntries = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowRosterTab))]
     private bool showHistory;
+
+    /// <summary>Onglet Adversaires (v2, lot 4a - maquette « Partie connectée », variante 3A) : visible pendant une partie
+    /// connectée jouée avec cette bande.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowRosterTab))]
+    private bool showOpponents;
+
+    public bool ShowRosterTab => !ShowHistory && !ShowOpponents;
+
+    [ObservableProperty]
+    private bool hasConnectedGame;
+
+    public ObservableCollection<Lobby.OpponentRow> Opponents { get; } = [];
+
+    private readonly LobbySession _lobby;
 
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
         ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker,
         IDramatisPersonaPickerService dramatisPersonaPicker, ISellEquipmentPickerService sellEquipmentPicker,
-        Core.Exchange.ExchangeService exchange)
+        Core.Exchange.ExchangeService exchange, LobbySession lobby)
     {
         _exchange = exchange;
+        _lobby = lobby;
+        WeakReferenceMessenger.Default.Register<LobbyChangedMessage>(this, (r, m) => ((WarbandDetailViewModel)r).RefreshConnectedGame());
+        WeakReferenceMessenger.Default.Register<LobbyEndedMessage>(this, (r, m) => ((WarbandDetailViewModel)r).OnConnectedGameEnded(m.Reason));
         _warbandService = warbandService;
         _libraryService = libraryService;
         _detailDialogs = detailDialogs;
@@ -250,6 +269,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Inventory = new ObservableCollection<WarbandEquipment>(data.Inventory);
             HistoryEntries = new ObservableCollection<HistoryEntry>(data.History);
         });
+        await SyncConnectedGameAsync();
     }
 
     private sealed record RosterData(
@@ -326,10 +346,60 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private static async Task BackAsync() => await Shell.Current.GoToAsync("..");
 
     [RelayCommand]
-    private void ShowRoster() => ShowHistory = false;
+    private void ShowRoster() => ShowHistory = ShowOpponents = false;
 
     [RelayCommand]
-    private void ShowHistoryTab() => ShowHistory = true;
+    private void ShowHistoryTab()
+    {
+        ShowOpponents = false;
+        ShowHistory = true;
+    }
+
+    [RelayCommand]
+    private void ShowOpponentsTab()
+    {
+        ShowHistory = false;
+        ShowOpponents = true;
+    }
+
+    /// <summary>Partie connectée de cette bande : adversaires à jour, onglet masqué quand elle se termine.</summary>
+    private void RefreshConnectedGame()
+    {
+        HasConnectedGame = Warband is { } warband && _lobby.IsPlayingWith(warband.Id);
+        if (!HasConnectedGame && ShowOpponents) ShowOpponents = false;
+        Opponents.Clear();
+        if (!HasConnectedGame) return;
+        foreach (var player in _lobby.Opponents)
+            Opponents.Add(new Lobby.OpponentRow(player.Id, player.Warband!.Name,
+                string.Format(Loc["LobbyPlayerWarband"], player.Name, player.Warband.ArchetypeName, player.Warband.Rating)));
+    }
+
+    /// <summary>Après chargement : lancer la partie d'un invité quand l'hôte vient de la commencer, et quitter la partie
+    /// connectée une fois la Fin de partie de cette bande terminée.</summary>
+    private async Task SyncConnectedGameAsync()
+    {
+        if (Warband is not { } warband) return;
+        if (_lobby.TakePendingStart(warband.Id) && !warband.GameInProgress) await RunStartGameAsync();
+        else if (_lobby.IsPlayingWith(warband.Id) && _lobby.LocalGameStarted && !warband.GameInProgress) await _lobby.LeaveAsync();
+        RefreshConnectedGame();
+    }
+
+    /// <summary>Hôte parti ou connexion perdue : prévenir, si c'est la fiche affichée qui jouait cette partie.</summary>
+    private async void OnConnectedGameEnded(Core.Lobby.LobbyCloseReason reason)
+    {
+        if (!HasConnectedGame || Shell.Current?.CurrentPage?.BindingContext != this) return;
+        await ShowInfoAsync(Loc["LobbyTitle"], Loc[Lobby.LobbyTexts.CloseReasonKey(reason)]);
+    }
+
+    [RelayCommand]
+    private Task OpenOpponent(Lobby.OpponentRow row) => Shell.Current.GoToAsync($"{nameof(Lobby.OpponentWarbandPage)}?playerId={row.PlayerId}");
+
+    [RelayCommand]
+    private async Task LeaveConnectedGame()
+    {
+        if (!await ConfirmAsync(Loc["LobbyLeaveTitle"], Loc["LobbyLeaveConfirm"], Loc["LobbyLeave"], Loc["BtnCancel"], destructive: true)) return;
+        await _lobby.LeaveAsync();
+    }
 
     /// <summary>"Rendre hostile" - Une Poignée d'Or (2026-09-01, Ulli &amp; Marquand uniquement, see
     /// WarriorRow.CanToggleHostile). Purely a manual player-facing bookkeeping toggle: the app can't

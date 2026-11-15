@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Lobby"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Lobby.LobbyForm"
+               x:DataType="local:LobbyViewModel">
+    <!-- Salle d'attente (maquette « Partie connectée ») : QR + code pour l'hôte, joueurs et leurs bandes. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         Subtitle="{Binding Subtitle}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{Binding SecondaryText}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{Binding PrimaryText}"
+                         PrimaryCommand="{Binding StartCommand}">
+        <VerticalStackLayout Spacing="12">
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsHost}">
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <Border BackgroundColor="White" StrokeThickness="0" Padding="8" StrokeShape="RoundRectangle 8"
+                            HorizontalOptions="Center" IsVisible="{Binding HasQr}">
+                        <zxing:BarcodeGeneratorView Format="QrCode" Value="{Binding QrText}" ForegroundColor="Black"
+                                                    BackgroundColor="White" WidthRequest="180" HeightRequest="180"/>
+                    </Border>
+                    <Label Text="{loc:Loc LobbyOrCode}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center"/>
+                    <Label Text="{Binding CodeText}" FontSize="26" FontAttributes="Bold" CharacterSpacing="4"
+                           TextColor="{DynamicResource AppAccent}" HorizontalOptions="Center"/>
+                    <Label Text="{Binding AddressText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding PlayersHeader}" FontAttributes="Bold"/>
+                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Players}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:LobbyPlayerRow">
+                                <Grid ColumnDefinitions="28,*" ColumnSpacing="10">
+                                    <Label Grid.Column="0" Text="{Binding Icon}" FontFamily="FontSolid" FontSize="16"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center" HorizontalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                        <Label Text="{Binding Name}"/>
+                                        <Label Text="{Binding Detail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsWaiting}" Value="True">
+                                                    <Setter Property="TextColor" Value="{DynamicResource AppWarning}"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{loc:Loc LobbyHostHint}" IsVisible="{Binding IsHost}" FontSize="12"
+                   TextColor="{DynamicResource AppTextMuted}" Margin="4,0"/>
+        </VerticalStackLayout>
+    </form:FormPageLayout>
+</form:FormContent>

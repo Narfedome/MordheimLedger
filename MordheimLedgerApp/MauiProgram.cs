@@ -159,6 +159,10 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<WarbandListPage>();
             builder.Services.AddTransient<WarbandDetailViewModel>();
             builder.Services.AddTransient<WarbandDetailPage>();
+            // Partie connectée (v2, lot 4a) : une seule à la fois pour tout l'appareil.
+            builder.Services.AddSingleton<LobbySession>();
+            builder.Services.AddTransient<Features.Lobby.OpponentWarbandViewModel>();
+            builder.Services.AddTransient<Features.Lobby.OpponentWarbandPage>();
             builder.Services.AddTransient<EndOfGamePageViewModel>();
             builder.Services.AddTransient<EndOfGamePage>();
             builder.Services.AddTransient<SettingsViewModel>();

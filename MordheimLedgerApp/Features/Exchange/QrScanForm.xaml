@@ -14,7 +14,7 @@
                          CloseCommand="{Binding CancelCommand}"
                          SecondaryText="{loc:Loc BtnCancel}"
                          SecondaryCommand="{Binding CancelCommand}"
-                         PrimaryText="{loc:Loc QrScanPickFile}"
+                         PrimaryText="{Binding FallbackText}"
                          PrimaryCommand="{Binding PickFileCommand}">
         <VerticalStackLayout Spacing="12">
             <Border StrokeShape="RoundRectangle 12" StrokeThickness="1" Stroke="{DynamicResource AppBorder}"

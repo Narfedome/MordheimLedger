@@ -679,6 +679,10 @@ mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`pre
   `dotnet test MordheimLedgerApp.Tests`.
 - **Depuis la passe tuiles du Codex : dev par branche de fonctionnalité** (`feature/<nom>`), plus
   directement sur `master` — la base est maintenant stable, à protéger.
+- **v2 = branche longue `v2`** (créée le 2026-11-15) : chaque lot v2 part de `v2` et sa PR cible `v2` (`--base v2`),
+  où elle est fusionnée (protégée par les 3 mêmes vérifs que master, auto-merge permis) ; **rien de la v2 ne va sur
+  `master`** tant que l'utilisateur ne l'a pas demandé, donc jamais d'auto-merge vers master pour la v2. `master` reste la version publiée (correctifs 1.5.x, auto-merge comme
+  avant) ; remettre `v2` à jour depuis `master` quand il avance.
 - La taille des tuiles du Codex (`ResponsiveGridSpanBehavior.TileWidth`, calcul du span de colonnes) a
   été temporairement centralisée en constante C# (`DefaultTileWidth`) référencée par XAML via
   `x:Static`, puis explicitement annulée par l'utilisateur ("on retourne en arrière") en faveur du

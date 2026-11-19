@@ -350,7 +350,35 @@
                                  seule la rançon change réellement quelque chose de notre point de vue
                                  (coût déduit de notre trésorerie, le guerrier revient). Décoché = perdu,
                                  considéré mort - même traitement que toute autre issue non ransomée. -->
-                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowCapturedChoice}" Spacing="6">
+                            <!-- Partie connectée (v2, lot 4b, maquette « Fin de partie connectée » variante A) : le capteur
+                                 propose la rançon depuis son appareil, on paie ou on refuse ici ; « Décider à la table »
+                                 repasse à la saisie habituelle ci-dessous. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowConnectedCapture}" Spacing="6">
+                                <Picker Title="{loc:Loc ConnectedCaptorPh}" ItemsSource="{Binding CurrentInjuryWarrior.ConnectedCapture.Captors}"
+                                        ItemDisplayBinding="{Binding Label, x:DataType=local:CaptorOption}"
+                                        SelectedItem="{Binding CurrentInjuryWarrior.ConnectedCapture.SelectedCaptor}"
+                                        IsVisible="{Binding CurrentInjuryWarrior.ConnectedCapture.HasSeveralCaptors}"/>
+                                <Label Text="{Binding CurrentInjuryWarrior.ConnectedCapture.StatusText}" FontSize="13"
+                                       IsVisible="{Binding CurrentInjuryWarrior.ConnectedCapture.StatusText, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                <VerticalStackLayout Spacing="6" IsVisible="{Binding CurrentInjuryWarrior.ConnectedCapture.HasOffer}">
+                                    <Label Text="{Binding CurrentInjuryWarrior.ConnectedCapture.OfferText}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding CurrentInjuryWarrior.ConnectedCapture.TreasuryText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Button Text="{loc:Loc ConnectedRansomPay}" Padding="12,6" AutomationId="ConnectedRansomPay"
+                                                Command="{Binding PayRansomCommand}" CommandParameter="{Binding CurrentInjuryWarrior}"/>
+                                        <Button Text="{loc:Loc ConnectedRansomRefuse}" Style="{StaticResource DialogSecondaryButtonStyle}" Padding="12,6"
+                                                AutomationId="ConnectedRansomRefuse"
+                                                Command="{Binding RefuseRansomCommand}" CommandParameter="{Binding CurrentInjuryWarrior}"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                                <Button Text="{loc:Loc ConnectedDecideAtTable}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                                        FontSize="12" Padding="8,4" HorizontalOptions="Start" AutomationId="ConnectedCaptureToTable"
+                                        IsVisible="{Binding CurrentInjuryWarrior.ConnectedCapture.IsSettled, Converter={StaticResource InverseBoolConverter}}"
+                                        Command="{Binding CaptureToTableCommand}" CommandParameter="{Binding CurrentInjuryWarrior}"/>
+                                <Label Text="{Binding CurrentInjuryWarrior.CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowManualCapturedChoice}" Spacing="6">
                                 <HorizontalStackLayout Spacing="8">
                                     <CheckBox IsChecked="{Binding CurrentInjuryWarrior.IsRansomed}" VerticalOptions="Center"/>
                                     <Label Text="{loc:Loc EndOfGameCapturedRansomLabel}" VerticalOptions="Center"/>

@@ -3569,4 +3569,94 @@ All the current data on this device will be replaced. A copy is kept: you can un
   <data name="OpponentInjuries" xml:space="preserve">
     <value>Injuries</value>
   </data>
+  <data name="ConnectedWinnerHeading" xml:space="preserve">
+    <value>Winner of the game (shared with the other players)</value>
+  </data>
+  <data name="ConnectedWinnerYou" xml:space="preserve">
+    <value>You ({0})</value>
+  </data>
+  <data name="ConnectedWinnerPlayer" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="ConnectedResultChosenBy" xml:space="preserve">
+    <value>Chosen by {0}: {1}. You can change it if you disagree.</value>
+  </data>
+  <data name="ConnectedCaptorPh" xml:space="preserve">
+    <value>Captured by</value>
+  </data>
+  <data name="ConnectedCaptureWaiting" xml:space="preserve">
+    <value>Waiting for {0}'s ransom offer…</value>
+  </data>
+  <data name="ConnectedCapturePaid" xml:space="preserve">
+    <value>Ransom paid ({0} gc): the warrior returns.</value>
+  </data>
+  <data name="ConnectedCaptureRefused" xml:space="preserve">
+    <value>Ransom refused: the warrior is lost.</value>
+  </data>
+  <data name="ConnectedCaptureManual" xml:space="preserve">
+    <value>Decided at the table: enter the outcome below.</value>
+  </data>
+  <data name="ConnectedCaptureChooseCaptor" xml:space="preserve">
+    <value>Choose who captured this warrior.</value>
+  </data>
+  <data name="ConnectedCaptureOffer" xml:space="preserve">
+    <value>{0} offers to return them for {1} gc.</value>
+  </data>
+  <data name="ConnectedCaptureTreasury" xml:space="preserve">
+    <value>Treasury: {0} gc → {1} gc</value>
+  </data>
+  <data name="ConnectedCapturePendingError" xml:space="preserve">
+    <value>Answer the offer, or decide at the table.</value>
+  </data>
+  <data name="ConnectedRansomPay" xml:space="preserve">
+    <value>Pay</value>
+  </data>
+  <data name="ConnectedRansomRefuse" xml:space="preserve">
+    <value>Refuse</value>
+  </data>
+  <data name="ConnectedRansomSend" xml:space="preserve">
+    <value>Offer ransom</value>
+  </data>
+  <data name="ConnectedDecideAtTable" xml:space="preserve">
+    <value>Decide at the table</value>
+  </data>
+  <data name="ConnectedCaptiveDetail" xml:space="preserve">
+    <value>{1}'s {0} ({2})</value>
+  </data>
+  <data name="ConnectedCaptiveOffered" xml:space="preserve">
+    <value>Ransom of {0} gc offered, waiting for {1}'s answer…</value>
+  </data>
+  <data name="ConnectedCaptiveAccepted" xml:space="preserve">
+    <value>Ransom paid: {0} gc received.</value>
+  </data>
+  <data name="ConnectedCaptiveRefused" xml:space="preserve">
+    <value>{0} refused the ransom: choose the prisoner's fate.</value>
+  </data>
+  <data name="ConnectedCaptiveManual" xml:space="preserve">
+    <value>Decided at the table: enter them in the prisoners below if needed.</value>
+  </data>
+  <data name="ConnectedCaptiveOfferRequired" xml:space="preserve">
+    <value>Offer a ransom, or decide at the table.</value>
+  </data>
+  <data name="ConnectedCaptiveAwaitingAnswer" xml:space="preserve">
+    <value>Waiting for the answer to your offer.</value>
+  </data>
+  <data name="HistoryConnectedCaptiveRansomedSentence" xml:space="preserve">
+    <value>{0} was returned to {1} for a ransom of {2} gc.</value>
+  </data>
+  <data name="ConnectedPairCorruptionOptionFormat" xml:space="preserve">
+    <value>Corruption of {0}, with {1} (A Fistful of Crowns)</value>
+  </data>
+  <data name="CancelGameButton" xml:space="preserve">
+    <value>Cancel game</value>
+  </data>
+  <data name="CancelGameTitle" xml:space="preserve">
+    <value>Cancel this game?</value>
+  </data>
+  <data name="CancelGameConfirm" xml:space="preserve">
+    <value>The warband will no longer be in a game and can start a new one. Nothing is recorded: no experience, income or injuries. What was noted before the game stays in the History.</value>
+  </data>
+  <data name="CancelGameKeep" xml:space="preserve">
+    <value>Keep playing</value>
+  </data>
 </root>

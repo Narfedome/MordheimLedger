@@ -30,6 +30,7 @@ public partial class EndOfGamePageViewModel
             }
         }
 
+        valid &= ValidateConnectedCaptives();
         return valid;
     }
 

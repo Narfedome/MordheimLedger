@@ -9,6 +9,33 @@
     <!-- Étape : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
     <VerticalStackLayout Spacing="12">
         <Label Text="{loc:Loc EndOfGameResultPh}" FontAttributes="Bold"/>
+        <!-- Partie connectée (v2, lot 4b) : le vainqueur choisi en premier est proposé à tous ; le résultat de cette bande
+             en découle, toujours modifiable en dessous. Texte des RadioButton en Label FRÈRE tapable (voir
+             ExplorationResultStepView). -->
+        <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsConnectedGame}">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc ConnectedWinnerHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding WinnerOptions}"
+                                     RadioButtonGroup.GroupName="ConnectedWinner"
+                                     RadioButtonGroup.SelectedValue="{Binding SelectedWinner, Mode=TwoWay}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WinnerOptionRow">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                <RadioButton Grid.Column="0" Value="{Binding .}" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding Label}" VerticalOptions="Center" Padding="0,4">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectWinnerCommand}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <Label Text="{Binding ResultChosenByText}" FontSize="12" TextColor="{DynamicResource AppWarning}"
+                       IsVisible="{Binding ResultChosenByText, Converter={StaticResource StringNotEmptyConverter}}"/>
+            </VerticalStackLayout>
+        </Border>
         <Border Style="{StaticResource SectionCardBorderStyle}">
             <components:SelectFieldView Title="{loc:Loc EndOfGameResultPh}" x:Name="ResultPicker"
                     ItemsSource="{Binding ResultOptions}"

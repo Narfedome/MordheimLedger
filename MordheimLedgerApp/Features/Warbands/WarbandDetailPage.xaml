@@ -323,6 +323,14 @@
                         <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailGameKey}"/>
                     </components:IconTextButton.Behaviors>
                 </components:IconTextButton>
+                <!-- Annuler la partie (v2, lot 4b) : lève « en partie » sans rien enregistrer - une partie lancée par erreur
+                     ou une partie connectée coupée ne bloque plus la bande. Icône seule sur téléphone. -->
+                <components:IconTextButton AutomationId="CancelGameButton" IsVisible="{Binding HasGameInProgress}"
+                                            Icon="{x:Static icons:SolidFont.Ban}"
+                                            Text="{loc:Loc CancelGameButton}"
+                                            ShowText="{OnIdiom Phone=False, Default=True}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding CancelGameCommand}"/>
                 <components:IconTextButton AutomationId="EndOfGameButton" IsVisible="{Binding HasGameInProgress}"
                                             Icon="{x:Static icons:SolidFont.FlagCheckered}"
                                             Text="{loc:Loc EndOfGameTitle}"

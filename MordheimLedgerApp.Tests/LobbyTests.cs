@@ -77,6 +77,31 @@ public class LobbyTests : IAsyncLifetime
         Assert.Equal(LobbyCloseReason.AlreadyStarted, late.Reason);
     }
 
+    /// <summary>Messages entre joueurs (v2, lot 4b) : à un joueur précis ou à tous, relayés par l'hôte.</summary>
+    [Fact]
+    public async Task Events_AreRelayed_ToTheirTarget_OrToEveryoneElse()
+    {
+        var marc = await JoinAsync("Marc");
+        var julie = await JoinAsync("Julie");
+        var received = new System.Collections.Concurrent.ConcurrentBag<(string Who, LobbyEvent Event)>();
+        _host.EventReceived += e => received.Add(("host", e));
+        marc.EventReceived += e => received.Add(("marc", e));
+        julie.EventReceived += e => received.Add(("julie", e));
+
+        await marc.SendEventAsync(julie.PlayerId, "ransom-offer", "{\"amount\":40}");
+        await WaitUntilAsync(() => received.Count == 1);
+        var (who, message) = received.Single();
+        Assert.Equal(("julie", marc.PlayerId, "ransom-offer"), (who, message.From, message.Kind));
+
+        await julie.SendEventAsync(null, "result", "{}");
+        await WaitUntilAsync(() => received.Count == 3);
+        Assert.Equal(["host", "julie", "marc"], received.Select(r => r.Who).Order());
+
+        await _host.SendEventAsync(marc.PlayerId, "capture", "{}");
+        await WaitUntilAsync(() => received.Count == 4);
+        Assert.Contains(received, r => r.Who == "marc" && r.Event.From == _host.PlayerId && r.Event.Kind == "capture");
+    }
+
     [Fact]
     public async Task HostLeaving_ClosesTheGameForGuests()
     {

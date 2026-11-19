@@ -17,6 +17,10 @@ public sealed record LobbySnapshot(IReadOnlyList<LobbyPlayer> Players, bool Star
     public static LobbySnapshot Empty { get; } = new([], false, new Dictionary<string, string>());
 }
 
+/// <summary>Message d'un joueur à un autre (ou à tous, To null), relayé par l'hôte (v2, lot 4b : résultat de la partie,
+/// captifs et rançons). Kind dit ce que contient Payload (JSON propre à chaque sorte de message, voir LobbyEvents).</summary>
+public sealed record LobbyEvent(string From, string? To, string Kind, string Payload);
+
 /// <summary>Raisons de refus ou de fermeture, traduites par l'appli.</summary>
 public enum LobbyCloseReason
 {
@@ -30,7 +34,8 @@ public enum LobbyCloseReason
 /// <summary>Message échangé sur la connexion TCP (JSON précédé de sa longueur sur 4 octets). Un seul type, les champs
 /// utiles selon Type :
 /// invité → hôte : hello (Token, Name), warband (Package, Summary), leave ;
-/// hôte → invité : welcome (PlayerId), reject (Reason), state (Snapshot), closed (Reason).</summary>
+/// hôte → invité : welcome (PlayerId), reject (Reason), state (Snapshot), closed (Reason) ;
+/// dans les deux sens : relay (Event), message d'un joueur à un autre que l'hôte fait suivre.</summary>
 internal sealed class LobbyMessage
 {
     public const int MaxBytes = 16 * 1024 * 1024;
@@ -44,6 +49,7 @@ internal sealed class LobbyMessage
     public string? Package { get; set; }
     public LobbyWarbandSummary? Summary { get; set; }
     public LobbySnapshot? Snapshot { get; set; }
+    public LobbyEvent? Event { get; set; }
 }
 
 internal static class LobbyProtocol

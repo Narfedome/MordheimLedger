@@ -74,7 +74,8 @@ public partial class CapturedEnemyEntry : ObservableObject
     [ObservableProperty]
     private string? fateError;
 
-    public CapturedEnemyEntry(int index, bool isUndeadWarband, bool isPossessedWarband, LocalizationService loc)
+    /// <param name="allowRansom">Faux pour un captif de partie connectée dont la rançon vient d'être refusée (v2, lot 4b).</param>
+    public CapturedEnemyEntry(int index, bool isUndeadWarband, bool isPossessedWarband, LocalizationService loc, bool allowRansom = true)
     {
         Index = index;
 
@@ -95,7 +96,7 @@ public partial class CapturedEnemyEntry : ObservableObject
         FateLabels.Add(loc["LibNoneOption"]);
         SelectedFateLabel = FateLabels[0];
 
-        AddFate(CapturedEnemyFate.Ransomed);
+        if (allowRansom) AddFate(CapturedEnemyFate.Ransomed);
         AddFate(CapturedEnemyFate.SoldToSlavers);
         if (isUndeadWarband) AddFate(CapturedEnemyFate.KilledForZombie);
         if (isPossessedWarband) AddFate(CapturedEnemyFate.SacrificedForXp);

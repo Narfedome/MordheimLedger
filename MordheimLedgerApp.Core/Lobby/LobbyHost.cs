@@ -22,6 +22,12 @@ public interface ILobbyConnection : IAsyncDisposable
 
     /// <summary>Quitter la partie (l'hôte la ferme pour tous).</summary>
     Task LeaveAsync();
+
+    /// <summary>Envoie un message à un joueur (to) ou à tous les autres (to null). From est rempli avec PlayerId.</summary>
+    Task SendEventAsync(string? to, string kind, string payload);
+
+    /// <summary>Message reçu d'un autre joueur (sur un thread du réseau).</summary>
+    event Action<LobbyEvent>? EventReceived;
 }
 
 /// <summary>Hôte d'une partie connectée (v2, lot 4a) : écoute en TCP sur le réseau local, accepte jusqu'à 3 invités qui
@@ -56,6 +62,7 @@ public sealed class LobbyHost : ILobbyConnection
     public LobbySnapshot State { get; private set; } = LobbySnapshot.Empty;
 
     public event Action<LobbySnapshot>? StateChanged;
+    public event Action<LobbyEvent>? EventReceived;
 
     /// <summary>Jamais levé côté hôte : c'est lui qui ferme.</summary>
     public event Action<LobbyCloseReason>? Closed { add { } remove { } }
@@ -178,6 +185,8 @@ public sealed class LobbyHost : ILobbyConnection
                 if (message is null || message.Type == "leave") break;
                 if (message is { Type: "warband", Package: { } package, Summary: { } summary })
                     await SetWarbandAsync(guest.Id, package, summary);
+                else if (message is { Type: "relay", Event: { } relayed })
+                    await RouteAsync(relayed with { From = guest.Id });
             }
         }
         catch (Exception) when (_cts.IsCancellationRequested)
@@ -213,6 +222,24 @@ public sealed class LobbyHost : ILobbyConnection
             _packages[playerId] = packageJson;
         }
         return BroadcastAsync();
+    }
+
+    public Task SendEventAsync(string? to, string kind, string payload) => RouteAsync(new LobbyEvent(HostPlayerId, to, kind, payload));
+
+    /// <summary>Remet un message à son destinataire (ou à tous sauf l'expéditeur) : l'hôte le lève chez lui, l'envoie aux
+    /// invités concernés.</summary>
+    private async Task RouteAsync(LobbyEvent message)
+    {
+        List<Guest> targets;
+        lock (_gate)
+        {
+            if (_closed) return;
+            targets = _guests.Where(g => g.Id != message.From && (message.To is null || message.To == g.Id)).ToList();
+        }
+        if (message.From != HostPlayerId && (message.To is null || message.To == HostPlayerId))
+            EventReceived?.Invoke(message);
+        foreach (var guest in targets)
+            await SendAsync(guest, new LobbyMessage { Type = "relay", Event = message });
     }
 
     private LobbySnapshot BuildSnapshot() => new([.. _players], _started, new Dictionary<string, string>(_packages, StringComparer.Ordinal));

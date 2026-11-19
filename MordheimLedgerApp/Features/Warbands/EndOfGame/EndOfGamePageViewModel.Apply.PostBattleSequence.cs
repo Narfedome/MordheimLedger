@@ -26,11 +26,18 @@ public partial class EndOfGamePageViewModel
     private async Task ApplyCapturedEnemiesAsync(
         IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByOfficialId, List<string> sentences)
     {
-        if (Warband is null || !HasCapturedEnemies) return;
+        if (Warband is null) return;
 
         // Les écritures (or, Zombie, XP du chef) : PostBattleSequenceService (Core, testé) ; ici les phrases.
         var outcomes = new List<CaptiveOutcome>();
-        foreach (var entry in CapturedEnemies)
+        // Captifs de la partie connectée (v2, lot 4b) d'abord, puis ceux saisis à la main.
+        foreach (var (outcome, sentence) in ConnectedCaptiveOutcomes())
+        {
+            outcomes.Add(outcome);
+            if (sentence is not null) sentences.Add(sentence);
+        }
+        if (outcomes.Count == 0 && !HasCapturedEnemies) return;
+        foreach (var entry in HasCapturedEnemies ? CapturedEnemies : [])
         {
             var hasGold = int.TryParse(entry.GoldAmount, out var gold);
             switch (entry.SelectedFate)

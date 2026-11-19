@@ -17,8 +17,10 @@ public partial class FistfulOfCrownsEntry : ObservableObject
 
     public FistfulOfCrownsEntry(FistfulOfCrownsGroup group, IReadOnlyList<WarriorOutcomeRow> ownedRows,
         IReadOnlyList<WarriorOutcomeRow> retentionRows, IReadOnlyList<DuelOpponentDisplay> duelOpponents,
-        Func<FistfulOfCrownsGroup, bool> isBeingRecruited, Action changed)
+        Func<FistfulOfCrownsGroup, bool> isBeingRecruited, Action changed, bool isConnected = false, string? heldBy = null)
     {
+        _isConnected = isConnected;
+        HeldBy = heldBy;
         Group = group;
         _ownedRows = ownedRows;
         _retentionRows = retentionRows;
@@ -29,6 +31,11 @@ public partial class FistfulOfCrownsEntry : ObservableObject
 
     private static LocalizationService Loc => LocalizationService.Instance;
 
+    private readonly bool _isConnected;
+
+    /// <summary>Partie connectée : joueur adverse qui aligne ce personnage (null s'il n'est chez personne).</summary>
+    public string? HeldBy { get; }
+
     public FistfulOfCrownsGroup Group { get; }
 
     public string Name => Group.DisplayName;
@@ -37,14 +44,16 @@ public partial class FistfulOfCrownsEntry : ObservableObject
 
     /// <summary>Proposée tant que la bande n'a plus personne de ce groupe en vie (jamais recruté, ou mort cette
     /// partie) et ne l'engage pas dans cette même Fin de partie.</summary>
-    public bool ShowCorruption => !_ownedRows.Any(r => !r.IsDead) && !_isBeingRecruited(Group);
+    public bool ShowCorruption => !_ownedRows.Any(r => !r.IsDead) && !_isBeingRecruited(Group) && (!_isConnected || HeldBy is not null);
 
     /// <summary>La bande l'a encore et il n'a pas été rendu hostile (corrompu cette bataille, il part de toute façon).</summary>
     public bool ShowRetention => _retentionRows.Any(r => !r.IsDead);
 
     public bool IsActive => ShowCorruption || ShowRetention;
 
-    public string CorruptionLabel => string.Format(Loc["EndOfGamePairCorruptionOptionFormat"], Name);
+    public string CorruptionLabel => HeldBy is null
+        ? string.Format(Loc["EndOfGamePairCorruptionOptionFormat"], Name)
+        : string.Format(Loc["ConnectedPairCorruptionOptionFormat"], Name, HeldBy);
 
     [ObservableProperty]
     private bool wantsToRecordCorruption;

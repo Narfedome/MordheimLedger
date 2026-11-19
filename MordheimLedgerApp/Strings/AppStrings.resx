@@ -3569,4 +3569,94 @@ Toutes les données actuelles de cet appareil seront remplacées. Une copie en e
   <data name="OpponentInjuries" xml:space="preserve">
     <value>Blessures</value>
   </data>
+  <data name="ConnectedWinnerHeading" xml:space="preserve">
+    <value>Vainqueur de la partie (partagé avec les autres joueurs)</value>
+  </data>
+  <data name="ConnectedWinnerYou" xml:space="preserve">
+    <value>Vous ({0})</value>
+  </data>
+  <data name="ConnectedWinnerPlayer" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="ConnectedResultChosenBy" xml:space="preserve">
+    <value>Choisi par {0} : {1}. Modifiable si vous n'êtes pas d'accord.</value>
+  </data>
+  <data name="ConnectedCaptorPh" xml:space="preserve">
+    <value>Capturé par</value>
+  </data>
+  <data name="ConnectedCaptureWaiting" xml:space="preserve">
+    <value>En attente de la proposition de rançon de {0}…</value>
+  </data>
+  <data name="ConnectedCapturePaid" xml:space="preserve">
+    <value>Rançon payée ({0} CO) : le guerrier revient.</value>
+  </data>
+  <data name="ConnectedCaptureRefused" xml:space="preserve">
+    <value>Rançon refusée : le guerrier est perdu.</value>
+  </data>
+  <data name="ConnectedCaptureManual" xml:space="preserve">
+    <value>Décidé à la table : saisissez l'issue ci-dessous.</value>
+  </data>
+  <data name="ConnectedCaptureChooseCaptor" xml:space="preserve">
+    <value>Choisissez qui a capturé ce guerrier.</value>
+  </data>
+  <data name="ConnectedCaptureOffer" xml:space="preserve">
+    <value>{0} propose de vous le rendre pour {1} CO.</value>
+  </data>
+  <data name="ConnectedCaptureTreasury" xml:space="preserve">
+    <value>Trésorerie : {0} CO → {1} CO</value>
+  </data>
+  <data name="ConnectedCapturePendingError" xml:space="preserve">
+    <value>Répondez à la proposition, ou décidez à la table.</value>
+  </data>
+  <data name="ConnectedRansomPay" xml:space="preserve">
+    <value>Payer</value>
+  </data>
+  <data name="ConnectedRansomRefuse" xml:space="preserve">
+    <value>Refuser</value>
+  </data>
+  <data name="ConnectedRansomSend" xml:space="preserve">
+    <value>Proposer la rançon</value>
+  </data>
+  <data name="ConnectedDecideAtTable" xml:space="preserve">
+    <value>Décider à la table</value>
+  </data>
+  <data name="ConnectedCaptiveDetail" xml:space="preserve">
+    <value>{0} de {1} ({2})</value>
+  </data>
+  <data name="ConnectedCaptiveOffered" xml:space="preserve">
+    <value>Rançon de {0} CO proposée, en attente de la réponse de {1}…</value>
+  </data>
+  <data name="ConnectedCaptiveAccepted" xml:space="preserve">
+    <value>Rançon payée : {0} CO reçues.</value>
+  </data>
+  <data name="ConnectedCaptiveRefused" xml:space="preserve">
+    <value>{0} a refusé la rançon : choisissez le sort du prisonnier.</value>
+  </data>
+  <data name="ConnectedCaptiveManual" xml:space="preserve">
+    <value>Décidé à la table : saisissez-le dans les prisonniers ci-dessous s'il y a lieu.</value>
+  </data>
+  <data name="ConnectedCaptiveOfferRequired" xml:space="preserve">
+    <value>Proposez une rançon, ou décidez à la table.</value>
+  </data>
+  <data name="ConnectedCaptiveAwaitingAnswer" xml:space="preserve">
+    <value>En attente de la réponse à votre proposition.</value>
+  </data>
+  <data name="HistoryConnectedCaptiveRansomedSentence" xml:space="preserve">
+    <value>{0} a été rendu à {1} contre une rançon de {2} CO.</value>
+  </data>
+  <data name="ConnectedPairCorruptionOptionFormat" xml:space="preserve">
+    <value>Corruption de {0}, chez {1} (Une Poignée d'Or)</value>
+  </data>
+  <data name="CancelGameButton" xml:space="preserve">
+    <value>Annuler la partie</value>
+  </data>
+  <data name="CancelGameTitle" xml:space="preserve">
+    <value>Annuler la partie ?</value>
+  </data>
+  <data name="CancelGameConfirm" xml:space="preserve">
+    <value>La bande ne sera plus en partie et pourra en relancer une. Rien n'est enregistré : pas d'expérience, de revenus ni de blessures. Ce qui a été noté avant la partie reste dans l'Historique.</value>
+  </data>
+  <data name="CancelGameKeep" xml:space="preserve">
+    <value>Continuer la partie</value>
+  </data>
 </root>

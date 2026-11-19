@@ -16,6 +16,60 @@
                  IsUndeadWarband/IsPossessedWarband), Rançon/Vendu aux esclavagistes toujours proposés. -->
             <VerticalStackLayout Spacing="12">
                 <Label Text="{loc:Loc EndOfGameCaptivesHeading}" FontAttributes="Bold"/>
+                <!-- Partie connectée (v2, lot 4b) : les guerriers que les adversaires déclarent capturés par cette bande,
+                     une carte chacun - proposer une rançon, attendre la réponse, décider du sort sur un refus. À la table
+                     = saisi dans la liste habituelle ci-dessous. -->
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ConnectedCaptives}" Spacing="8" IsVisible="{Binding HasConnectedCaptives}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:ConnectedCaptiveRow">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Title}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Detail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding CanOffer}">
+                                        <Entry Grid.Column="0" Text="{Binding RansomInput}" Keyboard="Numeric" AutomationId="ConnectedRansomAmount"
+                                               Placeholder="{loc:Loc EndOfGameCapturedRansomAmountPh}" WidthRequest="110">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                        <Button Grid.Column="1" Text="{loc:Loc ConnectedRansomSend}" Padding="12,6" AutomationId="ConnectedRansomSend"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=OfferRansomCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                    </Grid>
+                                    <Label Text="{Binding StatusText}" FontSize="13"
+                                           IsVisible="{Binding StatusText, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                    <VerticalStackLayout Spacing="6" IsVisible="{Binding IsRefused}">
+                                        <components:SelectFieldView Title="{loc:Loc EndOfGameCapturedEnemyFatePh}"
+                                                                    ItemsSource="{Binding RefusedFate.FateLabels}"
+                                                                    SelectedItem="{Binding RefusedFate.SelectedFateLabel}"/>
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding RefusedFate.ShowGoldAmount}">
+                                            <Entry Grid.Column="0" Text="{Binding RefusedFate.GoldAmount}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameCapturedEnemyGoldPh}" WidthRequest="90">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollConnectedSoldToSlaversCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding RefusedFate.FateError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding RefusedFate.FateError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                    <Button Text="{loc:Loc ConnectedDecideAtTable}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                                            FontSize="12" Padding="8,4" HorizontalOptions="Start"
+                                            IsVisible="{Binding CanOffer}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=CaptiveToTableCommand}"
+                                            CommandParameter="{Binding .}"/>
+                                    <Label Text="{Binding Error}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                           IsVisible="{Binding Error, Converter={StaticResource IsNotNullConverter}}"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
                 <!-- Grid Auto,* plutôt que HorizontalStackLayout (2026-09-01, retour utilisateur -
                      "Corruption de Marquand Volker & Ulli Leitpold (Une Poignée d'Or)" coupé net par le
                      bord du dialog) : dans un HorizontalStackLayout, le Label reçoit une largeur non

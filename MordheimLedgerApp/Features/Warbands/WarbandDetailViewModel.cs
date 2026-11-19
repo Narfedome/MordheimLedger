@@ -394,6 +394,19 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private Task OpenOpponent(Lobby.OpponentRow row) => Shell.Current.GoToAsync($"{nameof(Lobby.OpponentWarbandPage)}?playerId={row.PlayerId}");
 
+    /// <summary>« Annuler la partie » (v2, lot 4b) : la bande n'est plus « en partie », rien d'autre n'est enregistré ni
+    /// défait (ce que « Avant la partie » a noté reste dans l'Historique). Quitte aussi la partie connectée en cours.</summary>
+    [RelayCommand]
+    private async Task CancelGame()
+    {
+        if (Warband is not { GameInProgress: true } warband) return;
+        if (!await ConfirmAsync(Loc["CancelGameTitle"], Loc["CancelGameConfirm"], Loc["CancelGameButton"], Loc["CancelGameKeep"], destructive: true)) return;
+        warband.GameInProgress = false;
+        await _warbandService.SaveWarbandAsync(warband);
+        if (_lobby.IsPlayingWith(warband.Id)) await _lobby.LeaveAsync();
+        await LoadAsync(warband.Id);
+    }
+
     [RelayCommand]
     private async Task LeaveConnectedGame()
     {

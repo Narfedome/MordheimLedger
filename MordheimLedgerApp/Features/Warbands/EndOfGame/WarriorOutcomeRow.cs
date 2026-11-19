@@ -238,6 +238,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     partial void OnManualRollChanged(string value)
     {
+        NotifyConnectedCaptureChanged();
         InjuryResultText = string.Empty;
         if (int.TryParse(value, out var roll))
             ResolveInjuryResult(roll);
@@ -623,6 +624,20 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// coût déduit de notre trésorerie) ou perdu (considéré mort, comme toute autre issue du livre -
     /// échangé/vendu/tué/sacrifié se valent toutes de notre point de vue, aucune ne nous revient).</summary>
     public bool ShowCapturedChoice => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && roll == 61;
+
+    /// <summary>Partie connectée (v2, lot 4b) : le capteur est un vrai joueur, la rançon se négocie avec lui (null hors partie
+    /// connectée). Revenu à la table, la saisie habituelle ci-dessous reprend.</summary>
+    public ConnectedCaptureState? ConnectedCapture { get; set; }
+
+    public bool ShowConnectedCapture => ShowCapturedChoice && ConnectedCapture is { IsManual: false };
+    public bool ShowManualCapturedChoice => ShowCapturedChoice && ConnectedCapture is not { IsManual: false };
+
+    internal void NotifyConnectedCaptureChanged()
+    {
+        OnPropertyChanged(nameof(ShowConnectedCapture));
+        OnPropertyChanged(nameof(ShowManualCapturedChoice));
+    }
+
 
     /// <summary>Coché si le joueur choisit de payer une rançon pour récupérer ce guerrier - décoché
     /// (par défaut) signifie "perdu" (voir Core.Rules... non, pas de table Core ici, la logique est

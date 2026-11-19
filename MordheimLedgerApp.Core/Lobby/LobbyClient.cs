@@ -23,6 +23,10 @@ public sealed class LobbyClient : ILobbyConnection
 
     public event Action<LobbySnapshot>? StateChanged;
     public event Action<LobbyCloseReason>? Closed;
+    public event Action<LobbyEvent>? EventReceived;
+
+    public Task SendEventAsync(string? to, string kind, string payload) =>
+        SendAsync(new LobbyMessage { Type = "relay", Event = new LobbyEvent(PlayerId, to, kind, payload) });
 
     private LobbyClient(TcpClient client, string playerId)
     {
@@ -90,6 +94,10 @@ public sealed class LobbyClient : ILobbyConnection
                 {
                     State = snapshot;
                     StateChanged?.Invoke(snapshot);
+                }
+                else if (message is { Type: "relay", Event: { } relayed })
+                {
+                    EventReceived?.Invoke(relayed);
                 }
                 else if (message.Type == "closed")
                 {

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Exchange;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -37,6 +38,13 @@ public partial class EndOfGamePageViewModel
     private void BuildFistfulOfCrownsEntries()
     {
         var ruleId = _specialRulesByOfficialId.GetValueOrDefault(OfficialIds.FistfulOfCrownsRule)?.Id;
+        // Partie connectée (v2, lot 4b) : corruption proposée seulement pour un personnage qu'un adversaire aligne
+        // vraiment (lu dans son paquet), avec le nom du joueur. Une entrée Personnalisée n'a pas de clé officielle :
+        // elle n'est pas reconnue chez l'adversaire.
+        var opponentPersonae = Warband is { } warband && _lobby.IsPlayingWith(warband.Id) ? _lobby.OpponentDramatisPersonae() : null;
+        string? HolderOf(FistfulOfCrownsGroup group) => opponentPersonae is null ? null
+            : new[] { group.Primary, group.Partner }.Select(p => p?.OfficialId is { } id && opponentPersonae.TryGetValue(CatalogEntry.OfficialPrefix + id, out var name) ? name : null)
+                .FirstOrDefault(n => n is not null);
         FistfulOfCrownsEntries = FistfulOfCrownsRules.Groups(_dramatisPersonaCatalog, ruleId).Select(group =>
         {
             var ownedRows = WarriorRows.Where(r => r.Warrior.IsDramatisPersona && r.Warrior.DramatisPersonaId is { } id && group.Contains(id)).ToList();
@@ -44,7 +52,8 @@ public partial class EndOfGamePageViewModel
             var retentionRows = ownedRows.Where(r => !r.Warrior.IsHostileThisBattle).ToList();
             var opponents = new List<DuelOpponentDisplay> { new(group.Primary, ResolveDuelOpponentEquipment(group.Primary)) };
             if (group.Partner is { } partner) opponents.Add(new(partner, ResolveDuelOpponentEquipment(partner)));
-            return new FistfulOfCrownsEntry(group, ownedRows, retentionRows, opponents, IsBeingRecruitedThisWizard, OnFistfulOfCrownsChanged);
+            return new FistfulOfCrownsEntry(group, ownedRows, retentionRows, opponents, IsBeingRecruitedThisWizard, OnFistfulOfCrownsChanged,
+                isConnected: opponentPersonae is not null, heldBy: HolderOf(group));
         }).ToList();
     }
 

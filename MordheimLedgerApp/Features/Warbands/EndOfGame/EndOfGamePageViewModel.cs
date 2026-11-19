@@ -647,8 +647,10 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     public EndOfGamePageViewModel(ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService,
         IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, ISellEquipmentPickerService sellEquipmentPicker,
-        IDramatisPersonaPickerService dramatisPersonaPicker, IWarbandService warbandService, IMutationPickerService mutationPicker)
+        IDramatisPersonaPickerService dramatisPersonaPicker, IWarbandService warbandService, IMutationPickerService mutationPicker,
+        LobbySession lobby)
     {
+        _lobby = lobby;
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _libraryService = libraryService;
@@ -791,6 +793,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // trop large sur un ViewModel de cette taille), un seul PropertyChanged avec un nom vide -
             // idiome standard "toutes les propriétés ont changé", respecté par le moteur de binding MAUI -
             // force TOUS les bindings déjà posés sur cette page à se relire une fois le chargement fini.
+            InitializeConnectedGame();
             OnPropertyChanged(string.Empty);
         });
     }

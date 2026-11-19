@@ -317,8 +317,27 @@ en mémoire. Lancement : l'hôte « Commencer » → chacun passe par « Avant l
 `TakePendingStart`). La partie connectée se termine quand la Fin de partie de la bande est faite (`LocalGameStarted` : avant
 « Avant la partie » validé, un rechargement de fiche n'est pas une fin - défaut trouvé en recette), par « Quitter la partie »,
 ou quand l'hôte la ferme (message chez les invités). Recette Android avec un second joueur simulé sur le PC (programme de test
-sur Core.Lobby, l'émulateur étant isolé : redirection `adb forward`) ; découverte UDP et Windows non testés. Lot 4b (Fin de
-partie connectée : captifs, Poignée d'Or…) à venir.
+sur Core.Lobby, l'émulateur étant isolé : redirection `adb forward`) ; découverte UDP et Windows non testés.
+
+**Fin de partie connectée (v2 lot 4b, branche `feature/connected-eog`, 2026-11-16)** : maquette « Fin de partie connectée »,
+variante **A** (captif négocié dans la ligne du jet 61). Messages entre joueurs relayés par l'hôte (`LobbyEvent`,
+`ILobbyConnection.SendEventAsync`/`EventReceived`, à un joueur ou à tous). Captifs : `Core/Lobby/CaptureLedger` (un registre par
+appareil, mêmes messages des deux côtés, expéditeur vérifié ; `CaptureLedgerTests`) - le propriétaire déclare son Héros capturé
+(61 confirmé + capteur choisi, auto s'il n'y a qu'un adversaire), le capteur propose une rançon depuis Prisonniers ennemis, le
+propriétaire paie ou refuse sous le jet 61, le capteur choisit ensuite le sort (sans la rançon, `CapturedEnemyEntry(allowRansom:
+false)`) ; Suivant bloqué tant que rien n'est tranché, « Décider à la table » repasse à la saisie habituelle des deux côtés (un
+joueur qui part = ses échanges en cours passent à la table). Sous-jets (Blessures multiples) restent en saisie manuelle.
+Résultat : le premier vainqueur choisi est proposé à tous (`LobbySession.GameResult`), modifiable, jamais écrasé une fois touché.
+« Une Poignée d'Or » ne propose la corruption que des personnages qu'un adversaire aligne (`OpponentRosterFacts`, lu dans son
+paquet sans l'importer, par clé officielle - une entrée Personnalisée n'est pas reconnue), « chez Marc ». Aide des Dramatis
+Personae : valeur de bande adverse pré-remplie (la plus haute). ViewModel : `EndOfGamePageViewModel.Connected.cs` +
+`ConnectedEndOfGameRows.cs` ; rien ne change hors partie connectée. Recette Android avec le joueur PC piloté par fichier de
+commandes (résultat reçu/envoyé, rançon payée, refusée puis vendu, à la table, Poignée d'Or ciblée, Historique et trésorerie),
+puis à 3 joueurs (deux joueurs PC : choix du capteur, changement de capteur retiré chez l'ancien) avec une bande importée
+portant Bertha (aide pré-remplie à 368, jet 3+) ; Windows rejoint aussi la partie du joueur PC (résultat, rançon payée des deux
+côtés). « Annuler la partie » (⊘ de la fiche à côté de « Fin de partie », `WarbandDetailViewModel.CancelGame`) lève
+`GameInProgress` sans rien enregistrer et quitte la partie connectée : avant lui, une bande lancée puis abandonnée restait
+« en partie » jusqu'à une Fin de partie complète, et n'était plus proposée pour rejoindre une partie connectée.
 
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 

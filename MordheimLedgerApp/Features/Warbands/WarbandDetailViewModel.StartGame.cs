@@ -94,6 +94,10 @@ public partial class WarbandDetailViewModel
             .Where(r => r.Warrior.DramatisPersonaId is { } id && dramatisPersonaeById.TryGetValue(id, out var persona) && persona.RequiresRatingDisadvantage)
             .Select(r => new DramatisPersonaAidEntry(r.Warrior, dramatisPersonaeById[r.Warrior.DramatisPersonaId!.Value].Name, Rating))
             .ToList();
+        // Partie connectée (v2, lot 4b) : la valeur de bande adverse est connue - la plus haute des adversaires,
+        // pré-remplie et toujours modifiable.
+        if (_lobby.IsPlayingWith(Warband!.Id) && _lobby.HighestOpponentRating is { } opponentRating)
+            foreach (var entry in aidEntries) entry.EnemyRating = opponentRating.ToString();
 
         var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, aidEntries, Warband.NextGameNote);
         if (await ShowDialogAsync(new StartGameDialog(dialogViewModel)) != true) return;

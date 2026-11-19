@@ -268,6 +268,20 @@ public class ExchangeServiceTests : IDisposable
         Assert.Contains(bobCaptain.Equipment, e => e.Item.Name == "Lame de Wyrd");
     }
 
+    /// <summary>Fin de partie connectée (v2, lot 4b) : les Dramatis Personae d'une bande adverse se lisent dans son paquet,
+    /// sans import (corruption d'« Une Poignée d'Or » ciblée).</summary>
+    [Fact]
+    public async Task OpponentDramatisPersonae_AreReadFromThePackage()
+    {
+        var warband = await SampleAsync(_alice);
+        var persona = (await _alice.Library.GetDramatisPersonaeAsync("en")).First(p => p.OfficialId != null);
+        await _alice.Warbands.RecruitDramatisPersonaAsync(warband.Id, persona, persona.Name, [], []);
+        var json = ExchangeArchive.ToJson(await _alice.Exchange.ExportWarbandsAsync([warband.Id], new ExchangeExportOptions(IncludePhotos: false)));
+
+        Assert.Equal([CatalogEntry.OfficialPrefix + persona.OfficialId], Core.Lobby.OpponentRosterFacts.DramatisPersonaKeys(json));
+        Assert.Empty(Core.Lobby.OpponentRosterFacts.DramatisPersonaKeys("pas du json"));
+    }
+
     /// <summary>Bande adverse d'une partie connectée (v2, lot 4a) : lue dans une base temporaire, rien n'arrive dans
     /// celle du joueur.</summary>
     [Fact]

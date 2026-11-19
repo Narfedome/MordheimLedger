@@ -50,6 +50,75 @@ public sealed class LobbySession
     /// <summary>Partie commencée par l'hôte (levé chez l'hôte aussi).</summary>
     public event Action? Started;
 
+    // --- Fin de partie connectée (v2, lot 4b) -----------------------------------------------------------------
+
+    /// <summary>Captifs de cette partie (propriétaire et capteur), voir Core.Lobby.CaptureLedger.</summary>
+    public CaptureLedger? Captures { get; private set; }
+
+    /// <summary>Vainqueur proposé (le premier choisi par un joueur), null tant que personne n'a choisi.</summary>
+    public (string? WinnerPlayerId, string ChosenBy)? GameResult { get; private set; }
+
+    /// <summary>Dramatis Personae alignés par les adversaires : clé du catalogue (« o:… »/« s:… ») -> nom du joueur.</summary>
+    public IReadOnlyDictionary<string, string> OpponentDramatisPersonae()
+    {
+        var result = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var player in Opponents)
+            if (State.Packages.TryGetValue(player.Id, out var json))
+                foreach (var key in OpponentRosterFacts.DramatisPersonaKeys(json))
+                    result.TryAdd(key, player.Name);
+        return result;
+    }
+
+    /// <summary>Valeur de bande la plus haute parmi les adversaires (aide des Dramatis Personae), null sans adversaire.</summary>
+    public int? HighestOpponentRating => Opponents.Select(p => p.Warband?.Rating).Max();
+
+    public string PlayerNameOf(string playerId) => State.Players.FirstOrDefault(p => p.Id == playerId)?.Name ?? "?";
+
+    /// <summary>Propose le vainqueur à tous (null = match nul), seulement si personne ne l'a fait avant.</summary>
+    public async Task ProposeResultAsync(string? winnerPlayerId)
+    {
+        if (Connection is not { } connection || GameResult is not null) return;
+        GameResult = (winnerPlayerId, connection.PlayerId);
+        await connection.SendEventAsync(null, LobbyEventKinds.Result, LobbyEventKinds.Serialize(new GameResultPayload(winnerPlayerId)));
+    }
+
+    public Task DeclareCaptureAsync(int warriorId, string captorPlayerId, string warriorName, string roleName, string warbandName) =>
+        SendAsync(Captures?.Declare(warriorId, captorPlayerId, warriorName, roleName, warbandName));
+
+    public Task CancelCaptureAsync(int warriorId) => SendAsync(Captures?.Cancel(warriorId));
+    public Task OfferRansomAsync(string captureId, int amount) => SendAsync(Captures?.Offer(captureId, amount));
+    public Task AnswerRansomAsync(string captureId, bool accepted) => SendAsync(Captures?.Answer(captureId, accepted));
+    public Task CaptureToTableAsync(string captureId) => SendAsync(Captures?.GoManual(captureId));
+
+    private async Task SendAsync(IReadOnlyList<LobbyOutgoing>? outgoing)
+    {
+        if (Connection is { } connection && outgoing is not null)
+            foreach (var message in outgoing)
+                await connection.SendEventAsync(message.To, message.Kind, message.Payload);
+        NotifyChanged();
+    }
+
+    private void OnEvent(LobbyEvent message) => MainThread.BeginInvokeOnMainThread(() =>
+    {
+        if (Connection is null) return;
+        if (message.Kind == LobbyEventKinds.Result)
+        {
+            if (GameResult is null && LobbyEventKinds.Deserialize<GameResultPayload>(message.Payload) is { } result)
+            {
+                GameResult = (result.WinnerPlayerId, message.From);
+                NotifyChanged();
+            }
+            return;
+        }
+        if (Captures?.Apply(message) == true) NotifyChanged();
+    });
+
+    private void NotifyChanged()
+    {
+        Changed?.Invoke();
+        WeakReferenceMessenger.Default.Send(new LobbyChangedMessage());
+    }
+
     public static string PlayerName
     {
         get => Preferences.Default.Get(PlayerNameKey, DeviceInfo.Current.Name);
@@ -150,6 +219,9 @@ public sealed class LobbySession
         _started = false;
         connection.StateChanged += OnStateChanged;
         connection.Closed += OnClosed;
+        connection.EventReceived += OnEvent;
+        Captures = new CaptureLedger(connection.PlayerId);
+        GameResult = null;
     }
 
     private void Detach()
@@ -158,7 +230,10 @@ public sealed class LobbySession
         {
             connection.StateChanged -= OnStateChanged;
             connection.Closed -= OnClosed;
+            connection.EventReceived -= OnEvent;
         }
+        Captures = null;
+        GameResult = null;
         Connection = null;
         WarbandId = null;
         _started = false;
@@ -178,6 +253,10 @@ public sealed class LobbySession
     private void OnStateChanged(LobbySnapshot snapshot) => MainThread.BeginInvokeOnMainThread(() =>
     {
         if (Connection is null) return;
+        // Joueur parti : ses échanges de captifs en cours passent à la table.
+        if (Captures is { } captures)
+            foreach (var gone in captures.Mine.Select(c => c.CaptorPlayerId).Concat(captures.Held.Select(c => c.OwnerPlayerId)).Distinct().ToList())
+                if (snapshot.Players.All(p => p.Id != gone)) captures.PlayerLeft(gone);
         if (snapshot.Started && !_started)
         {
             _started = true;

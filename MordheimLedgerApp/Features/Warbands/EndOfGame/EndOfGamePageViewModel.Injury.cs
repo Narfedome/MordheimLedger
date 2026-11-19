@@ -61,8 +61,9 @@ public partial class EndOfGamePageViewModel
             if (row.ShowDeepWoundSubRoll)
                 valid &= CheckRoll(!row.HasValidDeepWoundSubRoll, () => row.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
 
-            if (row.ShowCapturedChoice && row.IsRansomed)
+            if (row.ShowManualCapturedChoice && row.IsRansomed)
                 valid &= CheckRoll(!row.HasValidRansomAmount, () => row.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+            valid &= ValidateConnectedCapture(row);
         }
         else
         {

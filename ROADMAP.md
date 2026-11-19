@@ -16,7 +16,7 @@ Détail technique et décisions : [CLAUDE.md](CLAUDE.md). Historique des imports
 - Accueil, visites guidées, bande d'exemple, nouveautés après mise à jour, accessibilité (clavier, lecteurs d'écran)
 - Stockage 100 % local (SQLite), Android + Windows (Google Play, Microsoft Store)
 
-## V2 — Partage entre joueurs (ébauche validée le 2026-11-15)
+## V2 — Partage entre joueurs (ébauche validée le 2026-11-15, lots 0 à 4b faits le 2026-11-16 sur la branche `v2`, version 2.0)
 Trois thèmes : **sauvegarde**, **partage de bandes/contenu**, **partie connectée en lobby local**. Tout reste local,
 **sans serveur ni compte** (Wi-Fi de la table, fichiers, QR). Ordre : du plus simple au plus risqué, chaque lot
 réutilisant le précédent.
@@ -42,9 +42,12 @@ réutilisant le précédent.
 
 **Hors v2** : campagne et classement (le modèle `Campaign` reste sans écran), historique enrichi / stats agrégées.
 
-**À trancher au fil des lots** : transport réseau du lobby (et règle de pare-feu Windows), extension et type MIME du
-fichier partagé, contenu exact de la sauvegarde (préférences comprises ?), comportement si un joueur quitte en cours
-de partie.
+**Tranché au fil des lots** (détail dans CLAUDE.md) : lobby en TCP sur le réseau local, découverte par annonce UDP
+(port 47821), réseaux privés seulement ; fichier `.mordheim` (archive .zip), reçu sous Android comme
+`application/octet-stream` ; sauvegarde `.mordheimbackup` = base + photos + langue/thème/palette ; un joueur qui quitte
+fait passer ses échanges en cours (captifs) à la table, l'hôte qui quitte ferme la partie.
+**Reste à vérifier sur de vrais appareils** : découverte sur le réseau, Wi-Fi entre deux appareils, scan d'un QR avec
+une vraie caméra, demande du pare-feu Windows quand le PC héberge.
 
 ## V3 — Optionnel, si le besoin se confirme
 - **Calculateur d'affrontement** : modificateurs à toucher/blesser/sauvegarde, règles spéciales courantes — volontairement mis de côté tant que le socle n'a pas prouvé sa valeur seul

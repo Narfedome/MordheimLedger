@@ -1202,9 +1202,11 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         // déjà passées (or, XP...). En cas d'échec rien n'est écrit ; l'état en mémoire du wizard, lui, a pu être
         // modifié par les Apply*Async, donc on ne le réutilise pas : retour à la fiche, qui relit la base
         // (le ROLLBACK change DataVersion).
+        var saved = false;
         try
         {
             await Loading.RunAsync(() => _warbandService.RunInTransactionAsync(ApplyEndOfGameAsync));
+            saved = true;
         }
         catch (Exception ex)
         {
@@ -1213,6 +1215,14 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         }
 
         await Shell.Current.GoToAsync("..");
+
+        // Rappel « Soutenir le projet » (Core.Services.SupportReminder) : une fois revenu sur la fiche, la 3e Fin de
+        // partie enregistrée puis rarement.
+        if (saved && SupportReminderService.GameCompleted())
+        {
+            var choice = await ShowDialogAsync(new SupportReminderDialog(new SupportReminderDialogViewModel()));
+            SupportReminderService.Answer(choice);
+        }
     }
 
     private async Task ApplyEndOfGameAsync()

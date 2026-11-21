@@ -46,7 +46,7 @@ namespace MordheimLedgerApp.Features.Settings
 
         [RelayCommand]
         public async Task OpenCoffeeLink() =>
-            await Launcher.OpenAsync(new Uri("https://buymeacoffee.com/narfedome"));
+            await Launcher.OpenAsync(MordheimLedgerApp.Services.SupportReminderService.SupportUri);
 
         [RelayCommand]
         public async Task ReportBug() =>

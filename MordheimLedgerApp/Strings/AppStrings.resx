@@ -3659,4 +3659,16 @@ Toutes les données actuelles de cet appareil seront remplacées. Une copie en e
   <data name="CancelGameKeep" xml:space="preserve">
     <value>Continuer la partie</value>
   </data>
+  <data name="SupportReminderMessage" xml:space="preserve">
+    <value>Mordheim Ledger est gratuit et le restera, partie connectée comprise. S'il vous sert à la table, un café aide à le faire vivre.</value>
+  </data>
+  <data name="SupportReminderSupport" xml:space="preserve">
+    <value>Offrir un café</value>
+  </data>
+  <data name="SupportReminderLater" xml:space="preserve">
+    <value>Plus tard</value>
+  </data>
+  <data name="SupportReminderNever" xml:space="preserve">
+    <value>Ne plus demander</value>
+  </data>
 </root>

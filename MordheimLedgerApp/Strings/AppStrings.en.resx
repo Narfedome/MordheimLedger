@@ -3659,4 +3659,16 @@ All the current data on this device will be replaced. A copy is kept: you can un
   <data name="CancelGameKeep" xml:space="preserve">
     <value>Keep playing</value>
   </data>
+  <data name="SupportReminderMessage" xml:space="preserve">
+    <value>Mordheim Ledger is free and will stay free, connected games included. If it helps at your table, a coffee helps keep it going.</value>
+  </data>
+  <data name="SupportReminderSupport" xml:space="preserve">
+    <value>Buy me a coffee</value>
+  </data>
+  <data name="SupportReminderLater" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="SupportReminderNever" xml:space="preserve">
+    <value>Don't ask again</value>
+  </data>
 </root>

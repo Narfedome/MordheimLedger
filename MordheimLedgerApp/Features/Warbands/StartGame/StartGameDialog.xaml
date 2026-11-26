@@ -35,7 +35,7 @@
                                 <DataTemplate x:DataType="local:OpponentRatingEntry">
                                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" Text="{Binding Label}" VerticalOptions="Center"/>
-                                        <Entry Grid.Column="1" Text="{Binding Text}" Keyboard="Numeric" WidthRequest="90"
+                                        <Entry AutomationId="OpponentRatingEntry" Grid.Column="1" Text="{Binding Text}" Keyboard="Numeric" WidthRequest="90"
                                                HorizontalTextAlignment="Center" VerticalOptions="Center">
                                             <Entry.Behaviors>
                                                 <components:DigitsOnlyBehavior/>

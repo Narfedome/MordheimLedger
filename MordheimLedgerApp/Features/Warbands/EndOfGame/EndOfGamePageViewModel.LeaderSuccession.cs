@@ -35,10 +35,11 @@ public partial class EndOfGamePageViewModel
         _allActiveWarriorRows.Select(r => r.Warrior).FirstOrDefault(w => w.IsLeader && IsDeadThisBattle(w));
 
     /// <summary>L'étape s'affiche si la bande a un type Chef mais plus de chef vivant après cette partie.</summary>
-    private bool NeedsLeaderSuccession =>
-        SurvivingLeader is null
-        && RecruitRows.Any(r => r.Archetype.IsLeader)
-        && (LeaderDeadThisBattle is not null || _allActiveWarriorRows.All(r => !r.Warrior.IsLeader));
+    private bool NeedsLeaderSuccession => LeaderSuccessionRules.NeedsSuccession(
+        warbandHasLeaderType: RecruitRows.Any(r => r.Archetype.IsLeader),
+        hasSurvivingLeader: SurvivingLeader is not null,
+        leaderDiedThisGame: LeaderDeadThisBattle is not null,
+        rosterHadLeader: _allActiveWarriorRows.Any(r => r.Warrior.IsLeader));
 
     private bool RequiresDesignatedSuccessor => RecruitRows.Any(r => r.Archetype.IsDesignatedSuccessor);
 
@@ -82,15 +83,9 @@ public partial class EndOfGamePageViewModel
             LeaderCandidates.Select((c, i) => new SuccessionCandidate(i, c.Leadership, c.Experience, c.IsDesignatedSuccessor)).ToList(),
             RequiresDesignatedSuccessor);
 
-        var proposedIndex = _leaderProposal.ProposedWarriorId;
-        if (_leaderProposal.Kind == SuccessionKind.Tie)
-        {
-            var rolls = _leaderProposal.TiedWarriorIds
-                .Select(i => (Index: i, Roll: int.TryParse(LeaderCandidates[i].TieRoll, out var r) ? r : (int?)null))
-                .ToList();
-            if (rolls.All(r => r.Roll is not null))
-                proposedIndex = LeaderSuccessionRules.ResolveTie(rolls.ToDictionary(r => r.Index, r => r.Roll!.Value));
-        }
+        var tieRolls = Enumerable.Range(0, LeaderCandidates.Count)
+            .ToDictionary(i => i, i => int.TryParse(LeaderCandidates[i].TieRoll, out var r) ? r : (int?)null);
+        var proposedIndex = LeaderSuccessionRules.ProposedAfterTieRolls(_leaderProposal, tieRolls);
 
         for (var i = 0; i < LeaderCandidates.Count; i++)
             LeaderCandidates[i].IsProposed = i == proposedIndex;
@@ -220,9 +215,9 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    private bool SuccessorLearnsMagicFor(Warrior warrior) =>
-        _recruitableWarbandArchetype.SuccessorLearnsMagic && _recruitableWarbandArchetype.MagicSchools.Count > 0
-        && ArchetypeOf(warrior)?.IsSpellcaster != true && !warrior.CastsAsSuccessor;
+    private bool SuccessorLearnsMagicFor(Warrior warrior) => LeaderSuccessionRules.SuccessorLearnsMagic(
+        _recruitableWarbandArchetype.SuccessorLearnsMagic, _recruitableWarbandArchetype.MagicSchools.Count > 0,
+        ArchetypeOf(warrior)?.IsSpellcaster == true, warrior.CastsAsSuccessor);
 
     /// <summary>Message ambre de l'étape Recrutement des Héros quand un type Chef est recruté : le livre l'interdit,
     /// sauf un type « Rachetable après sa mort » à partir de la partie qui suit sa mort.</summary>
@@ -286,13 +281,10 @@ public partial class EndOfGamePageViewModel
     private async Task ApplyRehiredLeaderAsync(string language, List<string> sentences)
     {
         if (Warband is null || !RecruitedHeroRows.Any(r => r.Archetype.IsLeader)) return;
-        var living = (await _warbandService.GetWarriorsAsync(Warband.Id, language))
-            .Where(w => w.Status != WarriorStatus.Dead && w.Status != WarriorStatus.Retired).ToList();
-        var leaders = living.Where(w => w.IsLeader).ToList();
-        if (leaders.Count < 2) return;
-        var newest = leaders.Where(w => ArchetypeOf(w)?.IsLeader == true).OrderByDescending(w => w.Id).FirstOrDefault();
-        if (newest is null) return;
-        await LeaderSuccession.ApplyRehiredLeaderAsync(leaders, newest);
+        var warriors = await _warbandService.GetWarriorsAsync(Warband.Id, language);
+        var leaderArchetypeIds = RecruitRows.Select(r => r.Archetype).Where(a => a.IsLeader).Select(a => a.Id).ToHashSet();
+        if (LeaderSuccessionRules.RehiredLeaderToKeep(warriors, leaderArchetypeIds) is not { } newest) return;
+        await LeaderSuccession.ApplyRehiredLeaderAsync(warriors.Where(w => w.IsLeader).ToList(), newest);
         sentences.Add(string.Format(Loc["HistoryNewLeaderSentence"], newest.Name));
     }
 

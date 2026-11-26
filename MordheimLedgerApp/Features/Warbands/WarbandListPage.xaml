@@ -75,9 +75,9 @@
 
         <!-- Onglets Actives / Archivées (1.6) : une bande archivée reste consultable en lecture seule. -->
         <HorizontalStackLayout Grid.Row="0" Spacing="16" Margin="6,8,6,0" IsVisible="{Binding IsInitialized}">
-            <components:TabToggleButton Text="{Binding ActiveTabText}" Command="{Binding ShowActiveTabCommand}"
+            <components:TabToggleButton AutomationId="ActiveWarbandsTab" Text="{Binding ActiveTabText}" Command="{Binding ShowActiveTabCommand}"
                                          IsActive="{Binding ShowActive}"/>
-            <components:TabToggleButton Text="{Binding ArchivedTabText}" Command="{Binding ShowArchivedTabCommand}"
+            <components:TabToggleButton AutomationId="ArchivedWarbandsTab" Text="{Binding ArchivedTabText}" Command="{Binding ShowArchivedTabCommand}"
                                          IsActive="{Binding ShowArchived}"/>
         </HorizontalStackLayout>
 

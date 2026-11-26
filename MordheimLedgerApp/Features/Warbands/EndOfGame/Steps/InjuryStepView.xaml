@@ -41,7 +41,7 @@
                              s'affiche tout seul sous le champ (pas de bouton à cliquer). -->
                         <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.IsHero}" Spacing="8">
                             <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
-                                <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.ManualRoll}" Keyboard="Numeric"
+                                <Entry AutomationId="InjuryRollEntry" Grid.Column="0" Text="{Binding CurrentInjuryWarrior.ManualRoll}" Keyboard="Numeric"
                                        Placeholder="{Binding CurrentInjuryWarrior.RollPlaceholder}" WidthRequest="70">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>

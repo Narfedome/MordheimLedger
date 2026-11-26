@@ -2431,4 +2431,91 @@ public class RulesTests
     {
         Assert.Equal(expected, LeaderSuccessionRules.RecruitmentNotice(isLeader, rehireable, diedThisGame));
     }
+
+    // --- Succession : règles sorties du wizard (1.6) ---
+
+    [Theory]
+    [InlineData(true, false, true, true, true)]    // le chef vient de mourir
+    [InlineData(true, false, false, false, true)]  // la bande avait déjà continué sans chef
+    [InlineData(true, true, false, true, false)]   // le chef a survécu
+    [InlineData(false, false, true, true, false)]  // bande sans type Chef (custom)
+    [InlineData(true, false, false, true, false)]  // incohérent : chef ni vivant ni mort cette partie (Malade) - rien
+    public void LeaderSuccession_NeedsSuccession(bool hasLeaderType, bool survivingLeader, bool diedThisGame, bool rosterHadLeader, bool expected)
+    {
+        Assert.Equal(expected, LeaderSuccessionRules.NeedsSuccession(hasLeaderType, survivingLeader, diedThisGame, rosterHadLeader));
+    }
+
+    [Fact]
+    public void LeaderSuccession_ProposedAfterTieRolls_WaitsForEveryTiedHero()
+    {
+        var tie = new SuccessionProposal(SuccessionKind.Tie, null, new[] { 0, 1 });
+
+        Assert.Null(LeaderSuccessionRules.ProposedAfterTieRolls(tie, new Dictionary<int, int?> { [0] = 5 }));
+        Assert.Null(LeaderSuccessionRules.ProposedAfterTieRolls(tie, new Dictionary<int, int?> { [0] = 5, [1] = null }));
+        Assert.Null(LeaderSuccessionRules.ProposedAfterTieRolls(tie, new Dictionary<int, int?> { [0] = 4, [1] = 4 }));
+        Assert.Equal(1, LeaderSuccessionRules.ProposedAfterTieRolls(tie, new Dictionary<int, int?> { [0] = 2, [1] = 6, [2] = 6 }));
+    }
+
+    [Fact]
+    public void LeaderSuccession_ProposedAfterTieRolls_KeepsAProposalWithoutTie()
+    {
+        var proposal = new SuccessionProposal(SuccessionKind.ByLeadership, 3, Array.Empty<int>());
+        var collapse = new SuccessionProposal(SuccessionKind.NoDesignatedSuccessor, null, Array.Empty<int>());
+
+        Assert.Equal(3, LeaderSuccessionRules.ProposedAfterTieRolls(proposal, new Dictionary<int, int?>()));
+        Assert.Null(LeaderSuccessionRules.ProposedAfterTieRolls(collapse, new Dictionary<int, int?>()));
+    }
+
+    [Theory]
+    [InlineData(true, true, false, false, true)]
+    [InlineData(false, true, false, false, false)]  // la bande n'apprend pas la magie (Mercenaires)
+    [InlineData(true, false, false, false, false)]  // pas d'école de magie à apprendre
+    [InlineData(true, true, true, false, false)]    // déjà lanceur de sorts (Augure)
+    [InlineData(true, true, false, true, false)]    // a déjà appris la magie d'une succession précédente
+    public void LeaderSuccession_SuccessorLearnsMagic(bool setting, bool hasSchools, bool isCaster, bool alreadyLearned, bool expected)
+    {
+        Assert.Equal(expected, LeaderSuccessionRules.SuccessorLearnsMagic(setting, hasSchools, isCaster, alreadyLearned));
+    }
+
+    [Fact]
+    public void LeaderSuccession_RehiredLeaderToKeep_IsTheNewestOfALeaderType()
+    {
+        var leaderTypes = new HashSet<int> { 1 };
+        var necromancer = new Warrior { Id = 5, IsLeader = true, WarriorArchetypeId = 2 };
+        var oldVampire = new Warrior { Id = 3, IsLeader = true, WarriorArchetypeId = 1, Status = WarriorStatus.Dead };
+        var newVampire = new Warrior { Id = 9, IsLeader = true, WarriorArchetypeId = 1 };
+
+        Assert.Same(newVampire, LeaderSuccessionRules.RehiredLeaderToKeep(new[] { necromancer, oldVampire, newVampire }, leaderTypes));
+        // Un seul chef vivant : rien à faire.
+        Assert.Null(LeaderSuccessionRules.RehiredLeaderToKeep(new[] { necromancer, oldVampire }, leaderTypes));
+        // Deux chefs vivants, aucun d'un type Chef : rien à trancher ici.
+        Assert.Null(LeaderSuccessionRules.RehiredLeaderToKeep(new[] { necromancer, new Warrior { Id = 6, IsLeader = true, WarriorArchetypeId = 2 } }, leaderTypes));
+        // Un chef retraité ne compte pas.
+        Assert.Null(LeaderSuccessionRules.RehiredLeaderToKeep(new[] { necromancer, new Warrior { Id = 9, IsLeader = true, WarriorArchetypeId = 1, Status = WarriorStatus.Retired } }, leaderTypes));
+    }
+
+    [Fact]
+    public void WarbandRating_Total_SumsWarriorsButNotHostileOnes()
+    {
+        var warriors = new[]
+        {
+            new Warrior { Experience = 20, HeadCount = 1 },                              // 25
+            new Warrior { Experience = 2, HeadCount = 3 },                               // 21
+            new Warrior { Experience = 3, HeadCount = 1, IsLargeCreature = true },       // 23
+            new Warrior { Experience = 0, HeadCount = 1, DramatisPersonaRatingBonus = 50, IsHostileThisBattle = true }
+        };
+
+        Assert.Equal(69, WarbandRatingRules.Total(warriors));
+    }
+
+    [Theory]
+    [InlineData(null, null, true)]
+    [InlineData("", "3", true)]
+    [InlineData("3", "3", true)]
+    [InlineData("5", "3", false)]
+    [InlineData("3", null, false)]
+    public void ExperiencePrefill_IsUntouched_NeverOverwritesThePlayer(string? current, string? lastApplied, bool expected)
+    {
+        Assert.Equal(expected, ExperiencePrefill.IsUntouched(current, lastApplied));
+    }
 }

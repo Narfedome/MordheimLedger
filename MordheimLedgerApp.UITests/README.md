@@ -10,6 +10,9 @@ Scénarios (`WarbandScenarios.cs`) :
   Guerrier), bande présente dans la liste.
 - **Partie complète** : bande d'exemple chargée à l'accueil, partie lancée, Fin de partie jouée jusqu'au bout (dés
   d'Exploration sans double, autres jets lancés par l'appli), entrée « Victoire » dans l'Historique.
+- **Mort du chef** (1.6) : valeur adverse au début de partie, scénario « Combat de rue », Capitaine mis hors de combat et
+  tué (D66 = 11), étape « Nouveau chef » avec le Héros pré-coché ; l'Historique cite le scénario et le nouveau chef.
+- **Onglet Archivées** (1.6) : vide sur une installation neuve, retour à l'onglet des bandes actives.
 
 Ils ne tournent pas dans la CI et sont **ignorés** sans `MORDHEIM_E2E=1` : un `dotnet test` ordinaire ne les lance pas.
 

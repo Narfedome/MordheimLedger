@@ -27,7 +27,7 @@
                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorRecapCommand}"/>
                                 <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                             </VerticalStackLayout>
-                            <CheckBox Grid.Column="1" IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"
+                            <CheckBox AutomationId="OutOfActionCheckBox" Grid.Column="1" IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"
                                       IsVisible="{Binding IsHero}"/>
                             <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center"
                                                     IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">

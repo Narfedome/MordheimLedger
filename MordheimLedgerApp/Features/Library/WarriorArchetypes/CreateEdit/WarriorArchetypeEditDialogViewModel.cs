@@ -200,6 +200,10 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     partial void OnIsChiefChanged(bool value)
     {
+        // Le flag pilote les règles qui visent le chef (succession, tests du chef à l'Exploration) ; un type qui
+        // n'est plus Chef ne peut pas non plus être « Rachetable après sa mort ».
+        Item.IsLeader = value;
+        if (!value) Item.CanBeRehiredAfterDeath = false;
         if (value) _ = AddSuggestedRuleAsync(OfficialIds.LeaderRule);
         else RemoveSuggestedRule(OfficialIds.LeaderRule);
     }

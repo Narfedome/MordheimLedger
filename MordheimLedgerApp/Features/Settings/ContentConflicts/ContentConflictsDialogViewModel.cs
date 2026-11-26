@@ -112,6 +112,9 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
             "Difficulty" => Loc["LibDifficultyAbbr"],
             // Effets d'une compétence, stockés en JSON (SkillEntity.EffectsJson) - « Effects json » sinon.
             "EffectsJson" => Loc["EffectsHeading"],
+            "IsDesignatedSuccessor" => Loc["WarriorArchetypeIsDesignatedSuccessor"],
+            "CanBeRehiredAfterDeath" => Loc["WarriorArchetypeCanBeRehiredAfterDeath"],
+            "SuccessorLearnsMagic" => Loc["WarbandArchetypeSuccessorLearnsMagic"],
             "Movement" or "WeaponSkill" or "BallisticSkill" or "Strength" or "Toughness" or "Wounds" or "Initiative" or "Attacks" or "Leadership"
                 => Loc[$"Stat{field}Abbr"],
             "RaceId" or "RacialProfileId" or "WarbandArchetypeId" or "EquipmentListId" or "MagicSchoolId"

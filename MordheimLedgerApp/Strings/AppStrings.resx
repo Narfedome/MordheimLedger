@@ -3372,4 +3372,25 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="FeedbackRejected" xml:space="preserve">
     <value>Le serveur a refusé ce message. Votre texte est toujours dans le formulaire : vérifiez-le ou réessayez plus tard.</value>
   </data>
+  <data name="LeaderDeathSectionTitle" xml:space="preserve">
+    <value>Mort du chef</value>
+  </data>
+  <data name="WarriorArchetypeIsDesignatedSuccessor" xml:space="preserve">
+    <value>Successeur imposé</value>
+  </data>
+  <data name="WarriorArchetypeIsDesignatedSuccessorHint" xml:space="preserve">
+    <value>Prend la tête de la bande à la mort du chef, quels que soient le Commandement et l'XP des autres Héros. Sans lui, la bande s'effondre.</value>
+  </data>
+  <data name="WarriorArchetypeCanBeRehiredAfterDeath" xml:space="preserve">
+    <value>Rachetable après sa mort</value>
+  </data>
+  <data name="WarriorArchetypeCanBeRehiredAfterDeathHint" xml:space="preserve">
+    <value>Peut être recruté de nouveau à partir de la partie qui suit sa mort, et reprend alors la tête de la bande (ex. Vampire).</value>
+  </data>
+  <data name="WarbandArchetypeSuccessorLearnsMagic" xml:space="preserve">
+    <value>Le successeur apprend la magie</value>
+  </data>
+  <data name="WarbandArchetypeSuccessorLearnsMagicHint" xml:space="preserve">
+    <value>Le nouveau chef reçoit les écoles de magie de la bande et choisit un sort ou une prière à sa première progression, au lieu de lancer les dés.</value>
+  </data>
 </root>

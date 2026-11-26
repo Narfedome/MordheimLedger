@@ -127,6 +127,25 @@
                                              <Label Text="{loc:Loc WarriorArchetypeStartingExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                              <Entry Text="{Binding Item.StartingExperience}" Keyboard="Numeric"/>
                                          </VerticalStackLayout>
+                                         <!-- Mort du chef (1.6) : réglages lus par Core.Rules.LeaderSuccessionRules plutôt que du code par
+                                              bande, pour qu'une bande custom puisse les reprendre. Rachetable : type Chef seulement. -->
+                                         <VerticalStackLayout Spacing="8">
+                                             <Label Text="{loc:Loc LeaderDeathSectionTitle}" FontAttributes="Bold"/>
+                                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                                 <CheckBox Grid.Column="0" IsChecked="{Binding Item.IsDesignatedSuccessor}" VerticalOptions="Start"/>
+                                                 <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                     <Label Text="{loc:Loc WarriorArchetypeIsDesignatedSuccessor}"/>
+                                                     <Label Text="{loc:Loc WarriorArchetypeIsDesignatedSuccessorHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                 </VerticalStackLayout>
+                                             </Grid>
+                                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" IsVisible="{Binding IsChief}">
+                                                 <CheckBox Grid.Column="0" IsChecked="{Binding Item.CanBeRehiredAfterDeath}" VerticalOptions="Start"/>
+                                                 <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                     <Label Text="{loc:Loc WarriorArchetypeCanBeRehiredAfterDeath}"/>
+                                                     <Label Text="{loc:Loc WarriorArchetypeCanBeRehiredAfterDeathHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                 </VerticalStackLayout>
+                                             </Grid>
+                                         </VerticalStackLayout>
                                      </VerticalStackLayout>
 
                                      <VerticalStackLayout Spacing="12" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">

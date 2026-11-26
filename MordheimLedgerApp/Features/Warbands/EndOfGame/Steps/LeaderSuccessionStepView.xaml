@@ -52,7 +52,7 @@
                                         </VerticalStackLayout>
                                     </Grid>
                                 </Border>
-                                <Button BackgroundColor="Transparent" BorderWidth="0" CornerRadius="8" Padding="0"
+                                <Button AutomationId="LeaderCandidateButton" BackgroundColor="Transparent" BorderWidth="0" CornerRadius="8" Padding="0"
                                         SemanticProperties.Description="{Binding Name}"
                                         SemanticProperties.Hint="{Binding SubtitleText}"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectLeaderCandidateCommand}"
@@ -65,7 +65,7 @@
                 <!-- Égalité de Commandement et d'XP : départage au D6. -->
                 <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowLeaderTie}">
                     <Label Text="{Binding LeaderTieText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Button Text="{loc:Loc LeaderSuccessionRollTie}" HorizontalOptions="Start" Command="{Binding RollLeaderTieCommand}"/>
+                    <Button AutomationId="LeaderTieRollButton" Text="{loc:Loc LeaderSuccessionRollTie}" HorizontalOptions="Start" Command="{Binding RollLeaderTieCommand}"/>
                 </VerticalStackLayout>
 
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding HasLeaderOffProposal}">
@@ -81,7 +81,7 @@
                                TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
                         <Label Grid.Column="1" Text="{Binding LeaderCollapseText}" FontSize="13" TextColor="{DynamicResource AppWarning}"/>
                     </Grid>
-                    <Button Text="{Binding ArchiveWarbandButtonText}" HorizontalOptions="Start" Command="{Binding ToggleArchiveWarbandCommand}"/>
+                    <Button AutomationId="ArchiveWarbandButton" Text="{Binding ArchiveWarbandButtonText}" HorizontalOptions="Start" Command="{Binding ToggleArchiveWarbandCommand}"/>
                     <Label Text="{Binding ArchiveWarbandNote}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
                            IsVisible="{Binding ArchiveWarbandAtFinish}"/>
                 </VerticalStackLayout>

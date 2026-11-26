@@ -89,6 +89,96 @@ public class WarbandScenarios
         }
     }
 
+    /// <summary>1.6 : valeur adverse au début de partie, nom du scénario, Capitaine mis hors de combat et tué (D66 = 11),
+    /// étape « Nouveau chef » avec un Héros pré-coché, puis l'Historique annonce le scénario et le nouveau chef.</summary>
+    [E2EFact]
+    public void LeaderDies_NewLeaderTakesCommand()
+    {
+        using var app = new AppSession();
+        try
+        {
+            FinishOnboarding(app, loadSample: true);
+
+            app.WaitForText(30, "Jouer", "Play").Click();
+            app.Tap("StartGameButton");
+            app.Type("OpponentRatingEntry", "300");
+            app.HideKeyboard();
+            app.Tap("StartGameConfirmButton");
+            AppSession.Pause();
+            app.Tap("EndOfGameButton");
+            AppSession.Pause(1500);
+
+            // Étape Résultat : scénario en saisie libre.
+            app.Type("ScenarioNameEntry", "Combat de rue");
+            app.HideKeyboard();
+
+            var steps = 0;
+            var captainOutOfAction = false;
+            var captainKilled = false;
+            var sawLeaderStep = false;
+            while (app.Exists("FormPrimaryButton"))
+            {
+                Assert.True(++steps < 60, "La Fin de partie ne se termine pas");
+
+                if (!captainOutOfAction && app.Exists("OutOfActionCheckBox"))
+                {
+                    // Le chef est toujours la première ligne (ordre Chef, Héros, groupes).
+                    app.All("OutOfActionCheckBox").First().Click();
+                    captainOutOfAction = true;
+                }
+                else if (captainOutOfAction && !captainKilled && app.Exists("InjuryRollEntry"))
+                {
+                    app.Type("InjuryRollEntry", "11");
+                    app.HideKeyboard();
+                    captainKilled = true;
+                }
+                else if (app.Exists("LeaderCandidateButton"))
+                {
+                    // Le Héros que désigne le livre est pré-coché : rien à toucher.
+                    sawLeaderStep = true;
+                }
+                else
+                {
+                    FillRolls(app);
+                }
+
+                app.Tap("FormPrimaryButton");
+                AppSession.Pause(1200);
+            }
+
+            Assert.True(captainKilled, "Le Capitaine n'a pas pu être tué");
+            Assert.True(sawLeaderStep, "L'étape Nouveau chef n'est pas apparue");
+            app.Tap("HistoryTabButton");
+            app.WaitForText(20, "Combat de rue");
+            app.WaitForText(20, "prend la tête de la bande", "takes command of the warband");
+        }
+        catch
+        {
+            app.Screenshot(nameof(LeaderDies_NewLeaderTakesCommand));
+            throw;
+        }
+    }
+
+    /// <summary>1.6 : l'onglet « Archivées » existe sur la liste des bandes et reste vide sur une installation neuve.</summary>
+    [E2EFact]
+    public void ArchivedTab_IsEmptyOnAFreshInstall()
+    {
+        using var app = new AppSession();
+        try
+        {
+            FinishOnboarding(app, loadSample: true);
+            app.Tap("ArchivedWarbandsTab");
+            app.WaitForText(20, "Aucune bande archivée", "No archived warband");
+            app.Tap("ActiveWarbandsTab");
+            app.WaitForText(20, "Jouer", "Play");
+        }
+        catch
+        {
+            app.Screenshot(nameof(ArchivedTab_IsEmptyOnAFreshInstall));
+            throw;
+        }
+    }
+
     /// <summary>Dés d'Exploration : 1, 2, 3... (jamais de double, donc pas d'issue à choisir) ; les autres jets de
     /// l'étape sont lancés par leur bouton dé.</summary>
     private static void FillRolls(AppSession app)

@@ -33,9 +33,7 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    private void CaptureRatingBeforeGame() =>
-        _ratingBeforeGame = _allActiveWarriorRows.Where(r => !r.Warrior.IsHostileThisBattle).Sum(r => WarbandRatingRules.WarriorContribution(
-            r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating, r.Warrior.DramatisPersonaRatingBonus));
+    private void CaptureRatingBeforeGame() => _ratingBeforeGame = WarbandRatingRules.Total(_allActiveWarriorRows.Select(r => r.Warrior));
 
     /// <summary>Pose le pré-remplissage de chaque guerrier de l'étape Expérience. Appelé à chaque arrivée sur l'étape :
     /// un champ que le joueur a modifié n'est jamais écrasé (voir WarriorOutcomeRow.AppliedExperiencePrefillText).</summary>
@@ -55,8 +53,7 @@ public partial class EndOfGamePageViewModel
                 : string.Format(Loc["EndOfGameXpPrefillTipFormat"], string.Join(", ", parts));
 
             var text = prefill.Total > 0 ? prefill.Total.ToString() : string.Empty;
-            var untouched = string.IsNullOrEmpty(row.ExperienceGainedText) || row.ExperienceGainedText == row.AppliedExperiencePrefillText;
-            if (untouched)
+            if (ExperiencePrefill.IsUntouched(row.ExperienceGainedText, row.AppliedExperiencePrefillText))
             {
                 row.ExperienceGainedText = text;
                 row.AppliedExperiencePrefillText = text;

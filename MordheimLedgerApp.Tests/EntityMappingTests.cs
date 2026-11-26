@@ -611,4 +611,79 @@ public class EntityMappingTests
         Assert.Equal(dagger.Id, entity.EquipmentItemId);
         Assert.Same(dagger, roundTripped.Item);
     }
+
+    // --- Règles du livre de base restantes (1.6) ---
+
+    [Fact]
+    public void Warband_ArchiveAndOpponentRatings_RoundTrip()
+    {
+        var warband = new Warband
+        {
+            Id = 4, Name = "Court of Mortis", IsArchived = true, ArchivedAt = new DateTime(2026, 11, 26, 18, 30, 0),
+            OpponentRatings = new List<int> { 176, 195 }
+        };
+
+        var entity = warband.ToEntity();
+        var roundTripped = entity.ToModel();
+
+        Assert.Equal("176,195", entity.OpponentRatings);
+        Assert.True(roundTripped.IsArchived);
+        Assert.Equal(warband.ArchivedAt, roundTripped.ArchivedAt);
+        Assert.Equal(new[] { 176, 195 }, roundTripped.OpponentRatings);
+    }
+
+    [Fact]
+    public void Warband_NoOpponentRatings_StoredAsNullAndReadAsEmpty()
+    {
+        var entity = new Warband { Name = "The Bleeding Roses" }.ToEntity();
+
+        Assert.Null(entity.OpponentRatings);
+        Assert.Empty(entity.ToModel().OpponentRatings);
+        Assert.False(entity.ToModel().IsArchived);
+        Assert.Null(entity.ToModel().ArchivedAt);
+    }
+
+    [Fact]
+    public void WarbandArchetype_SuccessorLearnsMagic_RoundTrips()
+    {
+        var archetype = new WarbandArchetype { Id = 7, Name = "Sisters of Sigmar", NameKey = "sisters-name", SuccessorLearnsMagic = true };
+
+        var roundTripped = archetype.ToEntity().ToModel(new Dictionary<string, string> { ["sisters-name"] = archetype.Name });
+
+        Assert.True(roundTripped.SuccessorLearnsMagic);
+    }
+
+    [Theory]
+    [InlineData(true, true, false)]
+    [InlineData(false, false, true)]
+    public void WarriorArchetype_LeaderDeathSettings_RoundTrip(bool isLeader, bool rehireable, bool designated)
+    {
+        var archetype = new WarriorArchetype
+        {
+            Id = 11, Name = "Vampire", NameKey = "vampire-name", IsHero = true, MinCount = 1,
+            IsLeader = isLeader, CanBeRehiredAfterDeath = rehireable, IsDesignatedSuccessor = designated
+        };
+
+        var roundTripped = archetype.ToEntity().ToModel(new Dictionary<string, string> { ["vampire-name"] = archetype.Name });
+
+        Assert.Equal(isLeader, roundTripped.IsLeader);
+        Assert.Equal(rehireable, roundTripped.CanBeRehiredAfterDeath);
+        Assert.Equal(designated, roundTripped.IsDesignatedSuccessor);
+        Assert.Equal(1, roundTripped.MinCount);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    public void Warrior_SuccessorFlags_RoundTrip(bool castsAsSuccessor, bool pendingSpell)
+    {
+        var warrior = new Warrior { Id = 5, Name = "Ilse", IsHero = true, IsLeader = true, CastsAsSuccessor = castsAsSuccessor, HasPendingSuccessorSpell = pendingSpell };
+
+        var roundTripped = warrior.ToEntity().ToModel();
+
+        Assert.True(roundTripped.IsLeader);
+        Assert.Equal(castsAsSuccessor, roundTripped.CastsAsSuccessor);
+        Assert.Equal(pendingSpell, roundTripped.HasPendingSuccessorSpell);
+    }
 }

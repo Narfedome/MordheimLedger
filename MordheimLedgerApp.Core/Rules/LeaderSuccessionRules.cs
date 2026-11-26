@@ -83,6 +83,45 @@ public static class LeaderSuccessionRules
         return winners.Count == 1 ? winners[0] : null;
     }
 
+    /// <summary>L'étape « Nouveau chef » est proposée : la bande a un type Chef, plus aucun chef vivant après la partie,
+    /// et soit son chef vient de mourir, soit elle n'en avait déjà plus (une bande qui a continué sans chef).</summary>
+    /// <param name="warbandHasLeaderType">Un type de guerrier de la bande porte IsLeader (sinon : bande sans chef, rien à proposer).</param>
+    /// <param name="hasSurvivingLeader">Un guerrier IsLeader est encore vivant après la partie.</param>
+    /// <param name="leaderDiedThisGame">Le chef est mort pendant la partie (blessures, Fosse, duel...).</param>
+    /// <param name="rosterHadLeader">Un guerrier de la bande était chef avant la partie.</param>
+    public static bool NeedsSuccession(bool warbandHasLeaderType, bool hasSurvivingLeader, bool leaderDiedThisGame, bool rosterHadLeader) =>
+        warbandHasLeaderType && !hasSurvivingLeader && (leaderDiedThisGame || !rosterHadLeader);
+
+    /// <summary>Candidat à pré-cocher : celui de la proposition, ou, en cas d'égalité, le vainqueur des D6 une fois que
+    /// chaque Héros à égalité a son jet (null tant qu'il en manque un ou que les meilleurs jets sont encore à égalité).
+    /// tieRolls = WarriorId → jet saisi (absent ou null = pas encore lancé).</summary>
+    public static int? ProposedAfterTieRolls(SuccessionProposal proposal, IReadOnlyDictionary<int, int?> tieRolls)
+    {
+        if (proposal.Kind != SuccessionKind.Tie) return proposal.ProposedWarriorId;
+        var rolls = new Dictionary<int, int>();
+        foreach (var id in proposal.TiedWarriorIds)
+        {
+            if (!tieRolls.TryGetValue(id, out var roll) || roll is null) return null;
+            rolls[id] = roll.Value;
+        }
+        return ResolveTie(rolls);
+    }
+
+    /// <summary>Le nouveau chef apprend la magie de la bande (errata p. 117) : réglage « Le successeur apprend la
+    /// magie » du type de bande, des écoles à apprendre, et un Héros qui ne lance pas déjà de sorts.</summary>
+    public static bool SuccessorLearnsMagic(bool warbandSetting, bool warbandHasMagicSchools, bool archetypeIsSpellcaster, bool alreadyCastsAsSuccessor) =>
+        warbandSetting && warbandHasMagicSchools && !archetypeIsSpellcaster && !alreadyCastsAsSuccessor;
+
+    /// <summary>Après un recrutement, deux chefs vivants ou plus (un chef racheté - le Vampire - et son successeur) :
+    /// le plus récent guerrier d'un type Chef garde la tête. Null s'il n'y a pas plusieurs chefs, ou aucun d'un type Chef.</summary>
+    public static Warrior? RehiredLeaderToKeep(IEnumerable<Warrior> warriors, IReadOnlySet<int> leaderArchetypeIds)
+    {
+        var leaders = warriors.Where(w => w.IsLeader && w.Status != WarriorStatus.Dead && w.Status != WarriorStatus.Retired).ToList();
+        if (leaders.Count < 2) return null;
+        return leaders.Where(w => w.WarriorArchetypeId is { } id && leaderArchetypeIds.Contains(id))
+            .OrderByDescending(w => w.Id).FirstOrDefault();
+    }
+
     /// <summary>Message à afficher quand on recrute un guerrier d'un type Chef (jamais un blocage) : le livre interdit
     /// de recruter un nouveau chef, sauf un type « Rachetable après sa mort » (le Vampire) à partir de la partie qui
     /// suit sa mort - il reprend alors la tête de la bande à son successeur.</summary>

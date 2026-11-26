@@ -20,7 +20,7 @@
             <VerticalStackLayout Spacing="6">
                 <Label Text="{loc:Loc EndOfGameScenarioNamePh}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameScenarioNameHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Entry Text="{Binding ScenarioName}" Placeholder="{loc:Loc EndOfGameScenarioNamePlaceholder}"/>
+                <Entry AutomationId="ScenarioNameEntry" Text="{Binding ScenarioName}" Placeholder="{loc:Loc EndOfGameScenarioNamePlaceholder}"/>
             </VerticalStackLayout>
         </Border>
     </VerticalStackLayout>

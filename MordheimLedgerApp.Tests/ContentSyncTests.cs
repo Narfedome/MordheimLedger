@@ -275,4 +275,53 @@ public class ContentSyncTests : IAsyncLifetime
         Assert.Equal("NEW", await _local.GetContentFingerprintAsync());
         Assert.Null(await _local.Connection.FindAsync<ContentMetaEntity>("ContentVersion"));
     }
+
+    // --- Réglages « Mort du chef » (1.6) arrivant sur une base installée avant eux ---
+
+    /// <summary>Base installée avant la 1.6 : les nouvelles colonnes y valent faux (valeur par défaut d'une colonne
+    /// ajoutée), la seed les porte à vrai.</summary>
+    private async Task ClearLeaderDeathSettingsLocallyAsync()
+    {
+        await _local.Connection.ExecuteAsync("UPDATE WarriorArchetypeEntity SET IsDesignatedSuccessor = 0, CanBeRehiredAfterDeath = 0");
+        await _local.Connection.ExecuteAsync("UPDATE WarbandArchetypeEntity SET SuccessorLearnsMagic = 0");
+    }
+
+    [Fact]
+    public async Task LeaderDeathSettings_ReachAnInstalledDatabase()
+    {
+        await ClearLeaderDeathSettingsLocallyAsync();
+
+        var report = await SyncAsync();
+
+        Assert.True(report.HasChanges, report.ToString());
+        Assert.True((await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.necromancer")).IsDesignatedSuccessor);
+        Assert.True((await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.vampire")).CanBeRehiredAfterDeath);
+        foreach (var id in new[] { "warband.sisters-of-sigmar", "warband.cult-of-the-possessed", "warband.carnival-of-chaos" })
+        {
+            var warband = await ByOfficialIdAsync<WarbandArchetypeEntity>(_local, id);
+            Assert.True(warband.SuccessorLearnsMagic);
+            Assert.Equal(ContentSource.Official, warband.Source);
+        }
+        Assert.False((await ByOfficialIdAsync<WarbandArchetypeEntity>(_local, "warband.reiklanders")).SuccessorLearnsMagic);
+    }
+
+    [Fact]
+    public async Task LeaderDeathSetting_OnAModifiedRow_IsListedAsADifference()
+    {
+        // Le joueur a modifié son Nécromancien et décoché le réglage ; l'officiel le coche ensuite.
+        var undead = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.OfficialId == "warband.undead");
+        var mine = (await _library.GetWarriorArchetypesAsync(undead.Id, "en")).Single(a => a.OfficialId == "warrior.undead.necromancer");
+        mine.IsDesignatedSuccessor = false;
+        await _library.SaveWarriorArchetypeAsync(mine, "en");
+        var seedNecromancer = await ByOfficialIdAsync<WarriorArchetypeEntity>(_seed, "warrior.undead.necromancer");
+        seedNecromancer.Cost += 1;
+        await _seed.Connection.UpdateAsync(seedNecromancer);
+
+        await SyncAsync();
+
+        var conflict = Assert.Single(await _local.GetContentConflictsAsync(OpenSeed, "en"));
+        Assert.Equal("warrior.undead.necromancer", conflict.OfficialId);
+        Assert.Contains(conflict.Differences, d => d.Field == nameof(WarriorArchetypeEntity.IsDesignatedSuccessor));
+        Assert.False((await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.necromancer")).IsDesignatedSuccessor);
+    }
 }

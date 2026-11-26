@@ -23,4 +23,10 @@ public static class WarbandRatingRules
         var perModel = dramatisPersonaRatingBonus ?? (hiredSwordBaseRating is { } baseRating ? baseRating + experience : (isLargeCreature ? 20 : 5) + experience);
         return perModel * headCount;
     }
+
+    /// <summary>Valeur de bande pour une liste de guerriers déjà vivants (Morts/Retraités exclus par l'appelant) ; un
+    /// guerrier passé à l'adversaire pour cette bataille (Warrior.IsHostileThisBattle) ne compte pas.</summary>
+    public static int Total(IEnumerable<Models.Warrior> warriors) =>
+        warriors.Where(w => !w.IsHostileThisBattle).Sum(w => WarriorContribution(
+            w.IsLargeCreature, w.Experience, w.HeadCount, w.HiredSwordBaseRating, w.DramatisPersonaRatingBonus));
 }

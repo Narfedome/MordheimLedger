@@ -102,7 +102,10 @@ public partial class WarriorRow : ObservableObject
 
     /// <summary>Drives the roster card's Edit (Pen) button - both permanent statuses freeze the card
     /// the same way, see IsDead/IsRetired.</summary>
-    public bool IsEditable => !IsDead && !IsRetired;
+    public bool IsEditable => !IsDead && !IsRetired && !IsWarbandArchived;
+
+    /// <summary>La bande est archivée (1.6) : fiche en lecture seule, aucune carte modifiable.</summary>
+    public bool IsWarbandArchived { get; set; }
 
     /// <summary>Manqué la partie précédente pour cause de maladie (ex. le Puits de la table
     /// d'Exploration, échec du test d'Endurance) - juste un pense-bête visuel, effacé automatiquement

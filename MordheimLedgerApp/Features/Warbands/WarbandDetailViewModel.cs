@@ -46,7 +46,32 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNextGameNote))]
     [NotifyPropertyChangedFor(nameof(HasGameInProgress))]
+    [NotifyPropertyChangedFor(nameof(IsArchived), nameof(IsPlayable), nameof(ArchivedBannerText), nameof(CanStartGame), nameof(CanEndGame), nameof(CanShowInventory))]
     private Warband? warband;
+
+    /// <summary>Bande archivée (1.6) : consultation seule - ni partie, ni inventaire, ni modification ; un bandeau
+    /// propose de la désarchiver.</summary>
+    public bool IsArchived => Warband?.IsArchived ?? false;
+
+    public bool IsPlayable => Warband is { IsArchived: false };
+
+    public bool CanStartGame => IsPlayable && !HasGameInProgress;
+
+    public bool CanEndGame => IsPlayable && HasGameInProgress;
+
+    public bool CanShowInventory => IsPlayable && HasInventory;
+
+    public string ArchivedBannerText => Warband?.ArchivedAt is { } at
+        ? string.Format(Loc["WarbandArchivedBannerFormat"], at.ToString("d MMMM yyyy", LocalizationService.Instance.Culture))
+        : string.Empty;
+
+    [RelayCommand]
+    private async Task UnarchiveAsync()
+    {
+        if (Warband is not { IsArchived: true } warband) return;
+        await new LeaderSuccessionService(_warbandService).UnarchiveAsync(warband);
+        await LoadAsync(WarbandId);
+    }
 
     /// <summary>Warband.NextGameNote non-null (voir sa doc) - une bannière dédiée sur cette page plutôt
     /// qu'une entrée d'Historique de plus, pour rester visible tant qu'elle s'applique (jusqu'à la Fin de
@@ -131,7 +156,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     /// (visible seulement si HasInventory) ouvre WarbandInventoryDialog pour les réattribuer, plutôt
     /// qu'une section dépliable dans le roster (retour utilisateur explicite, 2026-08-18).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasInventory))]
+    [NotifyPropertyChangedFor(nameof(HasInventory), nameof(CanShowInventory))]
     private ObservableCollection<WarbandEquipment> inventory = new();
 
     public bool HasInventory => Inventory.Count > 0;
@@ -225,6 +250,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             _warbandArchetypeNames = data.WarbandArchetypeNames;
 
             var rows = data.Rows;
+            foreach (var row in rows) row.IsWarbandArchived = data.Warband.IsArchived;
             var alive = rows.Where(r => !r.IsDead && !r.IsRetired).ToList();
             // Francs-Tireurs/Dramatis Personae : blocs à part depuis le 2026-09-01 (retour utilisateur) -
             // avant, un Franc-Tireur recruté tombait dans Henchmen (IsHero=false pour lui, voir sa propre
@@ -332,7 +358,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task ToggleHostile(WarriorRow row)
     {
-        if (Warband is null) return;
+        if (Warband is null || IsArchived) return;
 
         var newValue = !row.IsHostileThisBattle;
         row.IsHostileThisBattle = newValue;

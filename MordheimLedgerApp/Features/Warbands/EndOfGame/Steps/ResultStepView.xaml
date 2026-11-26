@@ -14,5 +14,14 @@
                     ItemsSource="{Binding ResultOptions}"
                     SelectedItem="{Binding SelectedResult}"/>
         </Border>
+        <!-- Scénario (1.6) : saisie libre, reprise dans la phrase d'Historique (pas de catalogue : un scénario
+             maison s'écrit comme un scénario du livre). -->
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="{loc:Loc EndOfGameScenarioNamePh}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameScenarioNameHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Entry Text="{Binding ScenarioName}" Placeholder="{loc:Loc EndOfGameScenarioNamePlaceholder}"/>
+            </VerticalStackLayout>
+        </Border>
     </VerticalStackLayout>
 </ContentView>

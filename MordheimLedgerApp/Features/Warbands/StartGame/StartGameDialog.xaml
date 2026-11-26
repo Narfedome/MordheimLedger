@@ -25,6 +25,38 @@
             <dialogs:AnimatedHeightScrollView Grid.Row="1">
                 <VerticalStackLayout Spacing="16">
 
+                    <!-- Adversaires (1.6) : valeur de chaque bande adverse, facultative (1 à 3) - XP d'outsider en Fin de
+                         partie et aide des Dramatis Personae. -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{loc:Loc StartGameOpponentsHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{loc:Loc StartGameOpponentsHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Opponents}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:OpponentRatingEntry">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Label}" VerticalOptions="Center"/>
+                                        <Entry Grid.Column="1" Text="{Binding Text}" Keyboard="Numeric" WidthRequest="90"
+                                               HorizontalTextAlignment="Center" VerticalOptions="Center">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                        <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                      Style="{StaticResource GhostIconButtonStyle}" VerticalOptions="Center"
+                                                                      IsVisible="{Binding CanRemove}"
+                                                                      Tooltip="{loc:Loc StartGameRemoveOpponent}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=RemoveOpponentCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Button Text="{loc:Loc StartGameAddOpponent}" HorizontalOptions="Start" IsVisible="{Binding CanAddOpponent}"
+                                Command="{Binding AddOpponentCommand}"/>
+                        <Label Text="{Binding OwnRatingText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding UnderdogVerdict}" FontSize="12" TextColor="{DynamicResource AppAccent}"/>
+                    </VerticalStackLayout>
+
                     <Label Text="{loc:Loc StartGameNothingToShow}" TextColor="{DynamicResource AppTextMuted}"
                            IsVisible="{Binding HasNothingToShow}"/>
 

@@ -18,6 +18,7 @@
                     <!-- Toute l'XP de la partie se saisit ici, scénario et victoire compris (pas d'étape
                          XP séparée dans Récompenses du scénario - retirée comme doublon, 2026-09-25). -->
                     <Label Text="{loc:Loc EndOfGameExperienceHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding ExperienceUnderdogHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" FontAttributes="Italic"/>
                 </VerticalStackLayout>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
                     <BindableLayout.ItemTemplate>
@@ -55,6 +56,9 @@
                                                                           CommandParameter="{Binding .}"/>
                                         </HorizontalStackLayout>
                                     </Grid>
+                                    <!-- D'où vient le pré-remplissage (1.6) - simple astuce, le total reste libre. -->
+                                    <Label Text="{Binding ExperiencePrefillTip}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding HasExperiencePrefillTip}"/>
                                     <!-- Même piste que la fiche de bande, les PX saisis ci-dessus en teinte
                                          claire à la suite des PX déjà acquis (paliers dorés visibles). -->
                                     <xp:ExperienceTrackView Experience="{Binding Warrior.Experience}" IsHero="{Binding Warrior.IsHero}"

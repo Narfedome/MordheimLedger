@@ -3249,4 +3249,25 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="SettingsWhatsNewButton" xml:space="preserve">
     <value>View</value>
   </data>
+  <data name="LeaderDeathSectionTitle" xml:space="preserve">
+    <value>Death of the leader</value>
+  </data>
+  <data name="WarriorArchetypeIsDesignatedSuccessor" xml:space="preserve">
+    <value>Designated successor</value>
+  </data>
+  <data name="WarriorArchetypeIsDesignatedSuccessorHint" xml:space="preserve">
+    <value>Takes command when the leader dies, whatever the Leadership and Experience of the other Heroes. Without one, the warband collapses.</value>
+  </data>
+  <data name="WarriorArchetypeCanBeRehiredAfterDeath" xml:space="preserve">
+    <value>Can be bought again after death</value>
+  </data>
+  <data name="WarriorArchetypeCanBeRehiredAfterDeathHint" xml:space="preserve">
+    <value>May be recruited again from the game after its death, then takes command back (e.g. the Vampire).</value>
+  </data>
+  <data name="WarbandArchetypeSuccessorLearnsMagic" xml:space="preserve">
+    <value>The successor learns magic</value>
+  </data>
+  <data name="WarbandArchetypeSuccessorLearnsMagicHint" xml:space="preserve">
+    <value>The new leader gains the warband's magic schools and picks a spell or prayer at their first advance instead of rolling.</value>
+  </data>
 </root>

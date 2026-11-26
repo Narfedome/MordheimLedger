@@ -116,6 +116,17 @@
                                          Command="{Binding ShowMagicSchoolDetailCommand}"
                                          AddCommand="{Binding AddMagicSchoolCommand}"
                                          RemoveCommand="{Binding RemoveMagicSchoolCommand}"/>
+                       <!-- Mort du chef (1.6, errata p. 117) : le successeur apprend la magie des écoles ci-dessus. -->
+                       <VerticalStackLayout Spacing="8">
+                           <Label Text="{loc:Loc LeaderDeathSectionTitle}" FontAttributes="Bold"/>
+                           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                               <CheckBox Grid.Column="0" IsChecked="{Binding Item.SuccessorLearnsMagic}" VerticalOptions="Start"/>
+                               <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                   <Label Text="{loc:Loc WarbandArchetypeSuccessorLearnsMagic}"/>
+                                   <Label Text="{loc:Loc WarbandArchetypeSuccessorLearnsMagicHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                               </VerticalStackLayout>
+                           </Grid>
+                       </VerticalStackLayout>
                    </VerticalStackLayout>
 
                    <!-- Guerriers/Équipement se chargent au premier passage sur leur onglet/étape, comme le récap

@@ -3366,4 +3366,100 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="StartGameGapTooSmallFormat" xml:space="preserve">
     <value>Gap of {0}{1}: too small for a bonus.</value>
   </data>
+  <data name="LeaderSuccessionHeading" xml:space="preserve">
+    <value>New leader</value>
+  </data>
+  <data name="LeaderSuccessionDeadFormat" xml:space="preserve">
+    <value>{0} ({1}) is dead.</value>
+  </data>
+  <data name="LeaderSuccessionNoLeader" xml:space="preserve">
+    <value>The warband has no leader.</value>
+  </data>
+  <data name="LeaderSuccessionBookRule" xml:space="preserve">
+    <value>Choose the Hero who takes command. The rulebook names the one with the highest Leadership, then the most Experience, then a D6: they are pre-selected.</value>
+  </data>
+  <data name="LeaderSuccessionDesignatedRule" xml:space="preserve">
+    <value>Choose the Hero who takes command. The rulebook names the designated successor, whatever the others' Leadership and Experience: they are pre-selected.</value>
+  </data>
+  <data name="LeaderSuccessionTieFormat" xml:space="preserve">
+    <value>{0} are tied on Leadership and Experience. Break the tie with a D6, or choose directly.</value>
+  </data>
+  <data name="LeaderSuccessionRollTie" xml:space="preserve">
+    <value>Roll a D6 each</value>
+  </data>
+  <data name="LeaderSuccessionOffProposalFormat" xml:space="preserve">
+    <value>{0} had the best Leadership (Ld {1}, {2} XP). {3} takes command instead.</value>
+  </data>
+  <data name="LeaderSuccessionOffDesignatedFormat" xml:space="preserve">
+    <value>The rulebook names {0}. {1} takes command instead.</value>
+  </data>
+  <data name="LeaderSuccessionCollapseFormat" xml:space="preserve">
+    <value>Without a {0}, the rulebook says the warband collapses. You can archive it (it stays viewable), or name a Hero to carry on.</value>
+  </data>
+  <data name="LeaderSuccessionNoCandidate" xml:space="preserve">
+    <value>No Hero can take command and the rulebook doesn't cover this case. You can archive the warband (it stays viewable), or carry on without a leader: a Hero recruited or promoted later can be named at the next end of game.</value>
+  </data>
+  <data name="LeaderSuccessionKeepWarband" xml:space="preserve">
+    <value>Don't archive</value>
+  </data>
+  <data name="LeaderSuccessionArchiveNote" xml:space="preserve">
+    <value>The warband will be archived when you finish.</value>
+  </data>
+  <data name="LeaderRuleName" xml:space="preserve">
+    <value>Leader</value>
+  </data>
+  <data name="LeaderSuccessionGainsFormat" xml:space="preserve">
+    <value>{0} gains: {1}.</value>
+  </data>
+  <data name="LeaderSuccessionGainsMagicFormat" xml:space="preserve">
+    <value>{0} gains: {1}. At their first advance, a spell or prayer of choice instead of rolling.</value>
+  </data>
+  <data name="LeaderSuccessionNoHireNoteFormat" xml:space="preserve">
+    <value>The rulebook forbids hiring a new {0}: recruitment will show it in amber.</value>
+  </data>
+  <data name="LeaderSuccessionRehireNoteFormat" xml:space="preserve">
+    <value>A {0} may be bought again after the next game: it will then take command back.</value>
+  </data>
+  <data name="LeaderCandidateLeadershipFormat" xml:space="preserve">
+    <value>Ld {0}</value>
+  </data>
+  <data name="LeaderCandidateExperienceFormat" xml:space="preserve">
+    <value>{0} XP</value>
+  </data>
+  <data name="LeaderCandidatePromoted" xml:space="preserve">
+    <value>promoted this game</value>
+  </data>
+  <data name="LeaderCandidateDesignated" xml:space="preserve">
+    <value>designated successor</value>
+  </data>
+  <data name="LeaderCandidateProposed" xml:space="preserve">
+    <value>proposed</value>
+  </data>
+  <data name="RecruitLeaderNotAllowedFormat" xml:space="preserve">
+    <value>The rulebook forbids hiring a new {0}: when the leader dies, a Hero of the warband takes over.</value>
+  </data>
+  <data name="RecruitLeaderRehireNextGameFormat" xml:space="preserve">
+    <value>The rulebook only allows buying a new {0} after the next game.</value>
+  </data>
+  <data name="RecruitLeaderReplacesActingFormat" xml:space="preserve">
+    <value>The {0} takes command back: {1} loses the Leader rule.</value>
+  </data>
+  <data name="HistoryNewLeaderSentence" xml:space="preserve">
+    <value>{0} takes command of the warband.</value>
+  </data>
+  <data name="HistoryWarbandArchivedSentence" xml:space="preserve">
+    <value>The warband is archived.</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellHint" xml:space="preserve">
+    <value>New leader: for this first advance, a spell or prayer of choice instead of rolling. Normal table afterwards.</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellButton" xml:space="preserve">
+    <value>Choose a spell</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellUndo" xml:space="preserve">
+    <value>Roll instead</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellResult" xml:space="preserve">
+    <value>Spell of choice (new leader)</value>
+  </data>
 </root>

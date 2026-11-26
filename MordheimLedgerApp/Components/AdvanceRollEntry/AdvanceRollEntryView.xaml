@@ -15,7 +15,21 @@
          AdvanceRollEntryView, aucune récursion possible. -->
     <VerticalStackLayout BindingContext="{Binding Source={x:Reference root}, Path=Entry}"
                           x:DataType="eog:AdvanceRollEntry" Spacing="8">
-        <local:AdvanceRollEntryBaseView Entry="{Binding .}"/>
+        <!-- Nouveau chef qui apprend la magie (1.6) : sort/prière au choix au lieu du jet, à sa première progression. -->
+        <VerticalStackLayout Spacing="6" IsVisible="{Binding OffersSuccessorSpell}">
+            <Label Text="{loc:Loc EndOfGameSuccessorSpellHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+            <Button Text="{loc:Loc EndOfGameSuccessorSpellButton}" HorizontalOptions="Start"
+                    IsVisible="{Binding ShowSuccessorSpellButton}"
+                    Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=PickSuccessorSpellCommand}"
+                    CommandParameter="{Binding .}"/>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsSuccessorSpellChoice}">
+                <Label Grid.Column="0" Text="{Binding SelectedSpell.Name, StringFormat='{0}'}" FontAttributes="Bold" VerticalOptions="Center"/>
+                <Button Grid.Column="1" Text="{loc:Loc EndOfGameSuccessorSpellUndo}"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=ClearSuccessorSpellCommand}"
+                        CommandParameter="{Binding .}"/>
+            </Grid>
+        </VerticalStackLayout>
+        <local:AdvanceRollEntryBaseView Entry="{Binding .}" IsVisible="{Binding IsSuccessorSpellChoice, Converter={StaticResource InverseBoolConverter}}"/>
 
         <!-- Résultat "Promotion" (Homme de main, jet 10-12, voir AdvanceOutcome.Kind == Promotion) -
              carte étendue en place : bannière de blocage si 6 Héros déjà atteints (CanPromote), sinon

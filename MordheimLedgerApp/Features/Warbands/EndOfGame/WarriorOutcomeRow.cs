@@ -1112,7 +1112,11 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
             // bon espacement de paliers Homme de main) mais progresse sur la table Héros ("roll on the
             // Heroes Advancement table as opposed to Henchmen") - le seul endroit où ces deux notions se
             // découplent, voir Warrior.IsHiredSword.
-            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, AdvanceRolls, IsSpellcaster, _promotion);
+            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, AdvanceRolls, IsSpellcaster, _promotion)
+            {
+                // Nouveau chef qui apprend la magie : sort au choix à sa toute première progression (1.6).
+                OffersSuccessorSpell = Warrior.HasPendingSuccessorSpell && Warrior.IsHero && AdvanceRolls.Count == 0
+            };
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             AdvanceRolls.Add(entry);
         }
@@ -1127,7 +1131,10 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     {
         while (ExplorationAdvanceRolls.Count < ExplorationMilestoneCount)
         {
-            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, ExplorationAdvanceRolls, IsSpellcaster, _promotion);
+            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, ExplorationAdvanceRolls, IsSpellcaster, _promotion)
+            {
+                OffersSuccessorSpell = Warrior.HasPendingSuccessorSpell && Warrior.IsHero && AdvanceRolls.Count == 0 && ExplorationAdvanceRolls.Count == 0
+            };
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             ExplorationAdvanceRolls.Add(entry);
         }

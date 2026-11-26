@@ -3366,4 +3366,100 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="StartGameGapTooSmallFormat" xml:space="preserve">
     <value>Écart de {0}{1} : trop faible pour un bonus.</value>
   </data>
+  <data name="LeaderSuccessionHeading" xml:space="preserve">
+    <value>Nouveau chef</value>
+  </data>
+  <data name="LeaderSuccessionDeadFormat" xml:space="preserve">
+    <value>{0} ({1}) est mort.</value>
+  </data>
+  <data name="LeaderSuccessionNoLeader" xml:space="preserve">
+    <value>La bande n'a plus de chef.</value>
+  </data>
+  <data name="LeaderSuccessionBookRule" xml:space="preserve">
+    <value>Choisissez le Héros qui prend la tête de la bande. Le livre désigne celui qui a le meilleur Commandement, puis le plus d'XP, puis un D6 : il est pré-coché.</value>
+  </data>
+  <data name="LeaderSuccessionDesignatedRule" xml:space="preserve">
+    <value>Choisissez le Héros qui prend la tête de la bande. Le livre impose le successeur désigné, quels que soient le Commandement et l'XP des autres : il est pré-coché.</value>
+  </data>
+  <data name="LeaderSuccessionTieFormat" xml:space="preserve">
+    <value>{0} sont à égalité de Commandement et d'XP. Départagez-les au D6, ou choisissez directement.</value>
+  </data>
+  <data name="LeaderSuccessionRollTie" xml:space="preserve">
+    <value>Lancer un D6 chacun</value>
+  </data>
+  <data name="LeaderSuccessionOffProposalFormat" xml:space="preserve">
+    <value>{0} avait le meilleur Commandement (Cd {1}, {2} XP). {3} prend la tête de la bande à sa place.</value>
+  </data>
+  <data name="LeaderSuccessionOffDesignatedFormat" xml:space="preserve">
+    <value>Le livre impose {0}. {1} prend la tête de la bande à sa place.</value>
+  </data>
+  <data name="LeaderSuccessionCollapseFormat" xml:space="preserve">
+    <value>Sans {0}, le livre dit que la bande s'effondre. Vous pouvez l'archiver (elle reste consultable), ou désigner un Héros pour continuer.</value>
+  </data>
+  <data name="LeaderSuccessionNoCandidate" xml:space="preserve">
+    <value>Aucun Héros ne peut prendre la tête de la bande et le livre ne prévoit pas ce cas. Vous pouvez l'archiver (elle reste consultable), ou continuer sans chef : un Héros recruté ou promu pourra être désigné à la prochaine Fin de partie.</value>
+  </data>
+  <data name="LeaderSuccessionKeepWarband" xml:space="preserve">
+    <value>Ne pas archiver</value>
+  </data>
+  <data name="LeaderSuccessionArchiveNote" xml:space="preserve">
+    <value>La bande sera archivée à Terminer.</value>
+  </data>
+  <data name="LeaderRuleName" xml:space="preserve">
+    <value>Chef</value>
+  </data>
+  <data name="LeaderSuccessionGainsFormat" xml:space="preserve">
+    <value>{0} reçoit : {1}.</value>
+  </data>
+  <data name="LeaderSuccessionGainsMagicFormat" xml:space="preserve">
+    <value>{0} reçoit : {1}. À sa première progression, un sort ou une prière au choix au lieu de lancer les dés.</value>
+  </data>
+  <data name="LeaderSuccessionNoHireNoteFormat" xml:space="preserve">
+    <value>Le livre interdit de recruter un nouveau {0} : le recrutement l'affichera en ambre.</value>
+  </data>
+  <data name="LeaderSuccessionRehireNoteFormat" xml:space="preserve">
+    <value>Un {0} pourra être racheté après la prochaine partie : il reprendra alors la tête de la bande.</value>
+  </data>
+  <data name="LeaderCandidateLeadershipFormat" xml:space="preserve">
+    <value>Cd {0}</value>
+  </data>
+  <data name="LeaderCandidateExperienceFormat" xml:space="preserve">
+    <value>{0} XP</value>
+  </data>
+  <data name="LeaderCandidatePromoted" xml:space="preserve">
+    <value>promu cette partie</value>
+  </data>
+  <data name="LeaderCandidateDesignated" xml:space="preserve">
+    <value>successeur imposé</value>
+  </data>
+  <data name="LeaderCandidateProposed" xml:space="preserve">
+    <value>proposé</value>
+  </data>
+  <data name="RecruitLeaderNotAllowedFormat" xml:space="preserve">
+    <value>Le livre interdit de recruter un nouveau {0} : à la mort du chef, un Héros de la bande prend sa place.</value>
+  </data>
+  <data name="RecruitLeaderRehireNextGameFormat" xml:space="preserve">
+    <value>Le livre permet de racheter un {0} seulement après la prochaine partie.</value>
+  </data>
+  <data name="RecruitLeaderReplacesActingFormat" xml:space="preserve">
+    <value>Le {0} reprend la tête de la bande : {1} perd la règle Chef.</value>
+  </data>
+  <data name="HistoryNewLeaderSentence" xml:space="preserve">
+    <value>{0} prend la tête de la bande.</value>
+  </data>
+  <data name="HistoryWarbandArchivedSentence" xml:space="preserve">
+    <value>La bande est archivée.</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellHint" xml:space="preserve">
+    <value>Nouveau chef : pour cette première progression, un sort ou une prière au choix au lieu de lancer les dés. Ensuite, table normale.</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellButton" xml:space="preserve">
+    <value>Choisir un sort</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellUndo" xml:space="preserve">
+    <value>Lancer les dés à la place</value>
+  </data>
+  <data name="EndOfGameSuccessorSpellResult" xml:space="preserve">
+    <value>Sort au choix (nouveau chef)</value>
+  </data>
 </root>

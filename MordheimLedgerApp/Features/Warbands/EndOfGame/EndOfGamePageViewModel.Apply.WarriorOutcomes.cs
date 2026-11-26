@@ -191,6 +191,12 @@ public partial class EndOfGamePageViewModel
 
                 await ApplyResolvedAdvanceAsync(warrior, advance);
                 if (advance.ResolvedField is not null) changed = true;
+                // Première progression du nouveau chef faite (sort au choix ou jet) : l'option disparaît (1.6).
+                if (warrior.HasPendingSuccessorSpell)
+                {
+                    warrior.HasPendingSuccessorSpell = false;
+                    changed = true;
+                }
             }
 
             if (row.Status != warrior.Status)

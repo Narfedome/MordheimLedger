@@ -477,7 +477,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         if (Warband is null) return;
 
-        var isSpellcaster = archetype?.IsSpellcaster == true || hiredSword?.MagicSchool is not null;
+        var isSpellcaster = archetype?.IsSpellcaster == true || hiredSword?.MagicSchool is not null || warrior.CastsAsSuccessor;
         var isMutant = archetype?.CanBuyMutations ?? false;
         var archetypeRules = archetype?.SpecialRules ?? hiredSword?.SpecialRules ?? new List<SpecialRule>();
         var specialRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id).ToList();

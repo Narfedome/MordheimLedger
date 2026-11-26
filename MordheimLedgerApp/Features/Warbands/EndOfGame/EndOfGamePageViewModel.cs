@@ -217,7 +217,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// <summary>Public depuis le passage à une vue par étape (2026-09-22, voir Steps/StepViewConverter.cs)
     /// - le convertisseur, hors de cette classe, doit pouvoir lire cette valeur pour choisir la bonne
     /// vue.</summary>
-    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, InjuryRecap, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
+    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, InjuryRecap, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, LeaderSuccession, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -309,6 +309,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         OnPropertyChanged(nameof(PendingSalesTotal));
         OnPropertyChanged(nameof(EquipmentTradingNetTotal));
         if (CurrentStepKind == StepKind.Experience) ApplyExperiencePrefill();
+        if (CurrentStepKind == StepKind.LeaderSuccession) BuildLeaderCandidates();
+        if (CurrentStepKind == StepKind.RecruitHeroesCount) NotifyLeaderRecruitmentChanged();
     }
 
     /// <summary>ExplorationResult ne s'ajoute que si un résultat a effectivement été déclenché par le
@@ -421,6 +423,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // liste) combinant nom ET achat d'équipement pour CE héros précis - "ce qui permet d'assigner
             // directement les items au personnage" (retour utilisateur), plutôt que les nommer tous ensemble
             // dans une étape Noms commune à la fin comme la version précédente.
+            // Nouveau chef (1.6) : juste avant le recrutement, une fois toutes les morts de la partie connues.
+            if (NeedsLeaderSuccession) steps.Add(new(StepKind.LeaderSuccession));
             steps.Add(new(StepKind.RecruitHeroesCount));
             steps.AddRange(RecruitedHeroRows.SelectMany(r => r.NameSlots)
                 .Select(slot => new WizardStep(StepKind.RecruitHeroDetail, RecruitHeroSlot: slot)));
@@ -1255,6 +1259,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         // (voir ApplyDismissalsAsync's own doc).
         await ApplyDismissalsAsync(sentences);
         await ApplyEquipmentTradingAsync(sentences);
+        await ApplyLeaderSuccessionAsync(sentences);
         await ApplyRecruitmentAsync(servedReservePicks, sentences);
         await ApplyHenchmanRecruitmentAsync(topUpPlans, servedReservePicks, sentences);
         ApplyHaggleSavings(haggleSavings, sentences);
@@ -1271,11 +1276,13 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         // Réallouer l'équipement : côté Héros seulement (la Réserve est couverte par ApplyReserveAsync).
         await ApplyEquipmentReallocationAsync(sentences);
         await ApplyReserveAsync(finalReserve);
+        await ApplyRehiredLeaderAsync(language, sentences);
 
         // La partie est terminée : redonne la main à "Lancer la partie" sur la fiche de bande (voir
         // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée.
         Warband.GameInProgress = false;
         await _warbandService.SaveWarbandAsync(Warband);
+        await ArchiveWarbandIfChosenAsync(sentences);
 
         await _warbandService.AddHistoryEntryAsync(Warband.Id, Core.Rules.HistoryText.Join(sentences));
     }

@@ -213,6 +213,7 @@ public partial class EndOfGamePageViewModel
     {
         OnPropertyChanged(nameof(RecruitedHeroRows));
         OnPropertyChanged(nameof(RecruitedHenchmanRows));
+        NotifyLeaderRecruitmentChanged();
         OnPropertyChanged(nameof(RecruitmentRosterCountDisplay));
         OnPropertyChanged(nameof(StepLabel));
         OnPropertyChanged(nameof(IsLastStep));

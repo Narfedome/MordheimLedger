@@ -91,6 +91,13 @@ public partial class AdvanceRollEntry : ObservableObject
     partial void OnManualRollChanged(string value)
     {
         var previousOutcome = Outcome;
+        // Un jet saisi après coup remplace le sort pris au lieu du jet (nouveau chef).
+        if (IsSuccessorSpellChoice && !string.IsNullOrWhiteSpace(value))
+        {
+            IsSuccessorSpellChoice = false;
+            SelectedSpell = null;
+        }
+        OnPropertyChanged(nameof(ShowSuccessorSpellButton));
 
         ResultText = string.Empty;
         Outcome = null;
@@ -174,6 +181,36 @@ public partial class AdvanceRollEntry : ObservableObject
     /// compétence sur ce résultat - deux boutons côte à côte (voir XAML), même disposition que
     /// WarriorEditDialog (Compétences/Sorts, deux commandes séparées plutôt qu'un mode partagé).</summary>
     public bool ShowSpellOption => IsSkillResult && IsHero && IsSpellcaster;
+
+    /// <summary>Première progression d'un nouveau chef qui apprend la magie (1.6, errata p. 117 - Warrior.
+    /// HasPendingSuccessorSpell) : il peut choisir un sort/une prière au lieu de lancer les dés.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowSuccessorSpellButton))]
+    private bool offersSuccessorSpell;
+
+    /// <summary>Le sort a été pris à la place du jet (voir ChooseSuccessorSpell).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowSuccessorSpellButton))]
+    private bool isSuccessorSpellChoice;
+
+    public bool ShowSuccessorSpellButton => OffersSuccessorSpell && !IsSuccessorSpellChoice && string.IsNullOrWhiteSpace(ManualRoll);
+
+    /// <summary>Sort/prière choisi au lieu du jet : pas de jet, pas de compétence.</summary>
+    public void ChooseSuccessorSpell(Spell spell)
+    {
+        SelectedSkills.Clear();
+        SelectedSpell = spell;
+        IsSuccessorSpellChoice = true;
+        ResultText = _loc["EndOfGameSuccessorSpellResult"];
+    }
+
+    /// <summary>Annule le choix du sort : le jet redevient nécessaire.</summary>
+    public void ClearSuccessorSpell()
+    {
+        SelectedSpell = null;
+        IsSuccessorSpellChoice = false;
+        ResultText = string.Empty;
+    }
 
     /// <summary>Compétence(s) choisie(s) pour ce jet - rattachée(s) au guerrier par
     /// WarbandDetailViewModel.EndOfGame à l'enregistrement, voir PickAdvanceSkill.</summary>
@@ -506,6 +543,7 @@ public partial class AdvanceRollEntry : ObservableObject
     {
         get
         {
+            if (IsSuccessorSpellChoice && HasSpellSelected) return null;
             if (string.IsNullOrWhiteSpace(ResultText)) return _loc["EndOfGameRollRequired"];
 
             switch (Outcome?.Kind)

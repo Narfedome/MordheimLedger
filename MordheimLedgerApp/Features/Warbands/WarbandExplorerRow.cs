@@ -16,15 +16,27 @@ public partial class WarbandRow : ObservableObject
 
     /// <summary>Nom accessible du bouton Jouer de la ligne : « Jouer, Les Roses Sanglantes » (un simple « Jouer »
     /// répété sur chaque ligne ne dit pas laquelle).</summary>
-    public string PlayAccessibleName => string.Format(LocalizationService.Instance["A11yPlayWarband"], Name);
+    public string PlayAccessibleName => string.Format(LocalizationService.Instance[IsArchived ? "A11yViewWarband" : "A11yPlayWarband"], Name);
+
+    /// <summary>Bande archivée (onglet « Archivées ») : le bouton de la ligne la consulte au lieu de la jouer.</summary>
+    public bool IsArchived => Warband.IsArchived;
+
+    public string OpenButtonText => LocalizationService.Instance[IsArchived ? "BtnView" : "BtnPlay"];
+
+    /// <summary>Ligne secondaire : type de bande · Valeur, ou date d'archivage pour une bande archivée.</summary>
+    public string Subtitle => IsArchived && Warband.ArchivedAt is { } at
+        ? string.Format(LocalizationService.Instance["WarbandArchivedOnFormat"], ArchetypeName,
+            at.ToString("d MMM yyyy", LocalizationService.Instance.Culture))
+        : $"{ArchetypeName} · {RatingDisplay}";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Subtitle))]
     private string archetypeName = string.Empty;
 
     /// <summary>Rulebook "calculate the warband rating" - see IWarbandService.GetWarbandRatingAsync.
     /// Fetched alongside ArchetypeName at list-load time.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(RatingDisplay))]
+    [NotifyPropertyChangedFor(nameof(RatingDisplay), nameof(Subtitle))]
     private int rating;
 
     public string RatingDisplay => string.Format(LocalizationService.Instance["WarbandRatingDisplay"], Rating);

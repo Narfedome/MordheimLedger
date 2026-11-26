@@ -293,7 +293,7 @@
                      trouvé (ex. étape Exploration du wizard Fin de Partie). -->
                 <!-- Icône seule sur téléphone : avec "Lancer la partie" à côté, le libellé laissait si peu
                      de place au titre qu'un nom de bande ordinaire se coupait en plein mot. -->
-                <components:IconTextButton IsVisible="{Binding HasInventory}"
+                <components:IconTextButton IsVisible="{Binding CanShowInventory}"
                                             Icon="{x:Static icons:SolidFont.BoxOpen}"
                                             Text="{loc:Loc InventoryHeading}"
                                             ShowText="{OnIdiom Phone=False, Default=True}"
@@ -306,7 +306,7 @@
                 <!-- Un seul des deux boutons à la fois (voir Warband.GameInProgress/HasGameInProgress) -
                      "Lancer la partie" remplace "Fin de partie" tant qu'aucune partie n'est en cours,
                      demande explicite de l'utilisateur (2026-08-26) : "Start a game" -> "End of game". -->
-                <components:IconTextButton AutomationId="StartGameButton" IsVisible="{Binding HasGameInProgress, Converter={StaticResource InverseBoolConverter}}"
+                <components:IconTextButton AutomationId="StartGameButton" IsVisible="{Binding CanStartGame}"
                                             Icon="{x:Static icons:SolidFont.Play}"
                                             Text="{loc:Loc StartGameButtonText}"
                                             TextColor="{DynamicResource AppAccent}"
@@ -315,7 +315,7 @@
                         <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailGameKey}"/>
                     </components:IconTextButton.Behaviors>
                 </components:IconTextButton>
-                <components:IconTextButton AutomationId="EndOfGameButton" IsVisible="{Binding HasGameInProgress}"
+                <components:IconTextButton AutomationId="EndOfGameButton" IsVisible="{Binding CanEndGame}"
                                             Icon="{x:Static icons:SolidFont.FlagCheckered}"
                                             Text="{loc:Loc EndOfGameTitle}"
                                             TextColor="{DynamicResource AppAccent}"
@@ -361,6 +361,17 @@
                  rappels de relance de l'étape Exploration du wizard (EndOfGamePendingBonusDieReminder/
                  EndOfGameCatacombRerollReminder, AppAccent) plutôt que AppDanger - un pense-bête
                  informatif, pas un état d'alerte (retour utilisateur 2026-08-25). -->
+            <!-- Bande archivée (1.6) : consultation seule, désarchivable d'ici ou depuis l'onglet Archivées. -->
+            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="12,8" IsVisible="{Binding IsArchived}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="8">
+                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.BoxArchive}" FontFamily="FontSolid"
+                           TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                    <Label Grid.Column="1" Text="{Binding ArchivedBannerText}" FontSize="13"/>
+                    <Button Grid.Row="1" Grid.Column="1" Text="{loc:Loc BtnUnarchive}" HorizontalOptions="Start"
+                            Command="{Binding UnarchiveCommand}"/>
+                </Grid>
+            </Border>
+
             <Border Style="{StaticResource SectionCardBorderStyle}" Stroke="{DynamicResource AppAccent}"
                     Padding="10,6" IsVisible="{Binding HasNextGameNote}">
                 <Label Text="{Binding Warband.NextGameNote}" FontSize="12" TextColor="{DynamicResource AppAccent}"/>

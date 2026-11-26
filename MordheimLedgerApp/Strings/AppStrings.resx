@@ -3270,4 +3270,31 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="WarbandArchetypeSuccessorLearnsMagicHint" xml:space="preserve">
     <value>Le nouveau chef reçoit les écoles de magie de la bande et choisit un sort ou une prière à sa première progression, au lieu de lancer les dés.</value>
   </data>
+  <data name="WarbandsActiveTabFormat" xml:space="preserve">
+    <value>Actives ({0})</value>
+  </data>
+  <data name="WarbandsArchivedTabFormat" xml:space="preserve">
+    <value>Archivées ({0})</value>
+  </data>
+  <data name="WarbandsNoArchived" xml:space="preserve">
+    <value>Aucune bande archivée. Une bande archivée reste consultable, sans partie ni modification.</value>
+  </data>
+  <data name="BtnView" xml:space="preserve">
+    <value>Consulter</value>
+  </data>
+  <data name="A11yViewWarband" xml:space="preserve">
+    <value>Consulter, {0}</value>
+  </data>
+  <data name="WarbandArchivedOnFormat" xml:space="preserve">
+    <value>{0} · archivée le {1}</value>
+  </data>
+  <data name="BtnUnarchive" xml:space="preserve">
+    <value>Désarchiver</value>
+  </data>
+  <data name="BtnArchiveWarband" xml:space="preserve">
+    <value>Archiver la bande</value>
+  </data>
+  <data name="WarbandArchivedBannerFormat" xml:space="preserve">
+    <value>Bande archivée le {0}. Consultation seule : pas de partie ni de modification.</value>
+  </data>
 </root>

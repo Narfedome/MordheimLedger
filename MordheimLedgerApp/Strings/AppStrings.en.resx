@@ -3270,4 +3270,31 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="WarbandArchetypeSuccessorLearnsMagicHint" xml:space="preserve">
     <value>The new leader gains the warband's magic schools and picks a spell or prayer at their first advance instead of rolling.</value>
   </data>
+  <data name="WarbandsActiveTabFormat" xml:space="preserve">
+    <value>Active ({0})</value>
+  </data>
+  <data name="WarbandsArchivedTabFormat" xml:space="preserve">
+    <value>Archived ({0})</value>
+  </data>
+  <data name="WarbandsNoArchived" xml:space="preserve">
+    <value>No archived warband. An archived warband can still be viewed, but not played or edited.</value>
+  </data>
+  <data name="BtnView" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="A11yViewWarband" xml:space="preserve">
+    <value>View, {0}</value>
+  </data>
+  <data name="WarbandArchivedOnFormat" xml:space="preserve">
+    <value>{0} · archived on {1}</value>
+  </data>
+  <data name="BtnUnarchive" xml:space="preserve">
+    <value>Unarchive</value>
+  </data>
+  <data name="BtnArchiveWarband" xml:space="preserve">
+    <value>Archive the warband</value>
+  </data>
+  <data name="WarbandArchivedBannerFormat" xml:space="preserve">
+    <value>Warband archived on {0}. View only: no games, no changes.</value>
+  </data>
 </root>

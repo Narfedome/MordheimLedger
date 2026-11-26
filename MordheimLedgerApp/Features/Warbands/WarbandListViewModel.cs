@@ -29,6 +29,32 @@ public partial class WarbandListViewModel : BaseViewModel
     [ObservableProperty]
     private bool hasWarbands;
 
+    /// <summary>Onglet « Archivées » (1.6) : bandes archivées, consultables en lecture seule et désarchivables.
+    /// Rows ne montre que les bandes de l'onglet courant ; _allRows garde les deux.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowActive), nameof(ShowEmptyState), nameof(ShowNoArchived), nameof(CanEditSelectedWarband),
+        nameof(CanUnarchiveSelectedWarband))]
+    private bool showArchived;
+
+    public bool ShowActive => !ShowArchived;
+
+    private List<WarbandRow> _allRows = new();
+
+    [ObservableProperty]
+    private string activeTabText = string.Empty;
+
+    [ObservableProperty]
+    private string archivedTabText = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyState), nameof(ShowNoArchived))]
+    private bool hasArchivedWarbands;
+
+    /// <summary>Accueil vide (aucune bande du tout, ou aucune bande active) : seulement sur l'onglet des bandes actives.</summary>
+    public bool ShowEmptyState => !ShowArchived && !HasWarbands;
+
+    public bool ShowNoArchived => ShowArchived && !HasArchivedWarbands;
+
     // Reste false pendant le court instant entre l'affichage de la page et le vrai début du
     // chargement (Loading.IsLoading ne passe à true qu'à l'intérieur de LoadWarbandsAsync) : sans ce
     // garde-fou, HasWarbands vaudrait encore false par défaut durant cette fenêtre et l'état vide
@@ -41,10 +67,15 @@ public partial class WarbandListViewModel : BaseViewModel
     // DmTools : sur Android, le fond de sélection natif reste teinté par colorAccent quel que soit le
     // style posé dessus) - IsSelected est porté par la ligne elle-même, cf. SelectionMarkerStyle.
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanModifySelectedWarband))]
+    [NotifyPropertyChangedFor(nameof(CanModifySelectedWarband), nameof(CanEditSelectedWarband), nameof(CanUnarchiveSelectedWarband))]
     private WarbandRow? selectedRow;
 
     public bool CanModifySelectedWarband => SelectedRow != null;
+
+    /// <summary>Une bande archivée ne se modifie pas : on la désarchive d'abord.</summary>
+    public bool CanEditSelectedWarband => SelectedRow is { IsArchived: false };
+
+    public bool CanUnarchiveSelectedWarband => SelectedRow is { IsArchived: true };
 
     public WarbandListViewModel(IWarbandArchetypePickerNavigationService pickerNavigation,
         IWarbandService warbandService, IWarbandArchetypePickerService warbandArchetypePickerService,
@@ -104,13 +135,51 @@ public partial class WarbandListViewModel : BaseViewModel
         var warbands = await _warbandService.GetWarbandsAsync();
         var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.WarbandArchetypeId, LocalizationService.Instance.Language)));
         var ratings = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandRatingAsync(b.Id)));
-        Rows = new ObservableCollection<WarbandRow>(warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i], Rating = ratings[i] }));
-        SelectedRow = null;
-        HasWarbands = warbands.Count > 0;
+        _allRows = warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i], Rating = ratings[i] }).ToList();
+        ApplyTab();
         IsInitialized = true;
         _loadedDataVersion = version;
     }
 
+
+    private void ApplyTab()
+    {
+        var active = _allRows.Where(r => !r.IsArchived).ToList();
+        var archived = _allRows.Where(r => r.IsArchived).OrderByDescending(r => r.Warband.ArchivedAt).ToList();
+        Rows = new ObservableCollection<WarbandRow>(ShowArchived ? archived : active);
+        SelectedRow = null;
+        HasWarbands = active.Count > 0;
+        HasArchivedWarbands = archived.Count > 0;
+        ActiveTabText = string.Format(Loc["WarbandsActiveTabFormat"], active.Count);
+        ArchivedTabText = string.Format(Loc["WarbandsArchivedTabFormat"], archived.Count);
+    }
+
+    [RelayCommand]
+    private void ShowActiveTab()
+    {
+        if (!ShowArchived) return;
+        ShowArchived = false;
+        ApplyTab();
+    }
+
+    [RelayCommand]
+    private void ShowArchivedTab()
+    {
+        if (ShowArchived) return;
+        ShowArchived = true;
+        ApplyTab();
+    }
+
+    [RelayCommand]
+    private async Task UnarchiveSelectedWarbandAsync()
+    {
+        if (SelectedRow is not { IsArchived: true } row) return;
+        await Loading.RunAsync(async () =>
+        {
+            await new LeaderSuccessionService(_warbandService).UnarchiveAsync(row.Warband);
+            await InitializeAsync();
+        });
+    }
 
     [RelayCommand]
     private void Select(WarbandRow row) => SelectedRow = row;
@@ -149,7 +218,7 @@ public partial class WarbandListViewModel : BaseViewModel
     [RelayCommand]
     private async Task EditSelectedWarbandAsync()
     {
-        if (SelectedRow is not { } row) return;
+        if (SelectedRow is not { IsArchived: false } row) return;
 
         var language = LocalizationService.Instance.Language;
         WarbandArchetype? archetype = null;

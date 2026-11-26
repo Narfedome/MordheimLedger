@@ -82,6 +82,7 @@
       "restrictedToThisWarband": true
     }
   ],
+  "successorLearnsMagic": true,
   "magicSchools": [
     {
       "id": "school.prayers-of-sigmar",

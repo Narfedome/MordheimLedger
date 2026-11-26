@@ -694,6 +694,7 @@ public partial class AppDatabase
             Source = ContentSource.Official,
             Grade = Enum.Parse<WarbandGrade>(data.Grade),
             StartingTreasury = data.StartingTreasury,
+            SuccessorLearnsMagic = data.SuccessorLearnsMagic,
             MaxWarriors = data.MaxWarriors,
             MinWarriors = data.MinWarriors,
             ImagePath = data.ImagePath ?? string.Empty,
@@ -822,6 +823,8 @@ public partial class AppDatabase
                 IsLargeCreature = w.IsLargeCreature,
                 GainsExperience = w.GainsExperience,
                 IsLeader = w.IsLeader,
+                IsDesignatedSuccessor = w.IsDesignatedSuccessor,
+                CanBeRehiredAfterDeath = w.CanBeRehiredAfterDeath,
                 // 0 (jamais fail-fast, contrairement à WarbandArchetype.RaceId ci-dessus) si : (a)
                 // w.RacialProfileId est null (archétype qui ne gagne jamais d'Expérience - Zombie/
                 // Loup Funeste/Chien de guerre/Squig des Cavernes/Troll/Rats géants - l'étape

@@ -228,6 +228,14 @@ public class Warrior
     /// every other warrior, including every other Hero.</summary>
     public bool IsLeader { get; set; }
 
+    /// <summary>Lance les sorts/prières de la bande parce qu'il a succédé au chef d'une bande « Le successeur apprend la
+    /// magie » (WarbandArchetype.SuccessorLearnsMagic) - en plus de WarriorArchetype.IsSpellcaster, jamais à sa place.</summary>
+    public bool CastsAsSuccessor { get; set; }
+
+    /// <summary>À sa première progression après la succession, il peut choisir un sort/une prière au lieu de lancer
+    /// les dés (errata p. 117) ; remis à faux une fois cette progression faite.</summary>
+    public bool HasPendingSuccessorSpell { get; set; }
+
     /// <summary>Racial characteristic maximums, snapshotted from the recruiting WarriorArchetype's
     /// RacialProfile at recruitment (see EntityMapping.ToWarrior) - same snapshot-at-recruit-time
     /// convention as the rest of the stat line, not a live reference: editing the RacialProfile catalog

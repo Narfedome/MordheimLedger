@@ -8,10 +8,14 @@
       "**/Services/RosterChangeService.cs",
       "**/Services/InjuryService.cs",
       "**/Services/PostBattleSequenceService.cs",
+      "**/Services/LeaderSuccessionService.cs",
+      "**/Rules/LeaderSuccessionRules.cs",
+      "**/Rules/UnderdogExperience.cs",
+      "**/Rules/ExperiencePrefill.cs",
       "**/Rules/InjuryCatalogLookup.cs"
     ],
     "coverage-analysis": "off",
-    "test-case-filter": "FullyQualifiedName~AdvancementServiceTests|FullyQualifiedName~ExplorationRewardServiceTests|FullyQualifiedName~PostBattleTradingServiceTests|FullyQualifiedName~RosterChangeServiceTests|FullyQualifiedName~InjuryServiceTests|FullyQualifiedName~PostBattleSequenceServiceTests|FullyQualifiedName~WarbandMutationTests.EquipStashItem",
+    "test-case-filter": "FullyQualifiedName~AdvancementServiceTests|FullyQualifiedName~ExplorationRewardServiceTests|FullyQualifiedName~PostBattleTradingServiceTests|FullyQualifiedName~RosterChangeServiceTests|FullyQualifiedName~InjuryServiceTests|FullyQualifiedName~PostBattleSequenceServiceTests|FullyQualifiedName~LeaderSuccessionServiceTests|FullyQualifiedName~RulesTests.UnderdogExperience|FullyQualifiedName~RulesTests.ExperiencePrefill|FullyQualifiedName~RulesTests.LeaderSuccession|FullyQualifiedName~WarbandMutationTests.EquipStashItem",
     "reporters": [ "html", "json", "progress" ],
     "concurrency": 4,
     "thresholds": { "high": 90, "low": 80, "break": 80 }

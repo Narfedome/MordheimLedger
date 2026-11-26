@@ -35,6 +35,9 @@ public static class EntityMapping
         NextGameNote = e.NextGameNote,
         HasCatacombReroll = e.HasCatacombReroll,
         GameInProgress = e.GameInProgress,
+        IsArchived = e.IsArchived,
+        ArchivedAt = e.ArchivedAt,
+        OpponentRatings = ParseRatings(e.OpponentRatings),
         Notes = e.Notes
     };
 
@@ -50,6 +53,9 @@ public static class EntityMapping
         NextGameNote = m.NextGameNote,
         HasCatacombReroll = m.HasCatacombReroll,
         GameInProgress = m.GameInProgress,
+        IsArchived = m.IsArchived,
+        ArchivedAt = m.ArchivedAt,
+        OpponentRatings = m.OpponentRatings.Count == 0 ? null : string.Join(',', m.OpponentRatings),
         Notes = m.Notes
     };
 
@@ -72,6 +78,7 @@ public static class EntityMapping
         ImagePath = e.ImagePath ?? string.Empty,
         SpecialRules = specialRulesByWarbandId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
         MagicSchools = magicSchoolsByWarbandId?.GetValueOrDefault(e.Id) ?? new List<MagicSchool>(),
+        SuccessorLearnsMagic = e.SuccessorLearnsMagic,
         RaceId = e.RaceId,
         Race = racesById?.GetValueOrDefault(e.RaceId)
     };
@@ -88,6 +95,7 @@ public static class EntityMapping
         MinWarriors = m.MinWarriors,
         DescriptionKey = m.DescriptionKey,
         ImagePath = m.ImagePath,
+        SuccessorLearnsMagic = m.SuccessorLearnsMagic,
         RaceId = m.RaceId
     };
 
@@ -129,9 +137,14 @@ public static class EntityMapping
         IsLargeCreature = e.IsLargeCreature,
         GainsExperience = e.GainsExperience,
         IsLeader = e.IsLeader,
+        IsDesignatedSuccessor = e.IsDesignatedSuccessor,
+        CanBeRehiredAfterDeath = e.CanBeRehiredAfterDeath,
         RacialProfileId = e.RacialProfileId,
         RacialProfile = racialProfilesById?.GetValueOrDefault(e.RacialProfileId)
     };
+
+    private static List<int> ParseRatings(string? csv) =>
+        string.IsNullOrWhiteSpace(csv) ? new List<int>() : csv.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
 
     private static List<SkillCategory> ParseSkillCategories(string? csv) =>
         string.IsNullOrEmpty(csv)
@@ -171,6 +184,8 @@ public static class EntityMapping
         IsLargeCreature = m.IsLargeCreature,
         GainsExperience = m.GainsExperience,
         IsLeader = m.IsLeader,
+        IsDesignatedSuccessor = m.IsDesignatedSuccessor,
+        CanBeRehiredAfterDeath = m.CanBeRehiredAfterDeath,
         RacialProfileId = m.RacialProfileId
     };
 
@@ -1011,6 +1026,8 @@ public static class EntityMapping
         IsLargeCreature = e.IsLargeCreature,
         GainsExperience = e.GainsExperience,
         IsLeader = e.IsLeader,
+        CastsAsSuccessor = e.CastsAsSuccessor,
+        HasPendingSuccessorSpell = e.HasPendingSuccessorSpell,
         MaxMovement = e.MaxMovement,
         MaxWeaponSkill = e.MaxWeaponSkill,
         MaxBallisticSkill = e.MaxBallisticSkill,
@@ -1070,6 +1087,8 @@ public static class EntityMapping
         IsLargeCreature = m.IsLargeCreature,
         GainsExperience = m.GainsExperience,
         IsLeader = m.IsLeader,
+        CastsAsSuccessor = m.CastsAsSuccessor,
+        HasPendingSuccessorSpell = m.HasPendingSuccessorSpell,
         MaxMovement = m.MaxMovement,
         MaxWeaponSkill = m.MaxWeaponSkill,
         MaxBallisticSkill = m.MaxBallisticSkill,

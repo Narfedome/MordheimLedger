@@ -20,5 +20,9 @@ public class WarbandEntity
     public string? NextGameNote { get; set; }
     public bool HasCatacombReroll { get; set; }
     public bool GameInProgress { get; set; }
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+    /// <summary>CSV des valeurs des bandes adverses saisies au début de partie (voir Warband.OpponentRatings).</summary>
+    public string? OpponentRatings { get; set; }
     public string? Notes { get; set; }
 }

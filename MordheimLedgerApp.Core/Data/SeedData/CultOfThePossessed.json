@@ -12,6 +12,7 @@
     "fr": "Des adorateurs du Chaos menés par le Seigneur des Ombres, récoltant la pierre magique de Mordheim pour créer toujours plus de Possédés - des guerriers qui ont volontairement abandonné leur corps à des démons."
   },
   "specialRules": [],
+  "successorLearnsMagic": true,
   "magicSchools": [
     {
       "id": "school.chaos-rituals",

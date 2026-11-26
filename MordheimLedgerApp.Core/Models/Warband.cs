@@ -53,5 +53,16 @@ public class Warband
     /// EndOfGame, set by StartGame.</summary>
     public bool GameInProgress { get; set; }
 
+    /// <summary>Bande archivée : hors de la liste active (onglet « Archivées »), consultable en lecture seule, jamais
+    /// jouée ni modifiée ; désarchivable. Base de la future fin de campagne.</summary>
+    public bool IsArchived { get; set; }
+
+    public DateTime? ArchivedAt { get; set; }
+
+    /// <summary>Valeurs des bandes adverses saisies au début de partie (facultatives, 0 à 3) - servent à l'XP
+    /// d'outsider (Core.Rules.UnderdogExperience) et à l'aide des Dramatis Personae. Remplacées à chaque début de
+    /// partie.</summary>
+    public List<int> OpponentRatings { get; set; } = new();
+
     public string? Notes { get; set; }
 }

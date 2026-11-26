@@ -2268,4 +2268,167 @@ public class RulesTests
     {
         Assert.Equal(expected, EffectHandling.StepNumericValue(kind, value, delta));
     }
+
+    // --- Outsider (table « Underdogs » du livre, multijoueur du Town Cryer 5) ---
+
+    [Theory]
+    [InlineData(-10, 0)]
+    [InlineData(0, 0)]
+    [InlineData(50, 0)]
+    [InlineData(51, 1)]
+    [InlineData(75, 1)]
+    [InlineData(76, 2)]
+    [InlineData(100, 2)]
+    [InlineData(101, 3)]
+    [InlineData(150, 3)]
+    [InlineData(151, 4)]
+    [InlineData(300, 4)]
+    [InlineData(301, 5)]
+    [InlineData(900, 5)]
+    public void UnderdogExperience_BonusForGap_FollowsTheBookChart(int gap, int expected)
+    {
+        Assert.Equal(expected, UnderdogExperience.BonusForGap(gap));
+    }
+
+    [Fact]
+    public void UnderdogExperience_TwoPlayers_ComparesWithTheOpponent()
+    {
+        Assert.Equal(2, UnderdogExperience.BonusFor(142, new[] { 231 }));
+        Assert.Equal(0, UnderdogExperience.BonusFor(231, new[] { 142 }));
+    }
+
+    [Fact]
+    public void UnderdogExperience_Multiplayer_ComparesLowestWithNextHighest()
+    {
+        // Exemple du Town Cryer 5 : Mercenaires 123, Skavens 176, Chasseurs de Sorcières 195 → écart 53 avec 176, +1.
+        Assert.Equal(53, UnderdogExperience.GapFor(123, new[] { 176, 195 }));
+        Assert.Equal(1, UnderdogExperience.BonusFor(123, new[] { 176, 195 }));
+        // Les Skavens ne sont pas la bande la plus faible : aucun bonus, même face aux Chasseurs plus forts.
+        Assert.Null(UnderdogExperience.GapFor(176, new[] { 123, 195 }));
+        Assert.Equal(0, UnderdogExperience.BonusFor(176, new[] { 123, 195 }));
+    }
+
+    [Fact]
+    public void UnderdogExperience_NoOpponentOrEqualRating_GivesNothing()
+    {
+        Assert.Equal(0, UnderdogExperience.BonusFor(150, Array.Empty<int>()));
+        Assert.Null(UnderdogExperience.GapFor(150, new[] { 150 }));
+    }
+
+    // --- Pré-remplissage de l'Expérience ---
+
+    [Fact]
+    public void ExperiencePrefill_WinningLeaderSurvivorAndUnderdog_AddsUp()
+    {
+        var prefill = ExperiencePrefill.For(gainsExperience: true, survived: true, wasLeaderDuringBattle: true, victory: true, underdogBonus: 2);
+        Assert.Equal(new ExperiencePrefill(1, 1, 2), prefill);
+        Assert.Equal(4, prefill.Total);
+    }
+
+    [Fact]
+    public void ExperiencePrefill_LeaderOnlyGetsTheBonusOnVictory()
+    {
+        Assert.Equal(1, ExperiencePrefill.For(true, true, wasLeaderDuringBattle: true, victory: false, underdogBonus: 0).Total);
+        Assert.Equal(1, ExperiencePrefill.For(true, true, wasLeaderDuringBattle: false, victory: true, underdogBonus: 0).Total);
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void ExperiencePrefill_DeadOrNeverGainsExperience_GetsNothing(bool gainsExperience, bool survived)
+    {
+        Assert.Equal(0, ExperiencePrefill.For(gainsExperience, survived, true, true, 3).Total);
+    }
+
+    // --- Succession du chef (livre p. 117 + errata) ---
+
+    [Fact]
+    public void LeaderSuccession_HighestLeadershipThenExperience_IsProposed()
+    {
+        var proposal = LeaderSuccessionRules.Propose(new[]
+        {
+            new SuccessionCandidate(1, Leadership: 6, Experience: 30),
+            new SuccessionCandidate(2, Leadership: 7, Experience: 9),
+            new SuccessionCandidate(3, Leadership: 7, Experience: 14)
+        }, requiresDesignatedSuccessor: false);
+
+        Assert.Equal(SuccessionKind.ByLeadership, proposal.Kind);
+        Assert.Equal(3, proposal.ProposedWarriorId);
+    }
+
+    [Fact]
+    public void LeaderSuccession_TieOnLeadershipAndExperience_AsksForADie()
+    {
+        var proposal = LeaderSuccessionRules.Propose(new[]
+        {
+            new SuccessionCandidate(1, 7, 14),
+            new SuccessionCandidate(2, 7, 14),
+            new SuccessionCandidate(3, 6, 3)
+        }, requiresDesignatedSuccessor: false);
+
+        Assert.Equal(SuccessionKind.Tie, proposal.Kind);
+        Assert.Null(proposal.ProposedWarriorId);
+        Assert.Equal(new[] { 1, 2 }, proposal.TiedWarriorIds);
+    }
+
+    [Fact]
+    public void LeaderSuccession_ResolveTie_HighestRollWinsOrRerolls()
+    {
+        Assert.Equal(2, LeaderSuccessionRules.ResolveTie(new Dictionary<int, int> { [1] = 3, [2] = 5 }));
+        Assert.Null(LeaderSuccessionRules.ResolveTie(new Dictionary<int, int> { [1] = 4, [2] = 4 }));
+    }
+
+    [Fact]
+    public void LeaderSuccession_DesignatedSuccessor_WinsOverBetterHeroes()
+    {
+        var proposal = LeaderSuccessionRules.Propose(new[]
+        {
+            new SuccessionCandidate(1, 7, 15),
+            new SuccessionCandidate(2, 7, 11, IsDesignatedSuccessor: true)
+        }, requiresDesignatedSuccessor: true);
+
+        Assert.Equal(SuccessionKind.DesignatedSuccessor, proposal.Kind);
+        Assert.Equal(2, proposal.ProposedWarriorId);
+    }
+
+    [Fact]
+    public void LeaderSuccession_DesignatedSuccessorMissing_WarbandCollapses()
+    {
+        var proposal = LeaderSuccessionRules.Propose(new[] { new SuccessionCandidate(1, 7, 15) }, requiresDesignatedSuccessor: true);
+
+        Assert.Equal(SuccessionKind.NoDesignatedSuccessor, proposal.Kind);
+        Assert.Null(proposal.ProposedWarriorId);
+    }
+
+    [Fact]
+    public void LeaderSuccession_NoHeroLeft_HasNoProposal()
+    {
+        var proposal = LeaderSuccessionRules.Propose(Array.Empty<SuccessionCandidate>(), requiresDesignatedSuccessor: false);
+
+        Assert.Equal(SuccessionKind.NoCandidate, proposal.Kind);
+        Assert.Null(proposal.ProposedWarriorId);
+    }
+
+    [Fact]
+    public void LeaderSuccession_IsEligible_OnlyLivingHeroesOfTheWarband()
+    {
+        Assert.True(LeaderSuccessionRules.IsEligible(new Warrior { IsHero = true }));
+        Assert.False(LeaderSuccessionRules.IsEligible(new Warrior { IsHero = false }));
+        Assert.False(LeaderSuccessionRules.IsEligible(new Warrior { IsHero = true, Status = WarriorStatus.Dead }));
+        Assert.False(LeaderSuccessionRules.IsEligible(new Warrior { IsHero = true, HiredSwordId = 4 }));
+        Assert.False(LeaderSuccessionRules.IsEligible(new Warrior { IsHero = true, DramatisPersonaId = 2 }));
+        // Malade : rate la prochaine partie, mais reste un Héros de la bande.
+        Assert.True(LeaderSuccessionRules.IsEligible(new Warrior { IsHero = true, Status = WarriorStatus.Sick }));
+    }
+
+    [Theory]
+    [InlineData(false, false, false, LeaderRecruitmentNotice.None)]
+    [InlineData(true, false, false, LeaderRecruitmentNotice.NewLeaderNotAllowed)]
+    [InlineData(true, false, true, LeaderRecruitmentNotice.NewLeaderNotAllowed)]
+    [InlineData(true, true, true, LeaderRecruitmentNotice.RehireOnlyAfterNextGame)]
+    [InlineData(true, true, false, LeaderRecruitmentNotice.ReplacesActingLeader)]
+    public void LeaderSuccession_RecruitmentNotice(bool isLeader, bool rehireable, bool diedThisGame, LeaderRecruitmentNotice expected)
+    {
+        Assert.Equal(expected, LeaderSuccessionRules.RecruitmentNotice(isLeader, rehireable, diedThisGame));
+    }
 }

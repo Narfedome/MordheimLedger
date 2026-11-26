@@ -49,6 +49,9 @@ public class WarbandSeedData
     /// either redeclaring its spell table.</summary>
     public List<MagicSchoolSeedData> MagicSchools { get; set; } = new();
 
+    /// <summary>« Le successeur apprend la magie » - voir WarbandArchetype.SuccessorLearnsMagic.</summary>
+    public bool SuccessorLearnsMagic { get; set; }
+
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
     public int? MinWarriors { get; set; }
@@ -158,6 +161,12 @@ public class WarriorSeedData
     /// <summary>True for the one archetype that represents this warband's leader (e.g. the Mercenary
     /// Captain) - exactly one per warband file. See WarriorArchetype.IsLeader.</summary>
     public bool IsLeader { get; set; }
+
+    /// <summary>« Successeur imposé » - voir WarriorArchetype.IsDesignatedSuccessor (ex. le Nécromancien).</summary>
+    public bool IsDesignatedSuccessor { get; set; }
+
+    /// <summary>« Rachetable après sa mort » (chef seulement) - voir WarriorArchetype.CanBeRehiredAfterDeath (ex. le Vampire).</summary>
+    public bool CanBeRehiredAfterDeath { get; set; }
 
     /// <summary>Id reference into Data/SeedData/RacialProfiles.json (e.g. "Human", "Vampire")
     /// - which creature body type's characteristic maximums govern this archetype's Advance rolls, see

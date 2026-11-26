@@ -215,6 +215,8 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             Grade = s.Grade,
             StartingTreasury = s.StartingTreasury,
             MaxWarriors = s.MaxWarriors,
+            MinWarriors = s.MinWarriors,
+            SuccessorLearnsMagic = s.SuccessorLearnsMagic,
             Description = s.Description,
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,

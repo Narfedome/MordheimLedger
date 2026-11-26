@@ -50,6 +50,12 @@ public class WarbandArchetype
     /// IsSpellcaster for which of the band's Hero types may actually cast.</summary>
     public List<MagicSchool> MagicSchools { get; set; } = new();
 
+    /// <summary>« Le successeur apprend la magie » (Codex, section Mort du chef ; errata p. 117) : le Héros qui prend
+    /// la tête après la mort du chef peut lancer les sorts/prières des MagicSchools de la bande, et choisit un sort au
+    /// lieu du jet à sa première progression (Sœurs de Sigmar, Possédés, Kermesse du Chaos). Voir
+    /// Warrior.CastsAsSuccessor/HasPendingSuccessorSpell.</summary>
+    public bool SuccessorLearnsMagic { get; set; }
+
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 

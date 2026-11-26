@@ -50,6 +50,8 @@ public class WarriorArchetypeEntity
     public bool IsLargeCreature { get; set; }
     public bool GainsExperience { get; set; } = true;
     public bool IsLeader { get; set; }
+    public bool IsDesignatedSuccessor { get; set; }
+    public bool CanBeRehiredAfterDeath { get; set; }
 
     [Indexed]
     public int RacialProfileId { get; set; }

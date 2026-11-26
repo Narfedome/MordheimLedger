@@ -60,7 +60,7 @@ public partial class WarbandDetailViewModel
             .Select(r => new DramatisPersonaAidEntry(r.Warrior, dramatisPersonaeById[r.Warrior.DramatisPersonaId!.Value].Name, Rating))
             .ToList();
 
-        var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, aidEntries, Warband.NextGameNote);
+        var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, aidEntries, Warband.NextGameNote, Rating);
         if (await ShowDialogAsync(new StartGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -95,6 +95,8 @@ public partial class WarbandDetailViewModel
             if (sentences.Count > 0)
                 await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
 
+            // Valeurs adverses (1.6) : remplacées à chaque partie, lues par la Fin de partie pour l'outsider.
+            Warband.OpponentRatings = dialogViewModel.OpponentRatings;
             Warband.GameInProgress = true;
             await _warbandService.SaveWarbandAsync(Warband);
             await LoadAsync(Warband.Id);

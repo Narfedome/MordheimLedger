@@ -2566,7 +2566,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Le scénario a rapporté {0} (ajouté à la réserve).</value>
   </data>
   <data name="EndOfGameExperienceHint" xml:space="preserve">
-    <value>Toute l'XP de la partie : survie, ennemis mis hors de combat, victoire et bonus du scénario.</value>
+    <value>Pré-rempli d'après le livre : survie, chef vainqueur et outsider. Ajoutez les ennemis mis hors de combat et le bonus du scénario.</value>
   </data>
   <data name="OnboardingWarbandTitle" xml:space="preserve">
     <value>Créez votre bande</value>
@@ -3419,5 +3419,74 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="WarbandArchivedBannerFormat" xml:space="preserve">
     <value>Bande archivée le {0}. Consultation seule : pas de partie ni de modification.</value>
+  </data>
+  <data name="EndOfGameScenarioNamePh" xml:space="preserve">
+    <value>Scénario</value>
+  </data>
+  <data name="EndOfGameScenarioNameHint" xml:space="preserve">
+    <value>Facultatif. Saisie libre, reprise dans l'Historique.</value>
+  </data>
+  <data name="EndOfGameScenarioNamePlaceholder" xml:space="preserve">
+    <value>ex. Combat de rue</value>
+  </data>
+  <data name="HistoryResultWithScenarioSentence" xml:space="preserve">
+    <value>Bataille ({1}) : {0}.</value>
+  </data>
+  <data name="EndOfGameExperienceNoOpponentRating" xml:space="preserve">
+    <value>Valeur adverse non saisie au début de partie : l'outsider est à ajouter vous-même.</value>
+  </data>
+  <data name="EndOfGameExperienceUnderdogFormat" xml:space="preserve">
+    <value>Outsider : écart de {0}, +{1} XP par Héros et groupe.</value>
+  </data>
+  <data name="EndOfGameExperienceNotUnderdog" xml:space="preserve">
+    <value>Pas d'XP d'outsider pour cette partie.</value>
+  </data>
+  <data name="EndOfGameXpPartSurvival" xml:space="preserve">
+    <value>survie {0}</value>
+  </data>
+  <data name="EndOfGameXpPartWinningLeader" xml:space="preserve">
+    <value>chef vainqueur {0}</value>
+  </data>
+  <data name="EndOfGameXpPartUnderdog" xml:space="preserve">
+    <value>outsider {0}</value>
+  </data>
+  <data name="EndOfGameXpPrefillTipFormat" xml:space="preserve">
+    <value>Pré-rempli : {0}.</value>
+  </data>
+  <data name="StartGameOpponentsHeading" xml:space="preserve">
+    <value>Adversaires</value>
+  </data>
+  <data name="StartGameOpponentsHint" xml:space="preserve">
+    <value>Valeur de chaque bande adverse, facultative. Sert à pré-remplir l'XP d'outsider en Fin de partie et à l'aide des Dramatis Personae.</value>
+  </data>
+  <data name="StartGameOpponentLabel" xml:space="preserve">
+    <value>Valeur de la bande adverse</value>
+  </data>
+  <data name="StartGameOpponentNumberFormat" xml:space="preserve">
+    <value>Adversaire {0}</value>
+  </data>
+  <data name="StartGameAddOpponent" xml:space="preserve">
+    <value>Ajouter un adversaire</value>
+  </data>
+  <data name="StartGameRemoveOpponent" xml:space="preserve">
+    <value>Retirer cet adversaire</value>
+  </data>
+  <data name="StartGameOwnRatingFormat" xml:space="preserve">
+    <value>Votre bande : {0}</value>
+  </data>
+  <data name="StartGameNotUnderdog" xml:space="preserve">
+    <value>Vous n'êtes pas l'outsider : pas d'XP en plus.</value>
+  </data>
+  <data name="StartGameNotLowestRating" xml:space="preserve">
+    <value>Vous n'êtes pas la bande la plus faible : pas d'XP d'outsider.</value>
+  </data>
+  <data name="StartGameNextHighestFormat" xml:space="preserve">
+    <value> avec la bande juste au-dessus ({0})</value>
+  </data>
+  <data name="StartGameUnderdogFormat" xml:space="preserve">
+    <value>Écart de {0}{1} : outsider, +{2} XP.</value>
+  </data>
+  <data name="StartGameGapTooSmallFormat" xml:space="preserve">
+    <value>Écart de {0}{1} : trop faible pour un bonus.</value>
   </data>
 </root>

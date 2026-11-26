@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Rules;
@@ -25,6 +27,72 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
     public bool HasNextGameNote => !string.IsNullOrWhiteSpace(NextGameNote);
     public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasAidEntries && !HasNextGameNote;
 
+    // --- Adversaires (1.6) : valeur de chaque bande adverse, facultative, jusqu'à 3 ---
+
+    private const int MaxOpponents = 3;
+    private readonly int _ownRating;
+
+    public ObservableCollection<OpponentRatingEntry> Opponents { get; } = new();
+
+    [ObservableProperty]
+    private bool canAddOpponent = true;
+
+    /// <summary>Verdict d'outsider affiché sous les champs (règle du livre + multijoueur du Town Cryer 5).</summary>
+    [ObservableProperty]
+    private string underdogVerdict = string.Empty;
+
+    public string OwnRatingText { get; }
+
+    /// <summary>Valeurs saisies, dans l'ordre ; enregistrées sur la bande au lancement (Warband.OpponentRatings).</summary>
+    public List<int> OpponentRatings => Opponents.Select(o => o.Value).OfType<int>().ToList();
+
+    [RelayCommand]
+    private void AddOpponent()
+    {
+        if (Opponents.Count >= MaxOpponents) return;
+        Opponents.Add(new OpponentRatingEntry(string.Empty, OnOpponentsChanged));
+        OnOpponentsChanged();
+    }
+
+    [RelayCommand]
+    private void RemoveOpponent(OpponentRatingEntry entry)
+    {
+        if (Opponents.Count <= 1) return;
+        Opponents.Remove(entry);
+        OnOpponentsChanged();
+    }
+
+    private void OnOpponentsChanged()
+    {
+        var loc = LocalizationService.Instance;
+        for (var i = 0; i < Opponents.Count; i++)
+        {
+            Opponents[i].Label = Opponents.Count > 1 ? string.Format(loc["StartGameOpponentNumberFormat"], i + 1) : loc["StartGameOpponentLabel"];
+            Opponents[i].CanRemove = Opponents.Count > 1;
+        }
+        CanAddOpponent = Opponents.Count < MaxOpponents;
+
+        var ratings = OpponentRatings;
+        if (ratings.Count == 0)
+            UnderdogVerdict = string.Empty;
+        else if (UnderdogExperience.GapFor(_ownRating, ratings) is not { } gap)
+            UnderdogVerdict = loc[ratings.Count > 1 ? "StartGameNotLowestRating" : "StartGameNotUnderdog"];
+        else
+        {
+            var bonus = UnderdogExperience.BonusForGap(gap);
+            var against = ratings.Count > 1 ? string.Format(loc["StartGameNextHighestFormat"], ratings.Min()) : string.Empty;
+            UnderdogVerdict = bonus > 0
+                ? string.Format(loc["StartGameUnderdogFormat"], gap, against, bonus)
+                : string.Format(loc["StartGameGapTooSmallFormat"], gap, against);
+        }
+
+        // Aide des Dramatis Personae (ex. Bertha) : même saisie, comparée à la bande adverse la plus forte - le champ
+        // de la carte reste modifiable.
+        if (ratings.Count > 0)
+            foreach (var aid in AidEntries)
+                aid.EnemyRating = ratings.Max().ToString();
+    }
+
     /// <summary>One line per RatingGapAidTable.Tier (plus a leading "won't come" row for anything below
     /// the first tier) - built from the table's actual data (user request 2026-09-01: "à voir si on a les
     /// valeurs modifiables plutôt qu'un resx") rather than one hand-written resx sentence, so this
@@ -34,13 +102,17 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
     public List<string> AidRuleTierRows { get; }
 
     public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundWarriorEntry> oldWoundEntries,
-        List<DramatisPersonaAidEntry> aidEntries, string? nextGameNote)
+        List<DramatisPersonaAidEntry> aidEntries, string? nextGameNote, int ownRating)
     {
+        _ownRating = ownRating;
+        OwnRatingText = string.Format(LocalizationService.Instance["StartGameOwnRatingFormat"], ownRating);
         UnavailableWarriors = unavailableWarriors;
         OldWoundEntries = oldWoundEntries;
         AidEntries = aidEntries;
         NextGameNote = nextGameNote;
         AidRuleTierRows = BuildAidRuleTierRows();
+        Opponents.Add(new OpponentRatingEntry(string.Empty, OnOpponentsChanged));
+        OnOpponentsChanged();
     }
 
     private static List<string> BuildAidRuleTierRows()

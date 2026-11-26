@@ -2566,7 +2566,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>The scenario earned {0} (added to the stash).</value>
   </data>
   <data name="EndOfGameExperienceHint" xml:space="preserve">
-    <value>All XP from this game: survival, enemies taken out of action, victory and scenario bonuses.</value>
+    <value>Pre-filled from the rulebook: survival, winning leader and underdog. Add enemies taken out of action and the scenario bonus.</value>
   </data>
   <data name="OnboardingWarbandTitle" xml:space="preserve">
     <value>Build your warband</value>
@@ -3419,5 +3419,74 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="WarbandArchivedBannerFormat" xml:space="preserve">
     <value>Warband archived on {0}. View only: no games, no changes.</value>
+  </data>
+  <data name="EndOfGameScenarioNamePh" xml:space="preserve">
+    <value>Scenario</value>
+  </data>
+  <data name="EndOfGameScenarioNameHint" xml:space="preserve">
+    <value>Optional. Free text, written to the History.</value>
+  </data>
+  <data name="EndOfGameScenarioNamePlaceholder" xml:space="preserve">
+    <value>e.g. Street Fight</value>
+  </data>
+  <data name="HistoryResultWithScenarioSentence" xml:space="preserve">
+    <value>Battle ({1}): {0}.</value>
+  </data>
+  <data name="EndOfGameExperienceNoOpponentRating" xml:space="preserve">
+    <value>No opponent rating entered at the start of the game: add any underdog bonus yourself.</value>
+  </data>
+  <data name="EndOfGameExperienceUnderdogFormat" xml:space="preserve">
+    <value>Underdog: rating gap of {0}, +{1} XP per Hero and group.</value>
+  </data>
+  <data name="EndOfGameExperienceNotUnderdog" xml:space="preserve">
+    <value>No underdog bonus for this game.</value>
+  </data>
+  <data name="EndOfGameXpPartSurvival" xml:space="preserve">
+    <value>survival {0}</value>
+  </data>
+  <data name="EndOfGameXpPartWinningLeader" xml:space="preserve">
+    <value>winning leader {0}</value>
+  </data>
+  <data name="EndOfGameXpPartUnderdog" xml:space="preserve">
+    <value>underdog {0}</value>
+  </data>
+  <data name="EndOfGameXpPrefillTipFormat" xml:space="preserve">
+    <value>Pre-filled: {0}.</value>
+  </data>
+  <data name="StartGameOpponentsHeading" xml:space="preserve">
+    <value>Opponents</value>
+  </data>
+  <data name="StartGameOpponentsHint" xml:space="preserve">
+    <value>Rating of each opposing warband, optional. Used to pre-fill the underdog bonus at the end of the game and for Dramatis Personae aid.</value>
+  </data>
+  <data name="StartGameOpponentLabel" xml:space="preserve">
+    <value>Opposing warband rating</value>
+  </data>
+  <data name="StartGameOpponentNumberFormat" xml:space="preserve">
+    <value>Opponent {0}</value>
+  </data>
+  <data name="StartGameAddOpponent" xml:space="preserve">
+    <value>Add an opponent</value>
+  </data>
+  <data name="StartGameRemoveOpponent" xml:space="preserve">
+    <value>Remove this opponent</value>
+  </data>
+  <data name="StartGameOwnRatingFormat" xml:space="preserve">
+    <value>Your warband: {0}</value>
+  </data>
+  <data name="StartGameNotUnderdog" xml:space="preserve">
+    <value>You are not the underdog: no extra XP.</value>
+  </data>
+  <data name="StartGameNotLowestRating" xml:space="preserve">
+    <value>You are not the lowest-rated warband: no underdog XP.</value>
+  </data>
+  <data name="StartGameNextHighestFormat" xml:space="preserve">
+    <value> with the next highest warband ({0})</value>
+  </data>
+  <data name="StartGameUnderdogFormat" xml:space="preserve">
+    <value>Gap of {0}{1}: underdog, +{2} XP.</value>
+  </data>
+  <data name="StartGameGapTooSmallFormat" xml:space="preserve">
+    <value>Gap of {0}{1}: too small for a bonus.</value>
   </data>
 </root>

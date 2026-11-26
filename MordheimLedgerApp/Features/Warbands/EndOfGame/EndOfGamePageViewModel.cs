@@ -308,6 +308,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         OnPropertyChanged(nameof(PurchasedReserveItemsCost));
         OnPropertyChanged(nameof(PendingSalesTotal));
         OnPropertyChanged(nameof(EquipmentTradingNetTotal));
+        if (CurrentStepKind == StepKind.Experience) ApplyExperiencePrefill();
     }
 
     /// <summary>ExplorationResult ne s'ajoute que si un résultat a effectivement été déclenché par le
@@ -772,6 +773,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             foreach (var row in RecruitRows)
                 row.ExternalHeadCount = ExistingCountForArchetype(row.Archetype.Id);
 
+            CaptureRatingBeforeGame();
             BuildHiredSwordUpkeepEntries();
             BuildDramatisPersonaUpkeepEntries();
             BuildFistfulOfCrownsEntries();
@@ -1217,7 +1219,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         if (Warband is null) return;
 
         var language = LocalizationService.Instance.Language;
-        var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], SelectedResult) };
+        var sentences = new List<string> { ResultHistorySentence() };
 
         // Réserve finale et consommation des vétérans figées AVANT le pipeline : les Apply*Async
         // mutent des guerriers (équipement, effectif, XP) dont ces deux calculs dépendent. La réserve

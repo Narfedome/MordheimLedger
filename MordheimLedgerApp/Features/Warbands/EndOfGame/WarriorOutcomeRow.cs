@@ -79,6 +79,18 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     public int ExperienceGained => int.TryParse(ExperienceGainedText, out var xp) ? xp : 0;
 
+    /// <summary>Astuce sous le total d'XP (1.6) : d'où vient le pré-remplissage (« Pré-rempli : survie 1, chef
+    /// vainqueur 1, outsider 2. »). Vide si rien n'a été pré-rempli. Voir EndOfGamePageViewModel.ApplyExperiencePrefill.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasExperiencePrefillTip))]
+    private string experiencePrefillTip = string.Empty;
+
+    public bool HasExperiencePrefillTip => !string.IsNullOrEmpty(ExperiencePrefillTip);
+
+    /// <summary>Dernier total posé par le pré-remplissage : tant que le champ vaut encore ce texte (le joueur n'y a
+    /// pas touché), un changement de résultat le recalcule ; sinon la saisie du joueur est gardée.</summary>
+    internal string? AppliedExperiencePrefillText { get; set; }
+
     /// <summary>Points d'Expérience alloués à ce Héros via le steppeur de répartition (Prisonniers,
     /// Possédés, Cimetière - voir ExplorationOutcome.GrantsDistributedHeroExperienceFormula) -
     /// totalement distinct d'ExperienceGained (l'étape Expérience, plus tôt dans le wizard, pour l'XP de

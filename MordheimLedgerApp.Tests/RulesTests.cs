@@ -2486,6 +2486,9 @@ public class RulesTests
         var newVampire = new Warrior { Id = 9, IsLeader = true, WarriorArchetypeId = 1 };
 
         Assert.Same(newVampire, LeaderSuccessionRules.RehiredLeaderToKeep(new[] { necromancer, oldVampire, newVampire }, leaderTypes));
+        // Deux chefs vivants d'un type Chef (correction manuelle, ancien rachat) : le plus récent l'emporte, quel que soit l'ordre.
+        var olderLivingVampire = new Warrior { Id = 4, IsLeader = true, WarriorArchetypeId = 1 };
+        Assert.Same(newVampire, LeaderSuccessionRules.RehiredLeaderToKeep(new[] { newVampire, necromancer, olderLivingVampire }, leaderTypes));
         // Un seul chef vivant : rien à faire.
         Assert.Null(LeaderSuccessionRules.RehiredLeaderToKeep(new[] { necromancer, oldVampire }, leaderTypes));
         // Deux chefs vivants, aucun d'un type Chef : rien à trancher ici.

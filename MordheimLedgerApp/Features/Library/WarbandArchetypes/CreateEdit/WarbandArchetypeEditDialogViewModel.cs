@@ -370,6 +370,10 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories),
             IsLargeCreature = warrior.IsLargeCreature,
             GainsExperience = warrior.GainsExperience,
+            MinCount = warrior.MinCount,
+            IsLeader = warrior.IsLeader,
+            IsDesignatedSuccessor = warrior.IsDesignatedSuccessor,
+            CanBeRehiredAfterDeath = warrior.CanBeRehiredAfterDeath,
             RacialProfileId = warrior.RacialProfileId
         };
 

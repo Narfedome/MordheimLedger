@@ -35,6 +35,7 @@
       }
     }
   ],
+  "successorLearnsMagic": true,
   "magicSchools": [
     {
       "id": "school.nurgle-rituals",

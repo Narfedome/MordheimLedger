@@ -16,6 +16,27 @@ Détail technique et décisions : [CLAUDE.md](CLAUDE.md). Historique des imports
 - Accueil, visites guidées, bande d'exemple, nouveautés après mise à jour, accessibilité (clavier, lecteurs d'écran)
 - Stockage 100 % local (SQLite), Android + Windows (Google Play, Microsoft Store)
 
+## 1.6 — Règles du livre de base encore absentes (validé le 2026-11-26)
+Maquettes et récap des décisions : canevas « Chef, Expérience et Scénario » (claude.ai,
+https://claude.ai/artifact/3AUYu6x5dHGEDaxRzZhYF5). Principe inchangé : l'appli propose, le joueur décide (ambre, jamais
+bloquant) ; compagnon de jeu, pas calculatrice de partie.
+- **Valeur des adversaires** au début de partie (1 à 3, facultative), champ partagé avec l'aide des Dramatis Personae.
+- **Outsider** : écart 0-50 rien, 51-75 +1, 76-100 +2, 101-150 +3, 151-300 +4, 301+ +5. Multijoueur (Town Cryer 5) :
+  seule la bande la plus faible, comparée à la bande juste au-dessus d'elle.
+- **Expérience** : saisie simple, pré-remplie (survie +1, chef vainqueur +1, outsider) avec une ligne d'astuce sur
+  l'origine ; ennemis hors de combat et bonus de scénario ajoutés par les joueurs.
+- **Scénario** : nom en saisie libre à l'étape Résultat, repris dans l'Historique (pas de catalogue).
+- **Succession du chef** (livre p. 117 + errata) : étape juste avant le recrutement, si le chef est mort. Tous les Héros
+  (promus de la partie compris), pré-coché : Commandement, puis XP, puis D6. Règle « Chef » transférée. Réglages du
+  Codex plutôt que du code par bande : « Successeur imposé » et « Rachetable après sa mort » (type de guerrier :
+  Nécromancien, Vampire), « Le successeur apprend la magie » (type de bande : Sœurs, Possédés, Kermesse - sort/prière
+  au choix à la première progression). Recruter un nouveau chef : ambre (Vampire : à partir de la partie suivante).
+  Sans successeur possible : avertissement, « Archiver la bande » ou continuer sans chef.
+- **Bandes archivées** : onglet « Archivées » de l'écran des bandes, consultation seule, désarchivables ; base de la
+  future fin de campagne.
+- Plus tard : objets à usage unique à l'écran de début de partie (effets sur le profil). Écarté : déroute, catalogue de
+  scénarios.
+
 ## V2 — Partage entre joueurs (ébauche validée le 2026-11-15)
 Trois thèmes : **sauvegarde**, **partage de bandes/contenu**, **partie connectée en lobby local**. Tout reste local,
 **sans serveur ni compte** (Wi-Fi de la table, fichiers, QR). Ordre : du plus simple au plus risqué, chaque lot

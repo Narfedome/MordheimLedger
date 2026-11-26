@@ -92,6 +92,8 @@ public class WarriorEntity
     public bool IsLargeCreature { get; set; }
     public bool GainsExperience { get; set; } = true;
     public bool IsLeader { get; set; }
+    public bool CastsAsSuccessor { get; set; }
+    public bool HasPendingSuccessorSpell { get; set; }
 
     /// <summary>See Models.Warrior's racial-maximum snapshot fields (copied from the recruiting
     /// WarriorArchetype's RacialProfile at recruitment).</summary>

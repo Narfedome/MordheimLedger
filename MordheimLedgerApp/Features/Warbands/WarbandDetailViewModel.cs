@@ -422,6 +422,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
             IsLargeCreature = w.IsLargeCreature,
             GainsExperience = w.GainsExperience,
             IsLeader = w.IsLeader,
+            CastsAsSuccessor = w.CastsAsSuccessor,
+            HasPendingSuccessorSpell = w.HasPendingSuccessorSpell,
             MaxMovement = w.MaxMovement,
             MaxWeaponSkill = w.MaxWeaponSkill,
             MaxBallisticSkill = w.MaxBallisticSkill,

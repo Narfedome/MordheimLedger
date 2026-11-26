@@ -136,6 +136,16 @@ public class WarriorArchetype
     /// Building's Leadership test - Bâtiment Éventré).</summary>
     public bool IsLeader { get; set; }
 
+    /// <summary>« Successeur imposé » (Codex, section Mort du chef) : à la mort du chef, un Héros de ce type prend la
+    /// tête de la bande quels que soient le Commandement et l'XP des autres ; si la bande n'en a aucun, le livre dit
+    /// qu'elle s'effondre (ex. le Nécromancien des Morts-Vivants). Voir Core.Rules.LeaderSuccessionRules.</summary>
+    public bool IsDesignatedSuccessor { get; set; }
+
+    /// <summary>« Rachetable après sa mort » (type Chef seulement) : le livre interdit de recruter un nouveau chef, sauf
+    /// ce type, à partir de la partie qui suit sa mort - il reprend alors la tête à son successeur (ex. le Vampire).
+    /// Voir LeaderSuccessionRules.RecruitmentNotice.</summary>
+    public bool CanBeRehiredAfterDeath { get; set; }
+
     /// <summary>Which creature body type's characteristic maximums govern this archetype's Advance
     /// rolls (see Core.Rules.CharacteristicIncreaseRules) - see Models.Library.RacialProfile. Copied
     /// onto Warrior at recruitment as a snapshot (see EntityMapping.ToWarrior/Warrior.MaxWeaponSkill

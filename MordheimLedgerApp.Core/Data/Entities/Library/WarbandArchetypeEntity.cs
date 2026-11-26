@@ -21,4 +21,5 @@ public class WarbandArchetypeEntity
     public string? DescriptionKey { get; set; }
     public string? ImagePath { get; set; }
     public int RaceId { get; set; }
+    public bool SuccessorLearnsMagic { get; set; }
 }

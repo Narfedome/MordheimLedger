@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.LeaderSuccessionStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+    <!-- Étape : Nouveau chef (1.6, livre p. 117 + errata) - voir EndOfGamePageViewModel.LeaderSuccession. Tous les
+         Héros, celui que désigne le livre pré-coché ; un autre choix n'est jamais bloqué (message ambre). -->
+    <VerticalStackLayout Spacing="12">
+        <VerticalStackLayout Spacing="2">
+            <Label Text="{loc:Loc LeaderSuccessionHeading}" FontAttributes="Bold"/>
+            <Label Text="{Binding LeaderSuccessionIntro}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+        </VerticalStackLayout>
+
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <VerticalStackLayout Spacing="8">
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding LeaderCandidates}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:LeaderCandidateRow">
+                            <!-- Dessin InputTransparent + Button transparent par-dessus (accessibilité, voir CLAUDE.md). -->
+                            <Grid>
+                                <Border Padding="12,8" StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                                        Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppBackground}"
+                                        AutomationProperties.IsInAccessibleTree="False" InputTransparent="True">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                        <Label Grid.Column="0" Text="{x:Static icons:RegularFont.Circle}" FontFamily="FontRegular" FontSize="16"
+                                               TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Text" Value="{x:Static icons:SolidFont.CircleDot}"/>
+                                                    <Setter Property="FontFamily" Value="FontSolid"/>
+                                                    <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                            <Label Text="{Binding SubtitleText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center" HorizontalOptions="End">
+                                            <Label Text="{Binding LeadershipText}" FontSize="13" HorizontalTextAlignment="End"/>
+                                            <Label Text="{Binding ExperienceText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="End"/>
+                                            <Label Text="{Binding TieRoll, StringFormat='D6 : {0}'}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                                                   HorizontalTextAlignment="End" IsVisible="{Binding HasTieRoll}"/>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Border>
+                                <Button BackgroundColor="Transparent" BorderWidth="0" CornerRadius="8" Padding="0"
+                                        SemanticProperties.Description="{Binding Name}"
+                                        SemanticProperties.Hint="{Binding SubtitleText}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectLeaderCandidateCommand}"
+                                        CommandParameter="{Binding .}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Égalité de Commandement et d'XP : départage au D6. -->
+                <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowLeaderTie}">
+                    <Label Text="{Binding LeaderTieText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Button Text="{loc:Loc LeaderSuccessionRollTie}" HorizontalOptions="Start" Command="{Binding RollLeaderTieCommand}"/>
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding HasLeaderOffProposal}">
+                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid" FontSize="12"
+                           TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                    <Label Grid.Column="1" Text="{Binding LeaderOffProposalText}" FontSize="13" TextColor="{DynamicResource AppWarning}"/>
+                </Grid>
+
+                <!-- Pas de successeur possible (bande qui s'effondre, aucun Héros) : avertissement + archivage à Terminer. -->
+                <VerticalStackLayout Spacing="8" IsVisible="{Binding HasLeaderCollapse}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid" FontSize="12"
+                               TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                        <Label Grid.Column="1" Text="{Binding LeaderCollapseText}" FontSize="13" TextColor="{DynamicResource AppWarning}"/>
+                    </Grid>
+                    <Button Text="{Binding ArchiveWarbandButtonText}" HorizontalOptions="Start" Command="{Binding ToggleArchiveWarbandCommand}"/>
+                    <Label Text="{Binding ArchiveWarbandNote}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                           IsVisible="{Binding ArchiveWarbandAtFinish}"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasSelectedLeader}">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="{Binding LeaderGainsText}" FontSize="13"/>
+                <Label Text="{Binding LeaderNoHireNote}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+            </VerticalStackLayout>
+        </Border>
+    </VerticalStackLayout>
+</ContentView>

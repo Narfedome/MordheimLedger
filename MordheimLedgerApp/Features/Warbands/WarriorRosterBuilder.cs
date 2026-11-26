@@ -26,6 +26,10 @@ public sealed class WarriorRosterBuilder
 
     private static LocalizationService Loc => LocalizationService.Instance;
 
+    /// <summary>La règle « Chef » du catalogue, prise sur un type de guerrier de la bande qui la porte.</summary>
+    private SpecialRule? LeaderRule => _recruitableArchetypes.SelectMany(a => a.SpecialRules)
+        .FirstOrDefault(r => r.OfficialId == Core.Data.OfficialIds.LeaderRule);
+
     public WarriorRosterBuilder(List<WarriorArchetype> recruitableArchetypes, List<HiredSword> recruitableHiredSwords,
         List<DramatisPersona> recruitableDramatisPersonae, List<SpecialRule> bandWideSpecialRules, List<MagicSchool> bandMagicSchools,
         Dictionary<int, string> warbandArchetypeNames)
@@ -89,9 +93,12 @@ public sealed class WarriorRosterBuilder
         // puce en double déjà écarté pour les Blessures le 2026-08-26 : "une fois via ... dans Blessures,
         // une fois via ... dans Règles spéciales").
         var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id);
+        // Successeur du chef (1.6) : il porte la règle Chef même si son type ne l'a pas (ex. le Nécromancien).
+        if (warrior.IsLeader && LeaderRule is { } leaderRule && mergedRules.All(r => r.Id != leaderRule.Id))
+            mergedRules = mergedRules.Append(leaderRule);
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
-        var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;
+        var magicSchools = archetype?.IsSpellcaster == true || warrior.CastsAsSuccessor ? _bandMagicSchools : null;
         var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) })
             .Concat(BuildRuleHatredChips(HatredSourceRules(warrior, mergedRules)))
             .Concat(BuildSkillHatredChips(warrior.Skills.Select(s => s.Item)));

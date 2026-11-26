@@ -253,6 +253,24 @@ e-mails exigeait de vérifier un domaine chez Resend, retiré) : le joueur voit 
 (`relay/dashboard/worker.js` du dépôt Support, généré par `npm run build:dashboard`). Tant que `FeedbackService.Endpoint` est nul, Paramètres ouvre encore le Google Form. Pas fait : copie de
 la bande jointe (attend l'export de la v2). Politique de confidentialité du site mise à jour (FR/EN).
 
+**Règles du livre de base restantes (branche `claude/nifty-hopper-dn1cdr`, 1.6, 2026-11-26)** : maquettes et récap des
+décisions sur le canevas « Chef, Expérience et Scénario » (claude.ai). Core : `Rules/UnderdogExperience` (table de
+l'outsider, multijoueur du Town Cryer 5 : la bande la plus faible contre celle juste au-dessus), `Rules/ExperiencePrefill`
+(survie, chef vainqueur, outsider), `Rules/LeaderSuccessionRules` (Commandement > XP > D6, successeur imposé, bande qui
+s'effondre, avertissement au recrutement d'un chef), `Services/LeaderSuccessionService` (succession, chef racheté, archivage ;
+`LeaderSuccessionServiceTests`). Réglages du Codex plutôt que du code par bande : `WarriorArchetype.IsDesignatedSuccessor`
+(Nécromancien), `CanBeRehiredAfterDeath` (Vampire), `WarbandArchetype.SuccessorLearnsMagic` (Sœurs, Possédés, Kermesse) ;
+le successeur porte `Warrior.CastsAsSuccessor`/`HasPendingSuccessorSpell` (sort au choix à sa première progression).
+Appli : valeurs adverses au début de partie (`Warband.OpponentRatings`, partagées avec l'aide des Dramatis Personae), nom du
+scénario en saisie libre (Historique), XP pré-remplie avec une ligne d'astuce (jamais imposée), étape « Nouveau chef » juste
+avant le recrutement (`EndOfGamePageViewModel.LeaderSuccession`), message ambre au recrutement d'un chef, bandes archivées
+(onglet « Archivées », fiche en lecture seule, désarchivables - `Warband.IsArchived`). Corrigé au passage : la copie faite
+avant l'édition d'un type de guerrier/de bande dans le Codex perdait `IsLeader`/`MinCount`/`MinWarriors` ; la case « Chef »
+du Codex pilote désormais `IsLeader`. **Vérifier l'UI sans Windows** : un projet jetable `net10.0` qui inclut les `.cs`/
+`.xaml` de l'appli (`MauiXaml` avec `Link="%(RecursiveDir)..."`, sans `UseMaui`) compile l'appli entière sous Linux ;
+`dotnet build -c Release -p:MauiXamlInflator=XamlC` y signale les liaisons introuvables (XC0045). Ne remplace pas une
+recette sur appareil.
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

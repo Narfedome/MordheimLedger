@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.RecruitHeroesCountStepView"
              x:DataType="local:EndOfGamePageViewModel">
@@ -27,6 +28,14 @@
                                                             IncrementCommand="{Binding IncrementRecruitCommand}"
                                                             DecrementCommand="{Binding DecrementRecruitCommand}"
                                                             DetailCommand="{Binding ShowWarriorDetailCommand}"/>
+                        <!-- Recruter un nouveau chef (1.6) : le livre l'interdit - message ambre, jamais un blocage. -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding HasLeaderRecruitmentNotice}">
+                            <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid" FontSize="12"
+                                   TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                            <Label Grid.Column="1" Text="{Binding LeaderRecruitmentNoticeText}" FontSize="13" TextColor="{DynamicResource AppWarning}"/>
+                        </Grid>
+                        <Label Text="{Binding LeaderRehireInfoText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                               IsVisible="{Binding HasLeaderRehireInfo}"/>
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>

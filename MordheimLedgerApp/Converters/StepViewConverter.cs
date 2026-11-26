@@ -50,6 +50,7 @@ namespace MordheimLedgerApp.Converters
                 EndOfGamePageViewModel.StepKind.PairDuel => new PairDuelStepView(),
                 EndOfGamePageViewModel.StepKind.DismissWarriors => new DismissWarriorsStepView(),
                 EndOfGamePageViewModel.StepKind.EquipmentTrading => new EquipmentTradingStepView(),
+                EndOfGamePageViewModel.StepKind.LeaderSuccession => new LeaderSuccessionStepView(),
                 EndOfGamePageViewModel.StepKind.RecruitHeroesCount => new RecruitHeroesCountStepView(),
                 EndOfGamePageViewModel.StepKind.RecruitHeroDetail => new RecruitHeroDetailStepView(),
                 EndOfGamePageViewModel.StepKind.RecruitVeteranTopUp => new RecruitVeteranTopUpStepView(),

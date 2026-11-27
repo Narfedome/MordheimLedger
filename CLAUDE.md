@@ -282,7 +282,7 @@ Sorcières et Sœurs de Sigmar (`restrictedToWarbandIds`).
 **Races par type et objets à usage unique (branche `feature/consumables`, 1.6, 2026-11-27)** : canevas « Objets à usage
 unique » (claude.ai). Race ≠ type ≠ classe ≠ profil racial (maximums seulement, pas fusionnable avec la race) :
 `WarriorArchetype`/`HiredSword`/`DramatisPersona.RaceId` (null = race de la bande, `Rules/RaceRules.EffectiveRaceId`),
-choisi dans le Codex via `Components/RaceChoice` ; supprimer une race vide ses références (`LibraryService.
+choisi dans le Codex via `Components/RaceChoice` ; races et profils raciaux ont leur section « Races » du Codex, juste après Bandes (`Races/RaceSectionView`, onglets Races / Profils raciaux, listes à plat) - les deux icônes « gérer » de la section Bandes et leurs pages à part (`RaceListPage`/`RacialProfileListPage`) sont supprimées ; supprimer une race vide ses références (`LibraryService.
 DeleteRaceAsync`, usage par `GetRaceUsageAsync`). Objets : `EquipmentItem.SingleUse` (`Models/Library/SingleUse.cs`, JSON
 `SingleUseJson` comme les effets de compétences : moment, cible Guerrier/Arme/Bande, bonus de la partie avec dés, table de
 conséquences) et `NoEffectOnRaceIds` (CSV, déclaré dans `OfficialContentSchema`). Partie en cours : `GameItemUse`

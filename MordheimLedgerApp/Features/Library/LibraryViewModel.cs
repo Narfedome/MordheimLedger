@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
 using MordheimLedgerApp.Features.Library.Injuries;
@@ -9,6 +9,8 @@ using MordheimLedgerApp.Features.Library.Mutations;
 using MordheimLedgerApp.Features.Library.HiredSwords;
 using MordheimLedgerApp.Features.Library.DramatisPersonae;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
+
+using MordheimLedgerApp.Features.Library.Races;
 
 namespace MordheimLedgerApp.Features.Library;
 
@@ -34,7 +36,7 @@ public partial class LibraryViewModel : BaseViewModel
     /// both the ActionSheet options and SelectedTabLabel, see SelectTab/RefreshSelectedTabLabel.</summary>
     private static readonly string[] TabKeys =
     [
-        "TabWarbands", "LibTabTradingPost", "TabSkills", "TabInjuries",
+        "TabWarbands", "LibTabRaces", "LibTabTradingPost", "TabSkills", "TabInjuries",
         "LibTabSpells", "LibTabSpecialRules", "LibTabMutations", "LibTabHiredSwords", "LibTabDramatisPersonae"
     ];
 
@@ -47,9 +49,11 @@ public partial class LibraryViewModel : BaseViewModel
     public MutationViewModel Mutations { get; }
     public HiredSwordViewModel HiredSwords { get; }
     public DramatisPersonaViewModel DramatisPersonae { get; }
+    public RaceSectionViewModel RaceSection { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
+    [NotifyPropertyChangedFor(nameof(IsRacesTab))]
     [NotifyPropertyChangedFor(nameof(IsTradingPostTab))]
     [NotifyPropertyChangedFor(nameof(IsSkillsTab))]
     [NotifyPropertyChangedFor(nameof(IsInjuriesTab))]
@@ -67,17 +71,19 @@ public partial class LibraryViewModel : BaseViewModel
     private string selectedTabLabel = string.Empty;
 
     public bool IsWarbandsTab => SelectedTab == 0;
-    public bool IsTradingPostTab => SelectedTab == 1;
-    public bool IsSkillsTab => SelectedTab == 2;
-    public bool IsInjuriesTab => SelectedTab == 3;
-    public bool IsSpellsTab => SelectedTab == 4;
-    public bool IsSpecialRulesTab => SelectedTab == 5;
-    public bool IsMutationsTab => SelectedTab == 6;
-    public bool IsHiredSwordsTab => SelectedTab == 7;
-    public bool IsDramatisPersonaeTab => SelectedTab == 8;
+    public bool IsRacesTab => SelectedTab == 1;
+    public bool IsTradingPostTab => SelectedTab == 2;
+    public bool IsSkillsTab => SelectedTab == 3;
+    public bool IsInjuriesTab => SelectedTab == 4;
+    public bool IsSpellsTab => SelectedTab == 5;
+    public bool IsSpecialRulesTab => SelectedTab == 6;
+    public bool IsMutationsTab => SelectedTab == 7;
+    public bool IsHiredSwordsTab => SelectedTab == 8;
+    public bool IsDramatisPersonaeTab => SelectedTab == 9;
 
     // Bandes (onglet 0) est chargé dès InitializeAsync (voir plus bas) - les 8 autres ne le sont qu'au
     // premier passage sur leur onglet, voir EnsureTabLoadedAsync.
+    private bool _racesLoaded;
     private bool _equipmentItemsLoaded;
     private bool _skillsLoaded;
     private bool _injuriesLoaded;
@@ -89,7 +95,7 @@ public partial class LibraryViewModel : BaseViewModel
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
         SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules,
-        MutationViewModel mutations, HiredSwordViewModel hiredSwords, DramatisPersonaViewModel dramatisPersonae)
+        MutationViewModel mutations, HiredSwordViewModel hiredSwords, DramatisPersonaViewModel dramatisPersonae, RaceSectionViewModel raceSection)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
@@ -100,6 +106,7 @@ public partial class LibraryViewModel : BaseViewModel
         Mutations = mutations;
         HiredSwords = hiredSwords;
         DramatisPersonae = dramatisPersonae;
+        RaceSection = raceSection;
         RefreshSelectedTabLabel();
     }
 
@@ -138,27 +145,30 @@ public partial class LibraryViewModel : BaseViewModel
         switch (index)
         {
             case 1:
-                if (!_equipmentItemsLoaded) { await EquipmentItems.InitializeAsync(); _equipmentItemsLoaded = true; }
+                if (!_racesLoaded) { await RaceSection.InitializeAsync(); _racesLoaded = true; }
                 break;
             case 2:
-                if (!_skillsLoaded) { await Skills.InitializeAsync(); _skillsLoaded = true; }
+                if (!_equipmentItemsLoaded) { await EquipmentItems.InitializeAsync(); _equipmentItemsLoaded = true; }
                 break;
             case 3:
-                if (!_injuriesLoaded) { await Injuries.InitializeAsync(); _injuriesLoaded = true; }
+                if (!_skillsLoaded) { await Skills.InitializeAsync(); _skillsLoaded = true; }
                 break;
             case 4:
-                if (!_spellsLoaded) { await Spells.InitializeAsync(); _spellsLoaded = true; }
+                if (!_injuriesLoaded) { await Injuries.InitializeAsync(); _injuriesLoaded = true; }
                 break;
             case 5:
-                if (!_specialRulesLoaded) { await SpecialRules.InitializeAsync(); _specialRulesLoaded = true; }
+                if (!_spellsLoaded) { await Spells.InitializeAsync(); _spellsLoaded = true; }
                 break;
             case 6:
-                if (!_mutationsLoaded) { await Mutations.InitializeAsync(); _mutationsLoaded = true; }
+                if (!_specialRulesLoaded) { await SpecialRules.InitializeAsync(); _specialRulesLoaded = true; }
                 break;
             case 7:
-                if (!_hiredSwordsLoaded) { await HiredSwords.InitializeAsync(); _hiredSwordsLoaded = true; }
+                if (!_mutationsLoaded) { await Mutations.InitializeAsync(); _mutationsLoaded = true; }
                 break;
             case 8:
+                if (!_hiredSwordsLoaded) { await HiredSwords.InitializeAsync(); _hiredSwordsLoaded = true; }
+                break;
+            case 9:
                 if (!_dramatisPersonaeLoaded) { await DramatisPersonae.InitializeAsync(); _dramatisPersonaeLoaded = true; }
                 break;
         }

@@ -206,9 +206,8 @@ namespace MordheimLedgerApp
             builder.Services.AddSingleton<IMagicSchoolPickerNavigationService, MagicSchoolPickerNavigationService>();
             builder.Services.AddSingleton<IMagicSchoolPickerService, MagicSchoolPickerService>();
             builder.Services.AddTransient<RaceViewModel>();
-            builder.Services.AddTransient<RaceListPage>();
+            builder.Services.AddTransient<RaceSectionViewModel>();
             builder.Services.AddTransient<RacialProfileViewModel>();
-            builder.Services.AddTransient<RacialProfileListPage>();
             builder.Services.AddTransient<LibraryViewModel>();
             builder.Services.AddTransient<LibraryPage>();
 

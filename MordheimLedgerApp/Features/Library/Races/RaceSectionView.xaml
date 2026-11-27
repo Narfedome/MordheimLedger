@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Features.Library.Races.RaceSectionView"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Races"
+             xmlns:profiles="clr-namespace:MordheimLedgerApp.Features.Library.RacialProfiles"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:DataType="local:RaceSectionViewModel">
+    <!-- Section « Races » du Codex : onglets Races / Profils raciaux, chacun sa liste à plat (RaceView, RacialProfileView). -->
+    <Grid RowDefinitions="Auto,*">
+        <components:ScrollableTabStripView Grid.Row="0" Margin="12,0,12,4">
+            <HorizontalStackLayout Spacing="16">
+                <components:TabToggleButton Text="{loc:Loc LibTabRaces}" Command="{Binding ShowRacesCommand}"
+                                             IsActive="{Binding IsRacesTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc LibTabRacialProfiles}" Command="{Binding ShowRacialProfilesCommand}"
+                                             IsActive="{Binding IsRacialProfilesTab}" FontSize="12"/>
+            </HorizontalStackLayout>
+        </components:ScrollableTabStripView>
+        <local:RaceView Grid.Row="1" BindingContext="{Binding Races}"
+                        IsVisible="{Binding IsRacesTab, Source={RelativeSource AncestorType={x:Type local:RaceSectionViewModel}}}"/>
+        <profiles:RacialProfileView Grid.Row="1" BindingContext="{Binding RacialProfiles}"
+                        IsVisible="{Binding IsRacialProfilesTab, Source={RelativeSource AncestorType={x:Type local:RaceSectionViewModel}}}"/>
+    </Grid>
+</ContentView>

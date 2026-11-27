@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -125,8 +125,4 @@ public partial class RaceViewModel : BaseViewModel
         return string.Join(", ", parts);
     }
 
-    /// <summary>Only bound when this ViewModel backs the standalone RaceListPage (reached from the
-    /// Bandes tab's "Gérer les Races" button) - même idiome que MagicSchoolViewModel.Back.</summary>
-    [RelayCommand]
-    private static async Task Back() => await Shell.Current.GoToAsync("..");
 }

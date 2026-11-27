@@ -3942,4 +3942,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="SingleUseOtherResultsNone" xml:space="preserve">
     <value>Other results: no effect.</value>
   </data>
+  <data name="LibTabRaces" xml:space="preserve">
+    <value>Races</value>
+  </data>
+  <data name="LibTabRacialProfiles" xml:space="preserve">
+    <value>Racial profiles</value>
+  </data>
 </root>

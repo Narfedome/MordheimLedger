@@ -3942,4 +3942,10 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="SingleUseOtherResultsNone" xml:space="preserve">
     <value>Autres résultats : sans effet.</value>
   </data>
+  <data name="LibTabRaces" xml:space="preserve">
+    <value>Races</value>
+  </data>
+  <data name="LibTabRacialProfiles" xml:space="preserve">
+    <value>Profils raciaux</value>
+  </data>
 </root>

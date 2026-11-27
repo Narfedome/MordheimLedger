@@ -11,6 +11,7 @@
              xmlns:mutations="clr-namespace:MordheimLedgerApp.Features.Library.Mutations"
              xmlns:hiredSwords="clr-namespace:MordheimLedgerApp.Features.Library.HiredSwords"
              xmlns:dramatisPersonae="clr-namespace:MordheimLedgerApp.Features.Library.DramatisPersonae"
+             xmlns:races="clr-namespace:MordheimLedgerApp.Features.Library.Races"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:services="clr-namespace:MordheimLedgerApp.Services"
@@ -48,6 +49,8 @@
              sa valeur par défaut (true), les 4 sections restent toutes visibles superposées. -->
         <warbandArchetypes:WarbandArchetypeView Grid.Row="1" BindingContext="{Binding WarbandArchetypes}"
             IsVisible="{Binding IsWarbandsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
+        <races:RaceSectionView Grid.Row="1" BindingContext="{Binding RaceSection}"
+            IsVisible="{Binding IsRacesTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
         <equipmentItems:EquipmentItemView Grid.Row="1" BindingContext="{Binding EquipmentItems}"
             IsVisible="{Binding IsTradingPostTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
         <skills:SkillView Grid.Row="1" BindingContext="{Binding Skills}"

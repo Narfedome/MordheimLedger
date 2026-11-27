@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -110,6 +110,4 @@ public partial class RacialProfileViewModel : BaseViewModel
         await LoadData();
     }
 
-    [RelayCommand]
-    private static async Task Back() => await Shell.Current.GoToAsync("..");
 }

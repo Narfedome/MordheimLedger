@@ -1,12 +1,10 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.RacialProfiles;
-using MordheimLedgerApp.Features.Library.Races;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Services;
 
@@ -234,17 +232,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         await LoadData();
     }
 
-    /// <summary>Ouvre le catalogue Race en édition (Créer/Renommer/Supprimer) - même idiome que
-    /// SpellViewModel.ManageMagicSchools, reflété ici sur l'onglet Bandes puisque Race classifie
-    /// WarbandArchetype comme MagicSchool classifie Spell.</summary>
-    [RelayCommand]
-    private static async Task ManageRaces() => await Shell.Current.GoToAsync(nameof(RaceListPage));
 
-    /// <summary>Ouvre le catalogue RacialProfile (maximums de caractéristiques par type de créature) -
-    /// même idiome que ManageRaces juste au-dessus, reflété ici pour la même raison (WarriorArchetype,
-    /// pas WarbandArchetype directement, mais aucun onglet Codex dédié pour l'instant).</summary>
-    [RelayCommand]
-    private static async Task ManageRacialProfiles() => await Shell.Current.GoToAsync(nameof(RacialProfileListPage));
 
     [RelayCommand]
     private async Task Delete()

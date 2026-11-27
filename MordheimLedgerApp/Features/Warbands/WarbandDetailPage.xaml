@@ -135,11 +135,26 @@
                              du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup
                              de cartes guerrier d'affilée. -->
                         <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}" Margin="0,8,0,8"
+                                                 GameModifiers="{Binding GameModifiers}"
                                                  AbbrFontSize="10" ValueFontSize="13">
                             <components:StatRowView.Behaviors>
                                 <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardStatsKey}"/>
                             </components:StatRowView.Behaviors>
                         </components:StatRowView>
+
+                        <!-- Objets à usage unique pris pour la partie en cours (début de partie) : valeurs de la partie en
+                             couleur d'accent dans le profil ci-dessus, détail et puces ici ; retirés à la Fin de partie. -->
+                        <Label Text="{Binding GameProfileText}" IsVisible="{Binding HasGameProfile}" FontSize="11"
+                               TextColor="{DynamicResource AppAccent}" Margin="0,0,0,4"/>
+                        <components:ChipListView HeaderText="{loc:Loc SingleUseThisGameHeading}"
+                                                  ItemsSource="{Binding GameUseChips}"
+                                                  IconGlyph="{x:Static icons:SolidFont.HourglassHalf}"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"/>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasAddiction}" Margin="0,4">
+                            <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid" FontSize="12"
+                                   TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                            <Label Grid.Column="1" Text="{Binding AddictionText}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                        </Grid>
 
                         <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
                              ViewModel depuis WarriorArchetype.SpecialRules + WarbandArchetype.
@@ -403,6 +418,11 @@
         <components:ScrollHintHost Grid.Row="2" IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
         <ScrollView x:Name="RosterScroll">
             <VerticalStackLayout Spacing="0" Margin="0,8">
+
+                <!-- Objets pris pour toute la bande au début de la partie en cours (Bière de Bugman). -->
+                <Border Style="{StaticResource SectionCardBorderStyle}" Margin="16,4,16,8" IsVisible="{Binding HasGameBanner}">
+                    <Label Text="{Binding GameBanner}" FontSize="13"/>
+                </Border>
 
                 <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
                     <Grid.Behaviors>

@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Extensions;
 
@@ -201,5 +202,40 @@ public partial class StatRowView : ContentView
         for (var i = 0; i < _valueLabels.Count; i++)
             _valueLabels[i].SetDynamicResource(Label.TextColorProperty,
                 changes[i].Decreased ? "AppDanger" : changes[i].Increased ? "AppSuccess" : "AppText");
+        ApplyGameModifiers(warrior);
+    }
+
+    /// <summary>Bonus de la partie en cours (objets à usage unique, ex. Ombre Cramoisie I +2) : valeur de la partie en
+    /// couleur d'accent, distincte du vert/rouge « a bougé depuis le recrutement ». Vide = profil normal.</summary>
+    public static readonly BindableProperty GameModifiersProperty =
+        BindableProperty.Create(nameof(GameModifiers), typeof(IReadOnlyList<RolledStatModifier>), typeof(StatRowView), null,
+            propertyChanged: (b, _, _) => ((StatRowView)b).ApplyValueColors());
+
+    public IReadOnlyList<RolledStatModifier>? GameModifiers
+    {
+        get => (IReadOnlyList<RolledStatModifier>?)GetValue(GameModifiersProperty);
+        set => SetValue(GameModifiersProperty, value);
+    }
+
+    private static readonly CharacteristicField[] Fields =
+    [
+        CharacteristicField.Movement, CharacteristicField.WeaponSkill, CharacteristicField.BallisticSkill, CharacteristicField.Strength,
+        CharacteristicField.Toughness, CharacteristicField.Wounds, CharacteristicField.Initiative, CharacteristicField.Attacks,
+        CharacteristicField.Leadership,
+    ];
+
+    private void ApplyGameModifiers(Warrior? warrior)
+    {
+        if (warrior is null || GameModifiers is not { Count: > 0 } modifiers) return;
+        for (var i = 0; i < _valueLabels.Count && i < Fields.Length; i++)
+        {
+            var field = Fields[i];
+            if (modifiers.All(m => m.Field != field)) continue;
+            if (CharacteristicModifier.Read(warrior, field) is not { } value) continue;
+            var label = _valueLabels[i];
+            label.RemoveBinding(Label.TextProperty);
+            label.Text = SingleUseRules.GameValue(value, field, modifiers).ToString();
+            label.SetDynamicResource(Label.TextColorProperty, "AppAccent");
+        }
     }
 }

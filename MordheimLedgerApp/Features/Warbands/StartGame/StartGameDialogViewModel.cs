@@ -25,7 +25,11 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
     public bool HasOldWoundRolls => OldWoundEntries.Count > 0;
     public bool HasAidEntries => AidEntries.Count > 0;
     public bool HasNextGameNote => !string.IsNullOrWhiteSpace(NextGameNote);
-    public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasAidEntries && !HasNextGameNote;
+    public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasAidEntries && !HasNextGameNote && !HasBeforeBattleItems;
+
+    /// <summary>Objets à usage unique et dépendants (section « Avant la bataille »).</summary>
+    public List<BeforeBattleItemEntry> BeforeBattleItems { get; }
+    public bool HasBeforeBattleItems => BeforeBattleItems.Count > 0;
 
     // --- Adversaires (1.6) : valeur de chaque bande adverse, facultative, jusqu'à 3 ---
 
@@ -102,8 +106,9 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
     public List<string> AidRuleTierRows { get; }
 
     public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundWarriorEntry> oldWoundEntries,
-        List<DramatisPersonaAidEntry> aidEntries, string? nextGameNote, int ownRating)
+        List<DramatisPersonaAidEntry> aidEntries, string? nextGameNote, int ownRating, List<BeforeBattleItemEntry>? beforeBattleItems = null)
     {
+        BeforeBattleItems = beforeBattleItems ?? new List<BeforeBattleItemEntry>();
         _ownRating = ownRating;
         OwnRatingText = string.Format(LocalizationService.Instance["StartGameOwnRatingFormat"], ownRating);
         UnavailableWarriors = unavailableWarriors;
@@ -139,4 +144,7 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
 
     [RelayCommand]
     private void AutoRollAid(DramatisPersonaAidEntry entry) => entry.Roll = Random.Shared.Next(1, 7).ToString();
+
+    [RelayCommand]
+    private void AutoRollModifier(DiceModifierEntry entry) => entry.Roll = Random.Shared.Next(1, (entry.Modifier.DiceSides ?? 6) + 1).ToString();
 }

@@ -191,6 +191,65 @@
                         </VerticalStackLayout>
                     </VerticalStackLayout>
 
+                    <!-- Avant la bataille (objets à usage unique) : objets pris pour la partie, retirés de la fiche à la Fin de
+                         partie ; dépendants sans dose. Jamais bloquant : une case contraire à la règle affiche un message ambre. -->
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasBeforeBattleItems}">
+                        <Label Text="{loc:Loc SingleUseBeforeBattleHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{loc:Loc SingleUseBeforeBattleHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding BeforeBattleItems}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:BeforeBattleItemEntry">
+                                    <Border Style="{StaticResource SectionCardBorderStyle}">
+                                        <VerticalStackLayout Spacing="6">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                <CheckBox AutomationId="BeforeBattleCheckBox" Grid.Column="0" IsChecked="{Binding IsChecked}"
+                                                          IsEnabled="{Binding IsUnlocked}" VerticalOptions="Center"
+                                                          SemanticProperties.Description="{Binding Title}"/>
+                                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                    <Label Text="{Binding Title}" FontAttributes="Bold"/>
+                                                    <Label Text="{Binding Subtitle}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                            <Label Text="{loc:Loc SingleUseLockedHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                                   IsVisible="{Binding IsLocked}"/>
+                                            <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowDice}" BindableLayout.ItemsSource="{Binding DiceModifiers}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="local:DiceModifierEntry">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                            <Label Grid.Column="0" Text="{Binding Label}" FontSize="12" VerticalOptions="Center"/>
+                                                            <Entry Grid.Column="1" Text="{Binding Roll}" Keyboard="Numeric"
+                                                                   Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60" VerticalOptions="Center">
+                                                                <Entry.Behaviors>
+                                                                    <components:DigitsOnlyBehavior/>
+                                                                </Entry.Behaviors>
+                                                            </Entry>
+                                                            <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                                          Style="{StaticResource GhostIconButtonStyle}" VerticalOptions="Center"
+                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=AutoRollModifierCommand}"
+                                                                                          CommandParameter="{Binding .}"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowWeapons}">
+                                                <Label Text="{loc:Loc SingleUsePoisonedWeaponPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                <components:SelectFieldView Title="{loc:Loc SingleUsePoisonedWeaponPh}" ItemsSource="{Binding WeaponOptions}"
+                                                        SelectedItem="{Binding SelectedWeapon}"/>
+                                                <Label Text="{loc:Loc SingleUsePoisonHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            </VerticalStackLayout>
+                                            <Label Text="{Binding ProfileText}" IsVisible="{Binding HasProfile}" FontSize="12" TextColor="{DynamicResource AppAccent}"/>
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasWarning}">
+                                                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid" FontSize="12"
+                                                       TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                                <Label Grid.Column="1" Text="{Binding Warning}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                                            </Grid>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
                     <!-- Effets actifs pour cette partie : Warband.NextGameNote, simple rappel textuel (voir sa
                          doc) - pas encore d'accumulation possible si plusieurs effets étaient actifs à la fois
                          (limite connue, confirmée avec l'utilisateur 2026-08-26 : laissé tel quel pour l'instant). -->

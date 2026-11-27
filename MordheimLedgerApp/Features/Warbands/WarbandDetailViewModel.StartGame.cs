@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
 using MordheimLedgerApp.Features.Warbands.StartGame;
 using MordheimLedgerApp.Services;
@@ -60,7 +62,8 @@ public partial class WarbandDetailViewModel
             .Select(r => new DramatisPersonaAidEntry(r.Warrior, dramatisPersonaeById[r.Warrior.DramatisPersonaId!.Value].Name, Rating))
             .ToList();
 
-        var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, aidEntries, Warband.NextGameNote, Rating);
+        var beforeBattleItems = await BuildBeforeBattleItemsAsync(Warband);
+        var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, aidEntries, Warband.NextGameNote, Rating, beforeBattleItems);
         if (await ShowDialogAsync(new StartGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -92,6 +95,17 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaDepartedSentence"], entry.Warrior.Name));
             }
 
+            // Objets à usage unique (« Avant la bataille ») : dépendants sans dose qui quittent la bande, objets pris.
+            var singleUse = new SingleUseService(_warbandService, _libraryService);
+            foreach (var entry in dialogViewModel.BeforeBattleItems.Where(e => e.Kind == BeforeBattleEntryKind.AddictionLeave && e.IsChecked))
+            {
+                await singleUse.LeaveForAddictionAsync(entry.Warrior!);
+                sentences.Add(string.Format(Loc["HistoryAddictionLeftSentence"], entry.Warrior!.Name, entry.Title));
+            }
+            await singleUse.StartGameAsync(Warband.Id, dialogViewModel.BeforeBattleItems
+                .Where(e => e.Kind == BeforeBattleEntryKind.Item && e.IsChecked)
+                .Select(e => e.ToUse()).ToList());
+
             if (sentences.Count > 0)
                 await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
 
@@ -101,5 +115,80 @@ public partial class WarbandDetailViewModel
             await _warbandService.SaveWarbandAsync(Warband);
             await LoadAsync(Warband.Id);
         });
+    }
+
+    /// <summary>Section « Avant la bataille » : chaque objet à usage unique proposé avant la bataille (pris ou valable une
+    /// partie) porté par un guerrier actif, les objets pour toute la bande (porté ou en réserve), et chaque dépendant -
+    /// sa dose pré-cochée s'il en a une (sur lui ou en réserve), sinon la ligne « quitte la bande » cochée.</summary>
+    private async Task<List<BeforeBattleItemEntry>> BuildBeforeBattleItemsAsync(Warband warband)
+    {
+        var language = LocalizationService.Instance.Language;
+        var items = (await _libraryService.GetEquipmentItemsAsync(language)).ToDictionary(i => i.Id);
+        var warbandRaceId = (await _libraryService.GetWarbandArchetypeAsync(warband.WarbandArchetypeId, language))?.RaceId;
+        var typeRaces = _recruitableArchetypes.ToDictionary(a => a.Id, a => a.RaceId);
+        var hiredSwordRaces = _recruitableHiredSwords.ToDictionary(h => h.Id, h => h.RaceId);
+        var personaRaces = _recruitableDramatisPersonae.ToDictionary(p => p.Id, p => p.RaceId);
+        int? RaceOf(Warrior w) => RaceRules.EffectiveRaceId(
+            w.WarriorArchetypeId is { } t && typeRaces.TryGetValue(t, out var tr) ? tr
+            : w.HiredSwordId is { } h && hiredSwordRaces.TryGetValue(h, out var hr) ? hr
+            : w.DramatisPersonaId is { } p && personaRaces.TryGetValue(p, out var pr) ? pr
+            : null, warbandRaceId);
+
+        EquipmentItem? Resolve(EquipmentItem item) => items.TryGetValue(item.Id, out var full) ? full : item;
+        var reserve = Inventory.Select(e => (Row: e, Item: Resolve(e.Item))).Where(x => x.Item is not null).ToList();
+        var entries = new List<BeforeBattleItemEntry>();
+        var active = AllActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Active).Select(r => r.Warrior).ToList();
+
+        foreach (var warrior in active)
+        {
+            var weapons = warrior.Equipment.Where(e => SingleUseRules.IsPoisonable(e.Item)).Select(e => e.NameDisplay).Distinct().ToList();
+            foreach (var carried in warrior.Equipment)
+            {
+                if (Resolve(carried.Item) is not { } item || !SingleUseRules.IsOfferedBeforeBattle(item)) continue;
+                var forBand = item.SingleUse!.Target == SingleUseTarget.Warband;
+                var withoutEffect = RaceRules.IsWithoutEffect(forBand ? warbandRaceId : RaceOf(warrior), item.NoEffectOnRaceIds);
+                var isDose = warrior.AddictedToEquipmentItemId == item.Id;
+                entries.Add(new BeforeBattleItemEntry(BeforeBattleEntryKind.Item, forBand ? null : warrior, item, item.Name,
+                    Subtitle(forBand ? Loc["SingleUseWholeWarband"] : warrior.Name, item),
+                    isChecked: isDose, isLocked: SingleUseRules.IsPreChecked(item), withoutEffect: withoutEffect, weapons: weapons)
+                    { WarriorEquipmentId = carried.Id });
+            }
+        }
+
+        foreach (var (row, item) in reserve.Where(x => SingleUseRules.IsOfferedBeforeBattle(x.Item!) && x.Item!.SingleUse!.Target == SingleUseTarget.Warband))
+            entries.Add(new BeforeBattleItemEntry(BeforeBattleEntryKind.Item, null, item, item!.Name, Subtitle(Loc["SingleUseWholeWarband"], item),
+                isChecked: false, isLocked: SingleUseRules.IsPreChecked(item), withoutEffect: RaceRules.IsWithoutEffect(warbandRaceId, item.NoEffectOnRaceIds))
+                { WarbandEquipmentId = row.Id });
+
+        foreach (var addict in active.Where(w => w.AddictedToEquipmentItemId is not null))
+        {
+            var drugId = addict.AddictedToEquipmentItemId!.Value;
+            if (entries.Any(e => e.Warrior?.Id == addict.Id && e.Item?.Id == drugId)) continue;
+            var drugName = items.TryGetValue(drugId, out var drug) ? drug.Name : "?";
+            if (reserve.FirstOrDefault(x => x.Item!.Id == drugId) is { Row: not null } stored)
+            {
+                // Dose prise dans la réserve pour lui.
+                var weapons = addict.Equipment.Where(e => SingleUseRules.IsPoisonable(e.Item)).Select(e => e.NameDisplay).Distinct().ToList();
+                entries.Add(new BeforeBattleItemEntry(BeforeBattleEntryKind.Item, addict, stored.Item, stored.Item!.Name,
+                    Subtitle(addict.Name, stored.Item), isChecked: true,
+                    withoutEffect: RaceRules.IsWithoutEffect(RaceOf(addict), stored.Item.NoEffectOnRaceIds), weapons: weapons)
+                    { WarbandEquipmentId = stored.Row.Id });
+                continue;
+            }
+            entries.Add(new BeforeBattleItemEntry(BeforeBattleEntryKind.AddictionLeave, addict, null,
+                string.Format(Loc["SingleUseAddictLeavesTitle"], addict.Name),
+                string.Format(Loc["SingleUseAddictLeavesSubtitle"], drugName), isChecked: true));
+        }
+
+        return entries;
+    }
+
+    private string Subtitle(string who, EquipmentItem item)
+    {
+        var effect = item.SingleUse!.StatModifiers.Count > 0
+            ? string.Join(", ", item.SingleUse.StatModifiers.Select(m =>
+                $"{Loc[$"Stat{m.Field}Abbr"]} {(m.DiceSides is > 0 ? (m.Value != 0 ? $"{m.Value:+0;-0} +1D{m.DiceSides}" : $"+1D{m.DiceSides}") : $"{m.Value:+0;-0}")}"))
+            : Loc[$"SingleUse{item.SingleUse.Timing}"];
+        return $"{who} · {effect}";
     }
 }

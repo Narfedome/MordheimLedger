@@ -107,6 +107,12 @@
                         <!-- Abréviations officielles du livre de règles - StatRowView en mode édition. MovementText
                              lié à MovementInput : un nombre ou une surcharge libre (« 2D6 »), résolu au Save. -->
                         <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
+                        <!-- Dépendance (objets à usage unique) : décocher la retire. -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" IsVisible="{Binding WasAddicted}">
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsAddicted}" VerticalOptions="Center"
+                                      SemanticProperties.Description="{Binding AddictionLabel}"/>
+                            <Label Grid.Column="1" Text="{Binding AddictionLabel}" VerticalOptions="Center"/>
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
 

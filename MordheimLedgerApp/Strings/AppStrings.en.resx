@@ -3687,4 +3687,94 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="NoEffectOnRacesEmpty" xml:space="preserve">
     <value>Works on every race.</value>
   </data>
+  <data name="SingleUseAddictedFormat" xml:space="preserve">
+    <value>Addicted · {0}: one dose before every battle, or he leaves the warband (reminded at the start of a game).</value>
+  </data>
+  <data name="SingleUseBandBannerFormat" xml:space="preserve">
+    <value>Game in progress · for the whole warband: {0}.</value>
+  </data>
+  <data name="SingleUseWithoutEffectShort" xml:space="preserve">
+    <value>no effect</value>
+  </data>
+  <data name="SingleUseGameProfileFormat" xml:space="preserve">
+    <value>For this game: {0}</value>
+  </data>
+  <data name="SingleUseThisGameHeading" xml:space="preserve">
+    <value>This game</value>
+  </data>
+  <data name="SingleUseEntryProfileFormat" xml:space="preserve">
+    <value>{0} for this game: {1}</value>
+  </data>
+  <data name="SingleUseAddictionKeptWarning" xml:space="preserve">
+    <value>Without a dose, the rulebook says he leaves the warband. He stays anyway (a dose found during a scenario, for instance).</value>
+  </data>
+  <data name="SingleUseWithoutEffectWarning" xml:space="preserve">
+    <value>No effect on this warrior's race: the item is used for nothing.</value>
+  </data>
+  <data name="SingleUseNoPoisonableWeaponWarning" xml:space="preserve">
+    <value>No weapon to coat: no close combat or missile weapon (never a blackpowder weapon).</value>
+  </data>
+  <data name="SingleUseBeforeBattleHeading" xml:space="preserve">
+    <value>Before the battle</value>
+  </data>
+  <data name="SingleUseBeforeBattleHint" xml:space="preserve">
+    <value>Tick the items used for this game: they will be removed from the sheet at the end of the game.</value>
+  </data>
+  <data name="SingleUseLockedHint" xml:space="preserve">
+    <value>Lasts one game, used or not: ticked automatically.</value>
+  </data>
+  <data name="SingleUsePoisonedWeaponPh" xml:space="preserve">
+    <value>Coated weapon</value>
+  </data>
+  <data name="SingleUsePoisonHint" xml:space="preserve">
+    <value>One vial for a single weapon, not blackpowder weapons.</value>
+  </data>
+  <data name="SingleUseWholeWarband" xml:space="preserve">
+    <value>Whole warband</value>
+  </data>
+  <data name="SingleUseTheWarband" xml:space="preserve">
+    <value>the warband</value>
+  </data>
+  <data name="SingleUseAddictLeavesTitle" xml:space="preserve">
+    <value>{0} leaves the warband</value>
+  </data>
+  <data name="SingleUseAddictLeavesSubtitle" xml:space="preserve">
+    <value>Addicted · {0}: no dose in the warband</value>
+  </data>
+  <data name="HistoryAddictionLeftSentence" xml:space="preserve">
+    <value>{0} leaves the warband for lack of a dose ({1})</value>
+  </data>
+  <data name="SingleUseStepHeading" xml:space="preserve">
+    <value>Single-use items</value>
+  </data>
+  <data name="SingleUseTakenHeading" xml:space="preserve">
+    <value>Taken before the battle</value>
+  </data>
+  <data name="SingleUseTakenHint" xml:space="preserve">
+    <value>Removed from the sheet on Finish.</value>
+  </data>
+  <data name="SingleUseUsedHeading" xml:space="preserve">
+    <value>Used during the battle?</value>
+  </data>
+  <data name="SingleUseUsedHint" xml:space="preserve">
+    <value>Tick those that were used: they will be removed from the sheet.</value>
+  </data>
+  <data name="SingleUseAfterBattleHeading" xml:space="preserve">
+    <value>After the battle</value>
+  </data>
+  <data name="SingleUseOutcomeNone" xml:space="preserve">
+    <value>No effect.</value>
+  </data>
+  <data name="SingleUseOutcomeAddiction" xml:space="preserve">
+    <value>Addicted: one dose before every battle, or he leaves the warband.</value>
+  </data>
+  <data name="SingleUseOutcomeCharacteristic" xml:space="preserve">
+    <value>{0} {1} permanently.</value>
+  </data>
+  <data name="SingleUseOutcomeRule" xml:space="preserve">
+    <value>Gains {0} permanently.</value>
+  </data>
+  <data name="WarriorAddictedCheckbox" xml:space="preserve">
+    <value>Addicted · {0}</value>
+  </data>
 </root>

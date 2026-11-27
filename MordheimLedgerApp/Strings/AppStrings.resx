@@ -3687,4 +3687,94 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="NoEffectOnRacesEmpty" xml:space="preserve">
     <value>Agit sur toutes les races.</value>
   </data>
+  <data name="SingleUseAddictedFormat" xml:space="preserve">
+    <value>Dépendant · {0} : une dose avant chaque bataille, sinon il quitte la bande (rappelé au début de partie).</value>
+  </data>
+  <data name="SingleUseBandBannerFormat" xml:space="preserve">
+    <value>Partie en cours · pour toute la bande : {0}.</value>
+  </data>
+  <data name="SingleUseWithoutEffectShort" xml:space="preserve">
+    <value>sans effet</value>
+  </data>
+  <data name="SingleUseGameProfileFormat" xml:space="preserve">
+    <value>Pour cette partie : {0}</value>
+  </data>
+  <data name="SingleUseThisGameHeading" xml:space="preserve">
+    <value>Cette partie</value>
+  </data>
+  <data name="SingleUseEntryProfileFormat" xml:space="preserve">
+    <value>{0} pour cette partie : {1}</value>
+  </data>
+  <data name="SingleUseAddictionKeptWarning" xml:space="preserve">
+    <value>Sans dose, le livre dit qu'il quitte la bande. Il reste quand même (dose trouvée pendant un scénario, par exemple).</value>
+  </data>
+  <data name="SingleUseWithoutEffectWarning" xml:space="preserve">
+    <value>Sans effet sur la race de ce guerrier : l'objet est utilisé pour rien.</value>
+  </data>
+  <data name="SingleUseNoPoisonableWeaponWarning" xml:space="preserve">
+    <value>Aucune arme à enduire : pas d'arme de corps à corps ni de tir (jamais une arme à poudre noire).</value>
+  </data>
+  <data name="SingleUseBeforeBattleHeading" xml:space="preserve">
+    <value>Avant la bataille</value>
+  </data>
+  <data name="SingleUseBeforeBattleHint" xml:space="preserve">
+    <value>Cochez les objets utilisés pour cette partie : ils seront retirés de la fiche à la Fin de partie.</value>
+  </data>
+  <data name="SingleUseLockedHint" xml:space="preserve">
+    <value>Dure une partie, utilisé ou non : coché d'office.</value>
+  </data>
+  <data name="SingleUsePoisonedWeaponPh" xml:space="preserve">
+    <value>Arme enduite</value>
+  </data>
+  <data name="SingleUsePoisonHint" xml:space="preserve">
+    <value>Une fiole pour une seule arme, pas les armes à poudre noire.</value>
+  </data>
+  <data name="SingleUseWholeWarband" xml:space="preserve">
+    <value>Toute la bande</value>
+  </data>
+  <data name="SingleUseTheWarband" xml:space="preserve">
+    <value>la bande</value>
+  </data>
+  <data name="SingleUseAddictLeavesTitle" xml:space="preserve">
+    <value>{0} quitte la bande</value>
+  </data>
+  <data name="SingleUseAddictLeavesSubtitle" xml:space="preserve">
+    <value>Dépendant · {0} : pas de dose dans la bande</value>
+  </data>
+  <data name="HistoryAddictionLeftSentence" xml:space="preserve">
+    <value>{0} quitte la bande, faute de dose ({1})</value>
+  </data>
+  <data name="SingleUseStepHeading" xml:space="preserve">
+    <value>Objets à usage unique</value>
+  </data>
+  <data name="SingleUseTakenHeading" xml:space="preserve">
+    <value>Pris avant la bataille</value>
+  </data>
+  <data name="SingleUseTakenHint" xml:space="preserve">
+    <value>Retirés de la fiche à Terminer.</value>
+  </data>
+  <data name="SingleUseUsedHeading" xml:space="preserve">
+    <value>Utilisés pendant la bataille ?</value>
+  </data>
+  <data name="SingleUseUsedHint" xml:space="preserve">
+    <value>Cochez ceux qui ont servi : ils seront retirés de la fiche.</value>
+  </data>
+  <data name="SingleUseAfterBattleHeading" xml:space="preserve">
+    <value>Après la bataille</value>
+  </data>
+  <data name="SingleUseOutcomeNone" xml:space="preserve">
+    <value>Sans effet.</value>
+  </data>
+  <data name="SingleUseOutcomeAddiction" xml:space="preserve">
+    <value>Dépendant : une dose avant chaque bataille, sinon il quitte la bande.</value>
+  </data>
+  <data name="SingleUseOutcomeCharacteristic" xml:space="preserve">
+    <value>{0} {1} définitivement.</value>
+  </data>
+  <data name="SingleUseOutcomeRule" xml:space="preserve">
+    <value>Gagne {0} définitivement.</value>
+  </data>
+  <data name="WarriorAddictedCheckbox" xml:space="preserve">
+    <value>Dépendant · {0}</value>
+  </data>
 </root>

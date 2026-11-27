@@ -273,6 +273,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             Inventory = new ObservableCollection<WarbandEquipment>(data.Inventory);
             HistoryEntries = new ObservableCollection<HistoryEntry>(data.History);
+            GameBanner = data.GameBanner;
         });
     }
 
@@ -286,7 +287,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
         Dictionary<int, string> WarbandArchetypeNames,
         List<WarriorRow> Rows,
         List<WarbandEquipment> Inventory,
-        List<HistoryEntry> History);
+        List<HistoryEntry> History,
+        string? GameBanner = null);
 
     /// <summary>Tout ce que LoadAsync lit en base et résout depuis le catalogue, sans toucher à aucune
     /// propriété liée - appelée hors du thread UI.</summary>
@@ -318,9 +320,10 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
         var inventory = await _warbandService.GetWarbandEquipmentAsync(id, language);
         var history = await _warbandService.GetHistoryEntriesAsync(id);
+        var gameBanner = await ApplySingleUsesAsync(warband, rows, language);
 
         return new RosterData(warband, recruitableArchetypes, recruitableHiredSwords, recruitableDramatisPersonae,
-            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, rows, inventory, history);
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, rows, inventory, history, gameBanner);
     }
 
     /// <summary>Ouvre l'inventaire de bande dans un dialog dédié (WarbandInventoryDialog) où chaque objet
@@ -451,6 +454,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
             CastsAsSuccessor = w.CastsAsSuccessor,
             HasPendingSuccessorSpell = w.HasPendingSuccessorSpell,
             ExtraMagicSchoolId = w.ExtraMagicSchoolId,
+            AddictedToEquipmentItemId = w.AddictedToEquipmentItemId,
+            GainedSpecialRuleIds = new List<int>(w.GainedSpecialRuleIds),
             MaxMovement = w.MaxMovement,
             MaxWeaponSkill = w.MaxWeaponSkill,
             MaxBallisticSkill = w.MaxBallisticSkill,

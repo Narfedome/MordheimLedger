@@ -36,6 +36,7 @@ namespace MordheimLedgerApp.Converters
                 EndOfGamePageViewModel.StepKind.PitFight => new PitFightStepView(),
                 EndOfGamePageViewModel.StepKind.InjuryRecap => new InjuryRecapStepView(),
                 EndOfGamePageViewModel.StepKind.Captives => new CaptivesStepView(),
+                EndOfGamePageViewModel.StepKind.SingleUse => new SingleUseStepView(),
                 EndOfGamePageViewModel.StepKind.Experience => new ExperienceStepView(),
                 EndOfGamePageViewModel.StepKind.Advance => new AdvanceStepView(),
                 EndOfGamePageViewModel.StepKind.ExplorationRoll => new ExplorationRollStepView(),

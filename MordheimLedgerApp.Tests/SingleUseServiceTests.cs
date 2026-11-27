@@ -102,7 +102,7 @@ public class SingleUseServiceTests : IDisposable
             new GameItemUse { EquipmentItemId = ale.Id, WarbandEquipmentId = aleStored.Id },
         });
 
-        await _service.FinishGameAsync(warband.Id, new[] { new ConsumedItem(herbsCarried.Id, null) }, Array.Empty<AfterBattleResult>(), "en");
+        await _service.FinishGameAsync(warband.Id, await _warbands.GetWarriorsAsync(warband.Id, "en"), new[] { new ConsumedItem(herbsCarried.Id, null) }, Array.Empty<AfterBattleResult>(), "en");
 
         Assert.Equal(1, (await ReloadAsync(warband, klaus.Id)).Equipment.Single(e => e.Id == twoDoses.Id).Quantity);
         Assert.DoesNotContain((await ReloadAsync(warband, hans.Id)).Equipment, e => e.Id == herbsCarried.Id);
@@ -119,7 +119,7 @@ public class SingleUseServiceTests : IDisposable
         await _service.StartGameAsync(warband.Id, new[] { new GameItemUse { WarriorId = klaus.Id, EquipmentItemId = garlic.Id, WarriorEquipmentId = carried.Id } });
         await _warbands.RemoveWarriorEquipmentAsync(carried.Id);
 
-        await _service.FinishGameAsync(warband.Id, new[] { new ConsumedItem(null, 999_999), new ConsumedItem(999_999, null), new ConsumedItem(null, null) },
+        await _service.FinishGameAsync(warband.Id, await _warbands.GetWarriorsAsync(warband.Id, "en"), new[] { new ConsumedItem(null, 999_999), new ConsumedItem(999_999, null), new ConsumedItem(null, null) },
             Array.Empty<AfterBattleResult>(), "en");
 
         Assert.Empty(await _warbands.GetGameItemUsesAsync(warband.Id));
@@ -135,7 +135,7 @@ public class SingleUseServiceTests : IDisposable
         var initiative = klaus.Initiative;
         var toughness = hans.Toughness;
 
-        await _service.FinishGameAsync(warband.Id, Array.Empty<ConsumedItem>(), new[]
+        await _service.FinishGameAsync(warband.Id, await _warbands.GetWarriorsAsync(warband.Id, "en"), Array.Empty<ConsumedItem>(), new[]
         {
             new AfterBattleResult(klaus.Id, shade.Id, SingleUseRules.ResolveAfterBattle(shade.SingleUse!, 2)!),
             new AfterBattleResult(klaus.Id, shade.Id, SingleUseRules.ResolveAfterBattle(shade.SingleUse!, 12)!),
@@ -156,12 +156,40 @@ public class SingleUseServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task FinishGame_ChangesTheRosterObjects_AndSavesThem()
+    {
+        var (warband, _, hans) = await ReiklandersAsync();
+        var root = await ItemAsync("equipment.mandrake-root");
+        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
+        var inMemory = roster.Single(w => w.Id == hans.Id);
+        var toughness = inMemory.Toughness;
+
+        await _service.FinishGameAsync(warband.Id, roster, Array.Empty<ConsumedItem>(),
+            new[] { new AfterBattleResult(hans.Id, root.Id, SingleUseRules.ResolveAfterBattle(root.SingleUse!, 2)!) }, "en");
+
+        Assert.Equal(toughness - 1, inMemory.Toughness);
+        Assert.Equal(toughness - 1, (await ReloadAsync(warband, hans.Id)).Toughness);
+    }
+
+    [Fact]
+    public async Task FinishGame_AddictionAloneIsSaved()
+    {
+        var (warband, klaus, _) = await ReiklandersAsync();
+        var shade = await ItemAsync("equipment.crimson-shade");
+
+        await _service.FinishGameAsync(warband.Id, await _warbands.GetWarriorsAsync(warband.Id, "en"), Array.Empty<ConsumedItem>(),
+            new[] { new AfterBattleResult(klaus.Id, shade.Id, SingleUseRules.ResolveAfterBattle(shade.SingleUse!, 3)!) }, "en");
+
+        Assert.Equal(shade.Id, (await ReloadAsync(warband, klaus.Id)).AddictedToEquipmentItemId);
+    }
+
+    [Fact]
     public async Task FinishGame_IncompleteOutcomesWriteNothing()
     {
         var (warband, klaus, _) = await ReiklandersAsync();
         var before = await ReloadAsync(warband, klaus.Id);
 
-        await _service.FinishGameAsync(warband.Id, Array.Empty<ConsumedItem>(), new[]
+        await _service.FinishGameAsync(warband.Id, await _warbands.GetWarriorsAsync(warband.Id, "en"), Array.Empty<ConsumedItem>(), new[]
         {
             new AfterBattleResult(klaus.Id, 1, new AfterBattleOutcome { Kind = AfterBattleOutcomeKind.CharacteristicChange, Field = CharacteristicField.Strength }),
             new AfterBattleResult(klaus.Id, 1, new AfterBattleOutcome { Kind = AfterBattleOutcomeKind.CharacteristicChange, Delta = 1 }),

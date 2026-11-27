@@ -2708,4 +2708,27 @@ public class RulesTests
     {
         Assert.Equal(expected, RaceRules.ParseIds(csv));
     }
+
+    [Fact]
+    public void SingleUse_ReadsEachCharacteristic()
+    {
+        var warrior = new Warrior { Movement = 4, WeaponSkill = 3, BallisticSkill = 5, Strength = 6, Toughness = 7, Wounds = 2, Initiative = 8, Attacks = 9, Leadership = 10 };
+        Assert.Equal(new int?[] { 4, 3, 5, 6, 7, 2, 8, 9, 10 },
+            Enum.GetValues<CharacteristicField>().Select(f => CharacteristicModifier.Read(warrior, f)));
+        Assert.Null(CharacteristicModifier.Read(warrior, (CharacteristicField)99));
+        warrior.MovementOverride = "2D6";
+        Assert.Null(CharacteristicModifier.Read(warrior, CharacteristicField.Movement));
+    }
+
+    [Fact]
+    public void SingleUse_AppliesAPermanentChangeToEachCharacteristic()
+    {
+        foreach (var field in Enum.GetValues<CharacteristicField>())
+        {
+            var warrior = new Warrior { Movement = 4, WeaponSkill = 4, BallisticSkill = 4, Strength = 4, Toughness = 4, Wounds = 4, Initiative = 4, Attacks = 4, Leadership = 4 };
+            CharacteristicModifier.Apply(warrior, field, 2);
+            Assert.Equal(6, CharacteristicModifier.Read(warrior, field));
+            Assert.Equal(8 * 4, Enum.GetValues<CharacteristicField>().Where(f => f != field).Sum(f => CharacteristicModifier.Read(warrior, f)!.Value));
+        }
+    }
 }

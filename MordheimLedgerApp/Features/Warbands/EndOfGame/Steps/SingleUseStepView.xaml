@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.SingleUseStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+    <!-- Étape : objets à usage unique - voir EndOfGamePageViewModel.SingleUse. -->
+    <VerticalStackLayout Spacing="12">
+        <Label Text="{loc:Loc SingleUseStepHeading}" FontAttributes="Bold"/>
+
+        <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasTakenItems}">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="{loc:Loc SingleUseTakenHeading}" FontAttributes="Bold" FontSize="13"/>
+                <Label Text="{loc:Loc SingleUseTakenHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding TakenItemLines}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="system:String">
+                            <Label Text="{Binding .}" FontSize="13"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasUsedInBattleEntries}">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="{loc:Loc SingleUseUsedHeading}" FontAttributes="Bold" FontSize="13"/>
+                <Label Text="{loc:Loc SingleUseUsedHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding UsedInBattleEntries}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:UsedInBattleEntry">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <CheckBox AutomationId="UsedInBattleCheckBox" Grid.Column="0" IsChecked="{Binding IsUsed}" VerticalOptions="Center"
+                                          SemanticProperties.Description="{Binding Title}"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                    <Label Text="{Binding Title}"/>
+                                    <Label Text="{Binding Who}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasAfterBattleRolls}">
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Loc SingleUseAfterBattleHeading}" FontAttributes="Bold" FontSize="13"/>
+                <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding AfterBattleRolls}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:AfterBattleRollEntry">
+                            <VerticalStackLayout Spacing="4">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="{Binding Label}" FontSize="13" VerticalOptions="Center"/>
+                                    <Entry Grid.Column="1" Text="{Binding Roll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60" VerticalOptions="Center">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                  Style="{StaticResource GhostIconButtonStyle}" VerticalOptions="Center"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollAfterBattleCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </Grid>
+                                <Label Text="{Binding ResultText}" IsVisible="{Binding HasResult}" FontSize="12" TextColor="{DynamicResource AppAccent}"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </VerticalStackLayout>
+</ContentView>

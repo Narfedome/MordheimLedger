@@ -37,25 +37,24 @@ public sealed class SingleUseService
     }
 
     /// <summary>Fin de partie : retire de l'équipement les objets pris avant la bataille et ceux cochés comme utilisés
-    /// pendant, applique les conséquences tirées, puis oublie la partie.</summary>
-    public async Task FinishGameAsync(int warbandId, IReadOnlyList<ConsumedItem> usedDuringBattle, IReadOnlyList<AfterBattleResult> results,
-        string languageCode)
+    /// pendant, applique les conséquences tirées, puis oublie la partie. Les conséquences s'appliquent aux guerriers de
+    /// roster, tels que le wizard les tient en mémoire (sinon un enregistrement ultérieur de ces mêmes objets les
+    /// écraserait) ; un guerrier absent du roster est ignoré.</summary>
+    public async Task FinishGameAsync(int warbandId, IReadOnlyCollection<Warrior> roster, IReadOnlyList<ConsumedItem> usedDuringBattle,
+        IReadOnlyList<AfterBattleResult> results, string languageCode)
     {
         foreach (var use in await _warbands.GetGameItemUsesAsync(warbandId))
             await ConsumeAsync(use.WarriorEquipmentId, use.WarbandEquipmentId);
         foreach (var item in usedDuringBattle)
             await ConsumeAsync(item.WarriorEquipmentId, item.WarbandEquipmentId);
 
-        if (results.Count > 0)
+        var warriors = roster.ToDictionary(w => w.Id);
+        var rulesByOfficialId = (await _library.GetSpecialRulesAsync(languageCode))
+            .Where(r => r.OfficialId is not null).ToDictionary(r => r.OfficialId!, r => r.Id);
+        foreach (var result in results)
         {
-            var warriors = (await _warbands.GetWarriorsAsync(warbandId, languageCode)).ToDictionary(w => w.Id);
-            var rulesByOfficialId = (await _library.GetSpecialRulesAsync(languageCode))
-                .Where(r => r.OfficialId is not null).ToDictionary(r => r.OfficialId!, r => r.Id);
-            foreach (var result in results)
-            {
-                if (!warriors.TryGetValue(result.WarriorId, out var warrior)) continue;
-                if (Apply(warrior, result, rulesByOfficialId)) await _warbands.SaveWarriorAsync(warrior);
-            }
+            if (!warriors.TryGetValue(result.WarriorId, out var warrior)) continue;
+            if (Apply(warrior, result, rulesByOfficialId)) await _warbands.SaveWarriorAsync(warrior);
         }
 
         await _warbands.ReplaceGameItemUsesAsync(warbandId, Array.Empty<GameItemUse>());

@@ -217,7 +217,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// <summary>Public depuis le passage à une vue par étape (2026-09-22, voir Steps/StepViewConverter.cs)
     /// - le convertisseur, hors de cette classe, doit pouvoir lire cette valeur pour choisir la bonne
     /// vue.</summary>
-    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, InjuryRecap, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, TomeOfMagic, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, LeaderSuccession, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
+    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, InjuryRecap, Captives, SingleUse, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, TomeOfMagic, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, LeaderSuccession, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -311,6 +311,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         if (CurrentStepKind == StepKind.Experience) ApplyExperiencePrefill();
         if (CurrentStepKind == StepKind.LeaderSuccession) BuildLeaderCandidates();
         if (CurrentStepKind == StepKind.TomeOfMagic) _ = Services.UiErrors.RunAsync(BuildTomeEntriesAsync, nameof(BuildTomeEntriesAsync));
+        if (CurrentStepKind == StepKind.SingleUse) BuildAfterBattleRolls();
         if (CurrentStepKind == StepKind.RecruitHeroesCount) NotifyLeaderRecruitmentChanged();
     }
 
@@ -347,6 +348,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // guerriers propres mis hors de combat ci-dessus. Ajout demandé par l'utilisateur (2026-08-27),
             // hors périmètre initial du wizard (voir la doc de classe).
             steps.Add(new(StepKind.Captives));
+            // Objets à usage unique (pris avant la bataille, utilisés pendant, conséquences) : seulement s'il y en a.
+            if (HasSingleUseStep) steps.Add(new(StepKind.SingleUse));
             steps.Add(new(StepKind.Experience));
             steps.AddRange(WarriorRows.Where(r => r.HasMilestone).Select(r => new WizardStep(StepKind.Advance, r)));
             steps.Add(new(StepKind.ExplorationRoll));
@@ -785,6 +788,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             BuildDramatisPersonaUpkeepEntries();
             BuildFistfulOfCrownsEntries();
             BuildExistingHenchmanTopUps();
+            LoadSingleUses(data.GameItemUses);
 
             WireUpChangeNotifications();
 
@@ -874,6 +878,10 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             p => p.StartingEquipmentIds.Count == 0 ? new List<EquipmentQuantityChip>() : EquipmentQuantityChip.GroupFrom(p.StartingEquipmentIds, localizedEquipment));
 
         var warbandInventory = await _warbandService.GetWarbandEquipmentAsync(warbandId, language);
+        // Objets à usage unique pris dans la réserve au début de partie : déjà consommés pour le wizard (ni vendables ni
+        // réallouables) - la réserve qu'il réécrit à Terminer ne les ressuscite donc pas (voir ApplySingleUseAsync).
+        var gameItemUses = warband.GameInProgress ? await _warbandService.GetGameItemUsesAsync(warbandId) : new List<GameItemUse>();
+        warbandInventory = SingleUseReserve.WithoutTaken(warbandInventory, gameItemUses);
         var ownedEquipmentItemIds = warbandInventory.Select(w => w.Item.Id).ToHashSet();
 
         // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - voir DramatisPersona.
@@ -888,7 +896,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         return new EndOfGameData(warband, explorationResults, localizedEquipment, equipmentItemsByOfficialId, specialRulesByOfficialId,
             skillIdsByOfficialId, warbandArchetype, warbandArchetypeNamesByOfficialId, localizedWarriorArchetypes, warriorArchetypesByOfficialId,
             injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment, dramatisPersonaCatalog,
-            dramatisPersonaStartingEquipmentById, warbandInventory, ownedEquipmentItemIds, cooldownDramatisPersonaIds, allRows);
+            dramatisPersonaStartingEquipmentById, warbandInventory, ownedEquipmentItemIds, cooldownDramatisPersonaIds, allRows, gameItemUses);
     }
 
     private sealed record EndOfGameData(
@@ -911,7 +919,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         List<WarbandEquipment> WarbandInventory,
         HashSet<int> OwnedEquipmentItemIds,
         List<int> CooldownDramatisPersonaIds,
-        List<WarriorRow> AllRows);
+        List<WarriorRow> AllRows,
+        List<GameItemUse> GameItemUses);
 
     /// <summary>Tous les abonnements PropertyChanged posés jusque-là dans le constructeur (avant que
     /// InitializeAsync le remplace) - déplacés tels quels dans leur propre méthode plutôt que dans le
@@ -1281,6 +1290,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         await ApplyEquipmentReallocationAsync(sentences);
         await ApplyReserveAsync(finalReserve);
         await ApplyRehiredLeaderAsync(language, sentences);
+        // En dernier : consomme les objets (lignes encore en place après la réserve et la réallocation) et applique les
+        // conséquences aux guerriers que le wizard tient en mémoire, plus réenregistrés ensuite.
+        await ApplySingleUseAsync(language, sentences);
 
         // La partie est terminée : redonne la main à "Lancer la partie" sur la fiche de bande (voir
         // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée.

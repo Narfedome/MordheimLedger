@@ -279,6 +279,21 @@ lanceur gagne un sort (sa liste ou Magie Mineure), sinon un Héros avec Savoir A
 « déjà utilisé » quand un Grimoire est donné ensuite (inventaire, Réallouer, correction). Interdit aux Chasseurs de
 Sorcières et Sœurs de Sigmar (`restrictedToWarbandIds`).
 
+**Races par type et objets à usage unique (branche `feature/consumables`, 1.6, 2026-11-27)** : canevas « Objets à usage
+unique » (claude.ai). Race ≠ type ≠ classe ≠ profil racial (maximums seulement, pas fusionnable avec la race) :
+`WarriorArchetype`/`HiredSword`/`DramatisPersona.RaceId` (null = race de la bande, `Rules/RaceRules.EffectiveRaceId`),
+choisi dans le Codex via `Components/RaceChoice` ; supprimer une race vide ses références (`LibraryService.
+DeleteRaceAsync`, usage par `GetRaceUsageAsync`). Objets : `EquipmentItem.SingleUse` (`Models/Library/SingleUse.cs`, JSON
+`SingleUseJson` comme les effets de compétences : moment, cible Guerrier/Arme/Bande, bonus de la partie avec dés, table de
+conséquences) et `NoEffectOnRaceIds` (CSV, déclaré dans `OfficialContentSchema`). Partie en cours : `GameItemUse`
+(table `GameItemUseEntity`, enfant de la bande et du guerrier), écrit au début de partie et consommé en dernier à Terminer
+par `Core/Services/SingleUseService` (sur les guerriers que le wizard tient en mémoire, sinon un enregistrement ultérieur
+écraserait « I +1 ») ; les objets pris dans la réserve sont retirés de l'instantané de réserve du wizard dès le chargement
+(`SingleUseReserve`), sinon la réécriture de la réserve les ressusciterait. `Warrior.AddictedToEquipmentItemId`
+(retirable dans « Corriger la fiche ») et `GainedSpecialRuleIds` (Stupidité des Champignons, ajoutée aux puces de règles).
+Les valeurs de la partie s'affichent en `AppAccent` (`StatRowView.GameModifiers`), distinctes du vert/rouge « a bougé
+depuis le recrutement ».
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

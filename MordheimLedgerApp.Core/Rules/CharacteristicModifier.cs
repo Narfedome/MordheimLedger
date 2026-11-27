@@ -24,4 +24,19 @@ public static class CharacteristicModifier
             case CharacteristicField.Leadership: warrior.Leadership += delta; break;
         }
     }
+
+    /// <summary>Valeur d'une caractéristique, null pour un Mouvement non chiffré (« 2D6 », Warrior.MovementOverride).</summary>
+    public static int? Read(Warrior warrior, CharacteristicField field) => field switch
+    {
+        CharacteristicField.Movement => warrior.MovementOverride is null ? warrior.Movement : null,
+        CharacteristicField.WeaponSkill => warrior.WeaponSkill,
+        CharacteristicField.BallisticSkill => warrior.BallisticSkill,
+        CharacteristicField.Strength => warrior.Strength,
+        CharacteristicField.Toughness => warrior.Toughness,
+        CharacteristicField.Wounds => warrior.Wounds,
+        CharacteristicField.Initiative => warrior.Initiative,
+        CharacteristicField.Attacks => warrior.Attacks,
+        CharacteristicField.Leadership => warrior.Leadership,
+        _ => null,
+    };
 }

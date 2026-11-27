@@ -37,8 +37,15 @@ bloquant) ; compagnon de jeu, pas calculatrice de partie.
 - **Magie** : un sort tiré en double réduit sa difficulté de 1 (au lieu d'une relance) ; **Grimoire** : un sort de plus
   pour un lanceur (sa liste ou Magie Mineure), ou la Magie Mineure pour un Héros avec Savoir Arcanique - effet unique à
   l'acquisition, avertissement s'il est donné ensuite.
-- Plus tard : objets à usage unique à l'écran de début de partie (effets sur le profil). Écarté : déroute, catalogue de
-  scénarios.
+- **Races par type** (branche `feature/consumables`) : un type de guerrier, Franc-Tireur ou Dramatis Persona peut avoir
+  sa propre race (Nécromancien et Larbins : Humain chez les Morts-Vivants ; Possédés : Possédé ; Porte-Peste : Démon),
+  vide = celle de la bande. Supprimer une race utilisée : confirmation qui dit où elle sert.
+- **Objets à usage unique** (canevas « Objets à usage unique ») : Codex « À usage unique » (pris avant la bataille / dure
+  une partie / utilisé pendant) et « Sans effet sur » (races). Début de partie : section « Avant la bataille » (bonus
+  lancés, arme enduite, Ail et Torche cochés d'office, dépendant sans dose qui quitte la bande - décochable, ambre).
+  Fiche : valeurs de la partie en couleur d'accent, puces « Cette partie », bandeau pour la bande, « Dépendant ». Fin de
+  partie : étape qui retire les objets pris, fait cocher ceux utilisés pendant, et lance les tables de conséquences
+  (Ombre Cramoisie, Racine de Mandragore, Champignons). Écarté : déroute, catalogue de scénarios.
 
 ## V2 — Partage entre joueurs (ébauche validée le 2026-11-15)
 Trois thèmes : **sauvegarde**, **partage de bandes/contenu**, **partie connectée en lobby local**. Tout reste local,

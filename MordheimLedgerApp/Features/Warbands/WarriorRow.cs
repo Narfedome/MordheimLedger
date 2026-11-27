@@ -81,6 +81,23 @@ public partial class WarriorRow : ObservableObject
     public string? PhotoSource { get; }
     public bool HasPhoto => PhotoSource is not null;
 
+    // --- Objets à usage unique de la partie en cours (voir Core.Models.GameItemUse), posés par WarbandDetailViewModel ---
+
+    /// <summary>Bonus de la partie, affichés en couleur d'accent dans le profil (StatRowView.GameModifiers).</summary>
+    public List<RolledStatModifier> GameModifiers { get; set; } = new();
+
+    /// <summary>Puces « Cette partie » : « Ombre Cramoisie · I +2, M +1, F +1 », « Lotus Noir · Épée ».</summary>
+    public List<GameUseChip> GameUseChips { get; set; } = new();
+    public bool HasGameUses => GameUseChips.Count > 0;
+
+    /// <summary>« Pour cette partie : M 4 → 5, I 3 → 5 » sous le profil, null sans bonus.</summary>
+    public string? GameProfileText { get; set; }
+    public bool HasGameProfile => !string.IsNullOrEmpty(GameProfileText);
+
+    /// <summary>« Dépendant · Ombre Cramoisie » (Warrior.AddictedToEquipmentItemId), null sinon.</summary>
+    public string? AddictionText { get; set; }
+    public bool HasAddiction => AddictionText is not null;
+
     public bool HasEquipment => Equipment.Count > 0;
     public bool HasSkills => Skills.Count > 0;
     public bool HasInjuries => Injuries.Count > 0;

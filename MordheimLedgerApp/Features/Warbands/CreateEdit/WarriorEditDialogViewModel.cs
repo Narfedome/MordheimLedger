@@ -45,7 +45,16 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// <summary>Voir DialogViewModel.EditableState - seulement le profil (Item, Animal compris) et la
     /// saisie du Mouvement : Équipement/Compétences/Blessures/Sorts/Mutations sont déjà persistés au fil
     /// de l'eau (voir Equipment), rien à perdre de ce côté en annulant.</summary>
-    protected override object? EditableState => new object?[] { Item, MovementInput };
+    protected override object? EditableState => new object?[] { Item, MovementInput, IsAddicted };
+
+    /// <summary>Dépendant (objet à usage unique, ex. Ombre Cramoisie) : décocher la guérit - correction libre.</summary>
+    public bool WasAddicted { get; }
+
+    [ObservableProperty]
+    private bool isAddicted;
+
+    [ObservableProperty]
+    private string addictionLabel = string.Empty;
 
     /// <summary>Masque le bouton "x" de retrait d'un objet d'équipement pour un Franc-Tireur (livre des
     /// règles, section Hired Swords : "A player cannot buy extra weapons or equipment for a Hired Sword,
@@ -218,6 +227,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _warband = warband;
         _warbandService = warbandService;
         _libraryService = libraryService;
+        WasAddicted = isAddicted = item.AddictedToEquipmentItemId is not null;
+        if (item.AddictedToEquipmentItemId is { } drugId) _ = LoadAddictionLabelAsync(drugId);
         _detailDialogs = detailDialogs;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
@@ -449,6 +460,12 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private Task ShowSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
 
+    private async Task LoadAddictionLabelAsync(int drugId)
+    {
+        var drug = (await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language)).FirstOrDefault(e => e.Id == drugId);
+        AddictionLabel = string.Format(Loc["WarriorAddictedCheckbox"], drug?.Name ?? "?");
+    }
+
     [RelayCommand]
     private void Save()
     {
@@ -461,6 +478,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         {
             Item.MovementOverride = MovementInput;
         }
+        if (!IsAddicted) Item.AddictedToEquipmentItemId = null;
 
         Close(true);
     }

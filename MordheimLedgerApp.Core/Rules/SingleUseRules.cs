@@ -42,6 +42,14 @@ public static class SingleUseRules
     public static AfterBattleOutcome? ResolveAfterBattle(SingleUseProfile profile, int total) =>
         profile.AfterBattle.FirstOrDefault(o => total >= o.Min && total <= o.Max);
 
+    /// <summary>Objet qui peut être perdu parce que son porteur a été mis hors de combat (Habits de soie, si c'est le chef).</summary>
+    public static bool IsAtRiskAfterOutOfAction(EquipmentItem item, bool carrierIsLeader) =>
+        item.LostAfterOutOfActionOn is > 0 && (carrierIsLeader || !item.LostAfterOutOfActionLeaderOnly);
+
+    /// <summary>Jet de 1D6 : perdu si le résultat est inférieur ou égal au seuil de l'objet.</summary>
+    public static bool IsLostAfterOutOfAction(EquipmentItem item, int roll) =>
+        item.LostAfterOutOfActionOn is { } upTo && roll >= 1 && roll <= upTo;
+
     /// <summary>Valeur d'une caractéristique pour la partie : profil + bonus de la partie.</summary>
     public static int GameValue(int baseValue, CharacteristicField field, IEnumerable<RolledStatModifier> modifiers) =>
         baseValue + modifiers.Where(m => m.Field == field).Sum(m => m.Value);

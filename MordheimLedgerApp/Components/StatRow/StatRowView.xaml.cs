@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Rules;
+﻿using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Extensions;
 
@@ -206,7 +206,7 @@ public partial class StatRowView : ContentView
     }
 
     /// <summary>Bonus de la partie en cours (objets à usage unique, ex. Ombre Cramoisie I +2) : valeur de la partie en
-    /// couleur d'accent, distincte du vert/rouge « a bougé depuis le recrutement ». Vide = profil normal.</summary>
+    /// bleu (AppGameModifier), distincte du vert/rouge « a bougé depuis le recrutement ». Vide = profil normal.</summary>
     public static readonly BindableProperty GameModifiersProperty =
         BindableProperty.Create(nameof(GameModifiers), typeof(IReadOnlyList<RolledStatModifier>), typeof(StatRowView), null,
             propertyChanged: (b, _, _) => ((StatRowView)b).ApplyValueColors());
@@ -235,7 +235,7 @@ public partial class StatRowView : ContentView
             var label = _valueLabels[i];
             label.RemoveBinding(Label.TextProperty);
             label.Text = SingleUseRules.GameValue(value, field, modifiers).ToString();
-            label.SetDynamicResource(Label.TextColorProperty, "AppAccent");
+            label.SetDynamicResource(Label.TextColorProperty, "AppGameModifier");
         }
     }
 }

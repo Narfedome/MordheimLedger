@@ -10,6 +10,8 @@
     <Color x:Key="AppScrim">#B3000000</Color>
     <Color x:Key="AppAccent">#7FA34F</Color>
     <Color x:Key="AppAccentSecondary">#5C6B73</Color>
+    <!-- Valeurs pour la partie en cours (objets à usage unique), redéfini par mode dans ThemeService.Apply. -->
+    <Color x:Key="AppGameModifier">#87CEFA</Color>
     <Color x:Key="AppText">#E8E4D8</Color>
     <Color x:Key="AppTextMuted">#948C7E</Color>
     <Color x:Key="AppBorder">#35303A</Color>

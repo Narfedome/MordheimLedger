@@ -123,6 +123,10 @@ namespace MordheimLedgerApp.Services
             tokens["AppWarning"] = Color.FromArgb(IsDark() ? "#D9A441" : "#9A6A12");
             // Voile derrière les dialogs (DialogPage) : noir dans les deux modes, plus opaque en sombre - à 45 %
             // sur un fond déjà sombre, la page ne s'assombrissait presque pas et la carte se détachait mal.
+            // Valeurs modifiées pour la partie en cours (objets à usage unique) : bleu de sélection (LightSkyBlue,
+            // voir SelectableCardBorderStyle) en sombre, assombri en clair pour rester lisible - distinct du vert
+            // AppSuccess « a progressé depuis le recrutement », trop proche de l'accent wyrdstone.
+            tokens["AppGameModifier"] = Color.FromArgb(IsDark() ? "#87CEFA" : "#1F6FB2");
             tokens["AppScrim"] = Colors.Black.WithAlpha(IsDark() ? 0.70f : 0.45f);
             var res = Application.Current.Resources;
             foreach (var kv in tokens)

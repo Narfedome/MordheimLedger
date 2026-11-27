@@ -45,7 +45,11 @@ bloquant) ; compagnon de jeu, pas calculatrice de partie.
   lancés, arme enduite, Ail et Torche cochés d'office, dépendant sans dose qui quitte la bande - décochable, ambre).
   Fiche : valeurs de la partie en couleur d'accent, puces « Cette partie », bandeau pour la bande, « Dépendant ». Fin de
   partie : étape qui retire les objets pris, fait cocher ceux utilisés pendant, et lance les tables de conséquences
-  (Ombre Cramoisie, Racine de Mandragore, Champignons). Écarté : déroute, catalogue de scénarios.
+  (Ombre Cramoisie, Racine de Mandragore, Champignons). Habits de soie : 1D6 après une partie où le chef a été mis hors de
+  combat (1-3 : détruits). Valeurs de la partie en bleu (`AppGameModifier`).
+- Plus tard : éditer dans le Codex les bonus de partie et les tables de conséquences (seuls le moment d'usage et « Sans
+  effet sur » le sont) ; remplacer « Retraité » par un statut « Hors course » avec une couleur par cause (dépendance,
+  œil perdu…) - à définir. Écarté : déroute, catalogue de scénarios.
 
 ## V2 — Partage entre joueurs (ébauche validée le 2026-11-15)
 Trois thèmes : **sauvegarde**, **partage de bandes/contenu**, **partie connectée en lobby local**. Tout reste local,

@@ -3777,4 +3777,16 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="WarriorAddictedCheckbox" xml:space="preserve">
     <value>Dépendant · {0}</value>
   </data>
+  <data name="SingleUseOutOfActionLossFormat" xml:space="preserve">
+    <value>{0} · {1} mis hors de combat : 1D6 (1-{2} : détruits)</value>
+  </data>
+  <data name="SingleUseOutOfActionLost" xml:space="preserve">
+    <value>Détruits : retirés de la fiche.</value>
+  </data>
+  <data name="SingleUseOutOfActionKept" xml:space="preserve">
+    <value>Conservés.</value>
+  </data>
+  <data name="HistoryOutOfActionLossSentence" xml:space="preserve">
+    <value>{0} de {1} sont perdus</value>
+  </data>
 </root>

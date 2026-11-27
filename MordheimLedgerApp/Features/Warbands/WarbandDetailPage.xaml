@@ -143,9 +143,9 @@
                         </components:StatRowView>
 
                         <!-- Objets à usage unique pris pour la partie en cours (début de partie) : valeurs de la partie en
-                             couleur d'accent dans le profil ci-dessus, détail et puces ici ; retirés à la Fin de partie. -->
+                             bleu (AppGameModifier) dans le profil ci-dessus, détail et puces ici ; retirés à la Fin de partie. -->
                         <Label Text="{Binding GameProfileText}" IsVisible="{Binding HasGameProfile}" FontSize="11"
-                               TextColor="{DynamicResource AppAccent}" Margin="0,0,0,4"/>
+                               TextColor="{DynamicResource AppGameModifier}" Margin="0,0,0,4"/>
                         <components:ChipListView HeaderText="{loc:Loc SingleUseThisGameHeading}"
                                                   ItemsSource="{Binding GameUseChips}"
                                                   IconGlyph="{x:Static icons:SolidFont.HourglassHalf}"

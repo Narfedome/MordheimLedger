@@ -174,4 +174,17 @@ public class RaceTests : IDisposable
         Assert.Equal(SingleUseTiming.DuringBattle, saved.SingleUse!.Timing);
         Assert.Equal(new[] { races["race.dwarf"] }, saved.NoEffectOnRaceIds);
     }
+
+    [Fact]
+    public async Task OfficialContent_SilkClothesLostByTheLeaderOnOneToThree()
+    {
+        var silk = await ItemAsync("equipment.cathayan-silk-clothes");
+        Assert.Equal(3, silk.LostAfterOutOfActionOn);
+        Assert.True(silk.LostAfterOutOfActionLeaderOnly);
+        Assert.Null((await ItemAsync("equipment.sword")).LostAfterOutOfActionOn);
+
+        var mapped = silk.ToEntity().ToModel(new Dictionary<string, string>());
+        Assert.Equal(3, mapped.LostAfterOutOfActionOn);
+        Assert.True(mapped.LostAfterOutOfActionLeaderOnly);
+    }
 }

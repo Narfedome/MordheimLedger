@@ -291,8 +291,10 @@ par `Core/Services/SingleUseService` (sur les guerriers que le wizard tient en m
 écraserait « I +1 ») ; les objets pris dans la réserve sont retirés de l'instantané de réserve du wizard dès le chargement
 (`SingleUseReserve`), sinon la réécriture de la réserve les ressusciterait. `Warrior.AddictedToEquipmentItemId`
 (retirable dans « Corriger la fiche ») et `GainedSpecialRuleIds` (Stupidité des Champignons, ajoutée aux puces de règles).
-Les valeurs de la partie s'affichent en `AppAccent` (`StatRowView.GameModifiers`), distinctes du vert/rouge « a bougé
-depuis le recrutement ».
+Les valeurs de la partie s'affichent en bleu `AppGameModifier` (bleu de sélection, `ThemeService.Apply`, plus sombre en
+clair ; `StatRowView.GameModifiers`) : pas l'accent, trop proche du vert « a progressé » dans la palette wyrdstone.
+Habits de soie : `EquipmentItem.LostAfterOutOfActionOn`/`LostAfterOutOfActionLeaderOnly` (1D6 ≤ 3 si le chef a été mis hors
+de combat), carte dans la même étape de Fin de partie. Le reroll de Déroute n'est pas géré (déroute écartée).
 
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 

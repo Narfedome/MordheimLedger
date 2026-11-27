@@ -76,3 +76,31 @@ public partial class AfterBattleRollEntry : ObservableObject
         }
     }
 }
+
+/// <summary>Objet porté qui peut être perdu parce que son porteur a été mis hors de combat (Habits de soie du chef : 1D6,
+/// 1-3 détruits) - saisie libre + bouton dé.</summary>
+public partial class OutOfActionLossEntry : ObservableObject
+{
+    public Warrior Warrior { get; }
+    public EquipmentItem Item { get; }
+    public int WarriorEquipmentId { get; }
+    public string Label { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLost), nameof(ResultText), nameof(HasResult))]
+    private string roll = string.Empty;
+
+    public OutOfActionLossEntry(Warrior warrior, EquipmentItem item, int warriorEquipmentId)
+    {
+        Warrior = warrior;
+        Item = item;
+        WarriorEquipmentId = warriorEquipmentId;
+        Label = string.Format(LocalizationService.Instance["SingleUseOutOfActionLossFormat"], item.Name, warrior.Name, item.LostAfterOutOfActionOn);
+    }
+
+    private int? Value => int.TryParse(Roll, out var value) && value is >= 1 and <= 6 ? value : null;
+    public bool HasResult => Value is not null;
+    public bool IsLost => Value is { } value && SingleUseRules.IsLostAfterOutOfAction(Item, value);
+    public string ResultText => !HasResult ? string.Empty
+        : LocalizationService.Instance[IsLost ? "SingleUseOutOfActionLost" : "SingleUseOutOfActionKept"];
+}

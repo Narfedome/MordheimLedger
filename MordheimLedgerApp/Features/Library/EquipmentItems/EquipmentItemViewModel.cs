@@ -605,7 +605,9 @@ public partial class EquipmentItemViewModel : BaseViewModel
             IsUniqueArtefact = s.IsUniqueArtefact,
             IsExplorationOnly = s.IsExplorationOnly,
             SingleUse = SingleUseJson.Deserialize(SingleUseJson.Serialize(s.SingleUse)),
-            NoEffectOnRaceIds = new List<int>(s.NoEffectOnRaceIds)
+            NoEffectOnRaceIds = new List<int>(s.NoEffectOnRaceIds),
+            LostAfterOutOfActionOn = s.LostAfterOutOfActionOn,
+            LostAfterOutOfActionLeaderOnly = s.LostAfterOutOfActionLeaderOnly
         };
 
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker, _libraryService);

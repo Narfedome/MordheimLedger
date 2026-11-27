@@ -271,6 +271,10 @@ public class EquipmentSeedData
     /// <summary>Race official ids (e.g. "race.undead") - see EquipmentItem.NoEffectOnRaceIds.</summary>
     public List<string>? NoEffectOnRaceIds { get; set; }
 
+    /// <summary>See EquipmentItem.LostAfterOutOfActionOn/LeaderOnly.</summary>
+    public int? LostAfterOutOfActionOn { get; set; }
+    public bool LostAfterOutOfActionLeaderOnly { get; set; }
+
     /// <summary>See EquipmentItem.IsUniqueArtefact. False/absent for almost every item - true only for a
     /// one-of-a-kind item permanently tied to a single owner (e.g. a Dramatis Persona's unique gear).</summary>
     public bool IsUniqueArtefact { get; set; }

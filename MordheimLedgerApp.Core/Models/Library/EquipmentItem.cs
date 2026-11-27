@@ -154,4 +154,11 @@ public class EquipmentItem
     /// <summary>« Sans effet sur » ces races (Ombre Cramoisie : Morts-Vivants, Possédés). Informatif : le début de partie
     /// affiche un message ambre, sans bloquer. Voir Core.Rules.RaceRules.IsWithoutEffect.</summary>
     public List<int> NoEffectOnRaceIds { get; set; } = new();
+
+    /// <summary>Perdu après une bataille où son porteur a été mis hors de combat : sur 1D6 inférieur ou égal à cette valeur
+    /// (Habits de soie de Cathay : 1-3), null = jamais. Voir Core.Rules.SingleUseRules.IsAtRiskAfterOutOfAction.</summary>
+    public int? LostAfterOutOfActionOn { get; set; }
+
+    /// <summary>Le risque ne vaut que si le porteur est le chef (Habits de soie : « whose leader is wearing »).</summary>
+    public bool LostAfterOutOfActionLeaderOnly { get; set; }
 }

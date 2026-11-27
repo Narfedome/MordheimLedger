@@ -237,7 +237,7 @@
                                                         SelectedItem="{Binding SelectedWeapon}"/>
                                                 <Label Text="{loc:Loc SingleUsePoisonHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
                                             </VerticalStackLayout>
-                                            <Label Text="{Binding ProfileText}" IsVisible="{Binding HasProfile}" FontSize="12" TextColor="{DynamicResource AppAccent}"/>
+                                            <Label Text="{Binding ProfileText}" IsVisible="{Binding HasProfile}" FontSize="12" TextColor="{DynamicResource AppGameModifier}"/>
                                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasWarning}">
                                                 <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid" FontSize="12"
                                                        TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>

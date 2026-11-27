@@ -45,6 +45,9 @@ public class EquipmentItemEntity
     /// <summary>Ids de Race séparés par des virgules - voir EquipmentItem.NoEffectOnRaceIds.</summary>
     public string? NoEffectOnRaceIds { get; set; }
 
+    public int? LostAfterOutOfActionOn { get; set; }
+    public bool LostAfterOutOfActionLeaderOnly { get; set; }
+
     /// <summary>See Models.Library.EquipmentItem.IsUniqueArtefact.</summary>
     public bool IsUniqueArtefact { get; set; }
 

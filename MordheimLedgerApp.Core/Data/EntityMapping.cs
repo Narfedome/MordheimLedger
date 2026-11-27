@@ -804,6 +804,8 @@ public static class EntityMapping
         GrantsBonusExplorationDice = e.GrantsBonusExplorationDice,
         RaisesCharacteristicMax = e.RaisesCharacteristicMax,
         SingleUse = SingleUseJson.Deserialize(e.SingleUseJson),
+        LostAfterOutOfActionOn = e.LostAfterOutOfActionOn,
+        LostAfterOutOfActionLeaderOnly = e.LostAfterOutOfActionLeaderOnly,
         NoEffectOnRaceIds = string.IsNullOrEmpty(e.NoEffectOnRaceIds)
             ? new List<int>()
             : e.NoEffectOnRaceIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList(),
@@ -973,6 +975,8 @@ public static class EntityMapping
         GrantsBonusExplorationDice = m.GrantsBonusExplorationDice,
         RaisesCharacteristicMax = m.RaisesCharacteristicMax,
         SingleUseJson = SingleUseJson.Serialize(m.SingleUse),
+        LostAfterOutOfActionOn = m.LostAfterOutOfActionOn,
+        LostAfterOutOfActionLeaderOnly = m.LostAfterOutOfActionLeaderOnly,
         NoEffectOnRaceIds = m.NoEffectOnRaceIds.Count == 0 ? null : string.Join(',', m.NoEffectOnRaceIds),
         IsUniqueArtefact = m.IsUniqueArtefact,
         IsExplorationOnly = m.IsExplorationOnly

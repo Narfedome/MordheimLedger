@@ -2731,4 +2731,27 @@ public class RulesTests
             Assert.Equal(8 * 4, Enum.GetValues<CharacteristicField>().Where(f => f != field).Sum(f => CharacteristicModifier.Read(warrior, f)!.Value));
         }
     }
+
+    [Theory]
+    [InlineData(true, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(false, false, true)]
+    public void SingleUse_SilkClothesAtRiskOnlyOnTheLeader(bool isLeader, bool leaderOnly, bool expected)
+    {
+        var silk = new EquipmentItem { LostAfterOutOfActionOn = 3, LostAfterOutOfActionLeaderOnly = leaderOnly };
+        Assert.Equal(expected, SingleUseRules.IsAtRiskAfterOutOfAction(silk, isLeader));
+        Assert.False(SingleUseRules.IsAtRiskAfterOutOfAction(new EquipmentItem(), true));
+        Assert.False(SingleUseRules.IsAtRiskAfterOutOfAction(new EquipmentItem { LostAfterOutOfActionOn = 0 }, true));
+    }
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(1, true)]
+    [InlineData(3, true)]
+    [InlineData(4, false)]
+    public void SingleUse_SilkClothesLostOnOneToThree(int roll, bool expected)
+    {
+        Assert.Equal(expected, SingleUseRules.IsLostAfterOutOfAction(new EquipmentItem { LostAfterOutOfActionOn = 3 }, roll));
+        Assert.False(SingleUseRules.IsLostAfterOutOfAction(new EquipmentItem(), 1));
+    }
 }

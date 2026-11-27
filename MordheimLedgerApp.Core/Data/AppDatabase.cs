@@ -336,6 +336,8 @@ public partial class AppDatabase
     private void ApplySingleUse(EquipmentItem item, EquipmentSeedData eq)
     {
         item.SingleUse = eq.SingleUse;
+        item.LostAfterOutOfActionOn = eq.LostAfterOutOfActionOn;
+        item.LostAfterOutOfActionLeaderOnly = eq.LostAfterOutOfActionLeaderOnly;
         item.NoEffectOnRaceIds = eq.NoEffectOnRaceIds?.Select(id => _raceIdsByOfficialId[id]).ToList() ?? new List<int>();
     }
 

@@ -3777,4 +3777,16 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="WarriorAddictedCheckbox" xml:space="preserve">
     <value>Addicted · {0}</value>
   </data>
+  <data name="SingleUseOutOfActionLossFormat" xml:space="preserve">
+    <value>{0} · {1} taken out of action: 1D6 (1-{2}: ruined)</value>
+  </data>
+  <data name="SingleUseOutOfActionLost" xml:space="preserve">
+    <value>Ruined: removed from the sheet.</value>
+  </data>
+  <data name="SingleUseOutOfActionKept" xml:space="preserve">
+    <value>Kept.</value>
+  </data>
+  <data name="HistoryOutOfActionLossSentence" xml:space="preserve">
+    <value>{1}'s {0} are ruined</value>
+  </data>
 </root>

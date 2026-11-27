@@ -1483,6 +1483,8 @@
       "fr": "Habits de Soie Cathayenne"
     },
     "category": "MiscellaneousEquipment",
+    "lostAfterOutOfActionOn": 3,
+    "lostAfterOutOfActionLeaderOnly": true,
     "cost": 50,
     "costRandomMax": 12,
     "rarity": 9,

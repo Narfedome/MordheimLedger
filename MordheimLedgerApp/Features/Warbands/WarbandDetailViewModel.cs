@@ -313,7 +313,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
         var loaded = await _warbandService.GetWarriorsAsync(id, language);
         var rosterBuilder = new WarriorRosterBuilder(recruitableArchetypes, recruitableHiredSwords, recruitableDramatisPersonae,
-            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames);
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, await _libraryService.GetMagicSchoolsAsync(language));
         var rows = rosterBuilder.BuildRows(loaded);
 
         var inventory = await _warbandService.GetWarbandEquipmentAsync(id, language);
@@ -450,6 +450,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             IsLeader = w.IsLeader,
             CastsAsSuccessor = w.CastsAsSuccessor,
             HasPendingSuccessorSpell = w.HasPendingSuccessorSpell,
+            ExtraMagicSchoolId = w.ExtraMagicSchoolId,
             MaxMovement = w.MaxMovement,
             MaxWeaponSkill = w.MaxWeaponSkill,
             MaxBallisticSkill = w.MaxBallisticSkill,
@@ -477,14 +478,18 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         if (Warband is null) return;
 
-        var isSpellcaster = archetype?.IsSpellcaster == true || hiredSword?.MagicSchool is not null || warrior.CastsAsSuccessor;
+        var isSpellcaster = archetype?.IsSpellcaster == true || hiredSword?.MagicSchool is not null || warrior.CastsAsSuccessor
+            || warrior.ExtraMagicSchoolId is not null;
         var isMutant = archetype?.CanBuyMutations ?? false;
         var archetypeRules = archetype?.SpecialRules ?? hiredSword?.SpecialRules ?? new List<SpecialRule>();
         var specialRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id).ToList();
         // École(s) proposée(s) au picker de sort : celles DE LA BANDE pour un guerrier normal, mais la
         // seule école PROPRE au Franc-Tireur pour lui (voir HiredSword.MagicSchoolId) - jamais les deux
         // mélangées, un Franc-Tireur n'a pas accès aux écoles de la bande qui l'engage.
-        var magicSchools = hiredSword?.MagicSchool is { } hiredSwordSchool ? new List<MagicSchool> { hiredSwordSchool } : _bandMagicSchools;
+        // Un guerrier qui a appris une école en propre (Magie Mineure du Grimoire) garde les écoles calculées sur sa carte.
+        var rowSchools = AllActiveWarriorRows.FirstOrDefault(r => r.Warrior.Id == warrior.Id)?.MagicSchools.ToList();
+        var magicSchools = hiredSword?.MagicSchool is { } hiredSwordSchool ? new List<MagicSchool> { hiredSwordSchool }
+            : warrior.ExtraMagicSchoolId is not null && rowSchools is { Count: > 0 } ? rowSchools : _bandMagicSchools;
 
         WarriorEditDialogViewModel NewViewModel() => new(warrior, Loc["WarriorEditTitle"], Warband, _warbandService,
             _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, magicSchools,

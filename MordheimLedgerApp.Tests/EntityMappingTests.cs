@@ -686,4 +686,26 @@ public class EntityMappingTests
         Assert.Equal(castsAsSuccessor, roundTripped.CastsAsSuccessor);
         Assert.Equal(pendingSpell, roundTripped.HasPendingSuccessorSpell);
     }
+
+    [Fact]
+    public void WarriorSpell_DifficultyReduction_RoundTrips()
+    {
+        var spell = new Spell { Id = 4, Name = "Re-Animation", RollValue = 2, Difficulty = 5 };
+        var learned = new WarriorSpell { Id = 9, WarriorId = 3, Item = spell, DifficultyReduction = 2 };
+
+        var roundTripped = learned.ToEntity().ToModel(spell);
+
+        Assert.Equal(2, roundTripped.DifficultyReduction);
+        Assert.Same(spell, roundTripped.Item);
+    }
+
+    [Theory]
+    [InlineData(7)]
+    [InlineData(null)]
+    public void Warrior_ExtraMagicSchool_RoundTrips(int? schoolId)
+    {
+        var roundTripped = new Warrior { Id = 5, Name = "Hans", ExtraMagicSchoolId = schoolId }.ToEntity().ToModel();
+
+        Assert.Equal(schoolId, roundTripped.ExtraMagicSchoolId);
+    }
 }

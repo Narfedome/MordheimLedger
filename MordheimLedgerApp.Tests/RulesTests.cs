@@ -2521,4 +2521,87 @@ public class RulesTests
     {
         Assert.Equal(expected, ExperiencePrefill.IsUntouched(current, lastApplied));
     }
+
+    // --- Sorts en double et Grimoire (1.6) ---
+
+    [Fact]
+    public void SpellRules_Learn_DuplicateLowersDifficulty()
+    {
+        Assert.Equal(SpellLearningOutcome.NewSpell, SpellRules.Learn(new[] { 1, 2 }, 3));
+        Assert.Equal(SpellLearningOutcome.DifficultyReduced, SpellRules.Learn(new[] { 1, 2 }, 2));
+        Assert.Equal(SpellLearningOutcome.NewSpell, SpellRules.Learn(Array.Empty<int>(), 2));
+    }
+
+    [Theory]
+    [InlineData(8, 0, 8)]
+    [InlineData(8, 1, 7)]
+    [InlineData(8, 2, 6)]
+    [InlineData(3, 4, 2)]
+    [InlineData(5, -1, 5)]
+    public void SpellRules_EffectiveDifficulty_NeverBelowTwo(int difficulty, int reduction, int expected)
+    {
+        Assert.Equal(expected, SpellRules.EffectiveDifficulty(difficulty, reduction));
+    }
+
+    [Fact]
+    public void SpellRules_EffectiveDifficulty_NoDifficulty_StaysNull()
+    {
+        Assert.Null(SpellRules.EffectiveDifficulty(null, 2));
+    }
+
+    [Fact]
+    public void TomeOfMagic_Users_WizardFirst()
+    {
+        var wizard = new Warrior { Id = 1, Name = "Hieronymus" };
+        var scholar = new Warrior { Id = 2, Name = "Hans" };
+        var (kind, users) = TomeOfMagicRules.Users(new[]
+        {
+            new TomeCandidate(scholar, IsSpellcaster: false, HasArcaneLore: true),
+            new TomeCandidate(wizard, IsSpellcaster: true, HasArcaneLore: false)
+        });
+
+        Assert.Equal(TomeUseKind.ExtraSpell, kind);
+        Assert.Equal(new[] { wizard }, users);
+    }
+
+    [Fact]
+    public void TomeOfMagic_Users_ArcaneLoreWithoutWizard()
+    {
+        var scholar = new Warrior { Id = 2 };
+        var (kind, users) = TomeOfMagicRules.Users(new[]
+        {
+            new TomeCandidate(new Warrior { Id = 1 }, false, false),
+            new TomeCandidate(scholar, false, true)
+        });
+
+        Assert.Equal(TomeUseKind.LearnLesserMagic, kind);
+        Assert.Equal(new[] { scholar }, users);
+    }
+
+    [Fact]
+    public void TomeOfMagic_Users_NobodyCanUseIt()
+    {
+        var (kind, users) = TomeOfMagicRules.Users(new[] { new TomeCandidate(new Warrior(), false, false) });
+
+        Assert.Equal(TomeUseKind.Nobody, kind);
+        Assert.Empty(users);
+    }
+
+    [Fact]
+    public void TomeOfMagic_AcquiredCount_CountsOnlyTomes()
+    {
+        Assert.Equal(2, TomeOfMagicRules.AcquiredCount(new (string?, int)[]
+        {
+            ("equipment.tome-of-magic", 1), ("equipment.axe", 3), (null, 1), ("equipment.tome-of-magic", 1), ("equipment.tome-of-magic", -1)
+        }));
+        Assert.Equal(0, TomeOfMagicRules.AcquiredCount(Array.Empty<(string?, int)>()));
+    }
+
+    [Fact]
+    public void TomeOfMagic_IsSpentTome_OnlyForTheTome()
+    {
+        Assert.True(TomeOfMagicRules.IsSpentTome("equipment.tome-of-magic"));
+        Assert.False(TomeOfMagicRules.IsSpentTome("equipment.lucky-charm"));
+        Assert.False(TomeOfMagicRules.IsSpentTome(null));
+    }
 }

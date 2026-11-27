@@ -28,8 +28,9 @@ public sealed class AdvancementService
     {
         foreach (var skill in result.Skills)
             await _warbands.AddWarriorSkillAsync(target.Id, skill);
+        // Un sort déjà connu n'est pas relancé : sa difficulté baisse de 1 (SpellLearningService).
         if (result.Spell is { } spell)
-            await _warbands.AddWarriorSpellAsync(target.Id, spell);
+            await new SpellLearningService(_warbands).LearnAsync(target, spell);
         if (result.Field is { } field)
             ApplyCharacteristicIncrease(target, field);
     }

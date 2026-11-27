@@ -34,6 +34,9 @@ bloquant) ; compagnon de jeu, pas calculatrice de partie.
   Sans successeur possible : avertissement, « Archiver la bande » ou continuer sans chef.
 - **Bandes archivées** : onglet « Archivées » de l'écran des bandes, consultation seule, désarchivables ; base de la
   future fin de campagne.
+- **Magie** : un sort tiré en double réduit sa difficulté de 1 (au lieu d'une relance) ; **Grimoire** : un sort de plus
+  pour un lanceur (sa liste ou Magie Mineure), ou la Magie Mineure pour un Héros avec Savoir Arcanique - effet unique à
+  l'acquisition, avertissement s'il est donné ensuite.
 - Plus tard : objets à usage unique à l'écran de début de partie (effets sur le profil). Écarté : déroute, catalogue de
   scénarios.
 

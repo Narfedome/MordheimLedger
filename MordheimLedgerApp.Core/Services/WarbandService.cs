@@ -544,6 +544,12 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarriorSpellEntity>(warriorSpellId);
     }
 
+    public async Task SaveWarriorSpellAsync(WarriorSpell spell)
+    {
+        await _db.Initialization;
+        await _db.Connection.UpdateAsync(spell.ToEntity());
+    }
+
     public async Task<WarriorMutation> AddWarriorMutationAsync(int warriorId, Mutation mutation)
     {
         await _db.Initialization;

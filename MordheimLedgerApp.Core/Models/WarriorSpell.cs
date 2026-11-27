@@ -17,5 +17,10 @@ public class WarriorSpell
     /// des règles : sort de départ/nouveau sort tirés au hasard, pas choisis - voir Spell.RollDisplay). Le
     /// seul consommateur de cette propriété est l'affichage en puce (ChipListView/ChipView, WarbandDetailPage/
     /// WarriorEditDialog) - pas de risque de double-préfixage ailleurs.</summary>
-    public string Name => Item.RollDisplay;
+    /// <summary>Le sort a été tiré de nouveau alors qu'il était déjà connu : chaque doublon réduit sa difficulté de 1
+    /// (livre, section Magie). Voir Core.Rules.SpellRules.Learn.</summary>
+    public int DifficultyReduction { get; set; }
+
+    /// <summary>« 2 · Réanimation (−1) » quand un doublon a réduit la difficulté.</summary>
+    public string Name => DifficultyReduction > 0 ? $"{Item.RollDisplay} (−{DifficultyReduction})" : Item.RollDisplay;
 }

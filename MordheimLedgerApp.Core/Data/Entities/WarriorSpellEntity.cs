@@ -12,4 +12,7 @@ public class WarriorSpellEntity
     public int WarriorId { get; set; }
 
     public int SpellId { get; set; }
+
+    /// <summary>Voir Models.WarriorSpell.DifficultyReduction.</summary>
+    public int DifficultyReduction { get; set; }
 }

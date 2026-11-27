@@ -91,7 +91,7 @@ public partial class EndOfGamePageViewModel
     {
         var (row, _, _) = FindAdvanceOwner(entry);
         var knownSpellIds = row.Warrior.Spells.Select(s => s.Item.Id).ToList();
-        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(row.MagicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds)));
+        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(row.MagicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds, allowDuplicate: true)));
         if (rolled is null) return;
 
         entry.SelectedSkills.Clear();
@@ -104,7 +104,7 @@ public partial class EndOfGamePageViewModel
     {
         var (row, _, _) = FindAdvanceOwner(entry);
         var knownSpellIds = row.Warrior.Spells.Select(s => s.Item.Id).ToList();
-        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(row.MagicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds)));
+        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(row.MagicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds, allowDuplicate: true)));
         if (rolled is null) return;
         entry.ChooseSuccessorSpell(rolled);
     }

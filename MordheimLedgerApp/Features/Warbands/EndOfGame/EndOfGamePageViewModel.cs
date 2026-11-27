@@ -217,7 +217,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// <summary>Public depuis le passage à une vue par étape (2026-09-22, voir Steps/StepViewConverter.cs)
     /// - le convertisseur, hors de cette classe, doit pouvoir lire cette valeur pour choisir la bonne
     /// vue.</summary>
-    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, InjuryRecap, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, LeaderSuccession, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
+    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, InjuryRecap, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, TomeOfMagic, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, LeaderSuccession, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -310,6 +310,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         OnPropertyChanged(nameof(EquipmentTradingNetTotal));
         if (CurrentStepKind == StepKind.Experience) ApplyExperiencePrefill();
         if (CurrentStepKind == StepKind.LeaderSuccession) BuildLeaderCandidates();
+        if (CurrentStepKind == StepKind.TomeOfMagic) _ = Services.UiErrors.RunAsync(BuildTomeEntriesAsync, nameof(BuildTomeEntriesAsync));
         if (CurrentStepKind == StepKind.RecruitHeroesCount) NotifyLeaderRecruitmentChanged();
     }
 
@@ -380,6 +381,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // Personnage (2026-08-31).
             if (HasEligibleHeroesForRareItems) steps.Add(new(StepKind.RareItems));
             if (RareItemSearchEntries.Any(e => e.IsFound)) steps.Add(new(StepKind.RareItemPurchase));
+            // Grimoire (1.6) : seulement si un Grimoire a été acquis pendant cette Fin de partie.
+            if (TomeAcquiredCount > 0) steps.Add(new(StepKind.TomeOfMagic));
             // Dramatis Personae : solde des personnages à frais en or/pierre magique déjà engagés
             // (Johann/Veskit/Marianna/Nicodemus) - voir EndOfGamePageViewModel.DramatisPersonae.cs.
             // Aucun recrutement combiné ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis
@@ -879,7 +882,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         var cooldownDramatisPersonaIds = await _warbandService.GetDramatisPersonaCooldownIdsAsync(warband.Id);
 
         var rosterBuilder = new WarriorRosterBuilder(localizedWarriorArchetypes, localizedHiredSwords, dramatisPersonaCatalog,
-            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames);
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, await _libraryService.GetMagicSchoolsAsync(language));
         var allWarriors = await _warbandService.GetWarriorsAsync(warbandId, language);
         var allRows = rosterBuilder.BuildRows(allWarriors);
         return new EndOfGameData(warband, explorationResults, localizedEquipment, equipmentItemsByOfficialId, specialRulesByOfficialId,
@@ -1243,6 +1246,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         await ApplyWyrdstoneSaleAsync(sentences);
         ApplyAvailableVeterans(sentences);
         await ApplyRareItemSearchAsync(_localizedEquipmentCatalog, sentences);
+        await ApplyTomeOfMagicAsync(sentences);
         // Délai de re-recherche (Aenur/Ulli & Marquand) : reste d'abord toute trace de cooldown
         // PRÉEXISTANTE (posée à une Fin de Partie antérieure) - le picker de CETTE Fin de Partie les
         // a déjà exclus, donc atteindre ce point veut dire "une bataille a été jouée sans eux",

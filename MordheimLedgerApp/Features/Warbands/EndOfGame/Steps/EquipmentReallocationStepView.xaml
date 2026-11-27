@@ -38,6 +38,11 @@
                                                FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
                                         <Label Grid.Column="1" Text="{Binding OutOfListWarning}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
                                     </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasSpentTomeWarning}">
+                                        <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                               FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                        <Label Grid.Column="1" Text="{loc:Loc TomeAlreadyUsedWarning}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                                    </Grid>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>

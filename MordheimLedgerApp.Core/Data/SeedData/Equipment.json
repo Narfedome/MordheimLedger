@@ -2180,6 +2180,7 @@
     "cost": 200,
     "costRandomMax": 150,
     "rarity": 12,
+    "restrictedToWarbandIds": ["warband.averlanders", "warband.beastmen-raiders", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.dwarf-treasure-hunters", "warband.kislevites", "warband.marienburgers", "warband.middenheimers", "warband.orc-mob", "warband.ostlanders", "warband.reiklanders", "warband.skaven-of-clan-eshin", "warband.undead"],
     "description": {
       "en": "Sometimes books of forbidden lore are offered for sale in the markets and dark alleys of the settlements around Mordheim. If the warband doesn't contain a wizard, a warrior with the Arcane Lore skill may use the Tome of Magic to learn Lesser Magic.",
       "fr": "Il arrive que des livres de savoir interdit soient proposés à la vente sur les marchés et dans les ruelles sombres des colonies autour de Mordheim. Si la bande ne possède pas de sorcier, un guerrier avec la compétence Savoir Arcanique peut utiliser le Grimoire pour apprendre la Magie Mineure."

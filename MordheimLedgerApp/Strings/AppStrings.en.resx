@@ -3585,4 +3585,49 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameSuccessorSpellResult" xml:space="preserve">
     <value>Spell of choice (new leader)</value>
   </data>
+  <data name="SpellRollDuplicateFormat" xml:space="preserve">
+    <value>{0} is already known: as the rulebook says, the duplicate lowers its difficulty by 1 ({1} → {2}).</value>
+  </data>
+  <data name="SpellRollDuplicateNoDifficultyFormat" xml:space="preserve">
+    <value>{0} is already known: the duplicate lowers its difficulty by 1.</value>
+  </data>
+  <data name="TomeHeading" xml:space="preserve">
+    <value>Tome of Magic</value>
+  </data>
+  <data name="TomeIntro" xml:space="preserve">
+    <value>A Tome of Magic was acquired at this end of game. Its effect applies once, to a single warrior: giving it to someone else later has no effect.</value>
+  </data>
+  <data name="TomeUsersWizard" xml:space="preserve">
+    <value>Spellcaster who uses it: one more spell, permanently</value>
+  </data>
+  <data name="TomeUsersArcaneLore" xml:space="preserve">
+    <value>Hero who uses it (no spellcaster in the warband)</value>
+  </data>
+  <data name="TomeArcaneLoreHint" xml:space="preserve">
+    <value>Thanks to Arcane Lore, they learn Lesser Magic: they become a spellcaster and roll their first spell below.</value>
+  </data>
+  <data name="TomeListLabel" xml:space="preserve">
+    <value>Spell list</value>
+  </data>
+  <data name="TomeOwnListFormat" xml:space="preserve">
+    <value>{0} (own list)</value>
+  </data>
+  <data name="TomeNobody" xml:space="preserve">
+    <value>The warband has no spellcaster and no Hero with Arcane Lore: nobody can use this Tome. It goes to the stash with no effect (its effect only applies when acquired).</value>
+  </data>
+  <data name="HistoryTomeSpellSentence" xml:space="preserve">
+    <value>{0} learns {1} from the Tome of Magic.</value>
+  </data>
+  <data name="HistoryTomeLesserMagicSentence" xml:space="preserve">
+    <value>{0} learns Lesser Magic from the Tome of Magic, and the spell {1}.</value>
+  </data>
+  <data name="HistoryTomeDuplicateSentence" xml:space="preserve">
+    <value>The Tome of Magic lowers the difficulty of {1} by 1 for {0}.</value>
+  </data>
+  <data name="HistoryTomeUnusedSentence" xml:space="preserve">
+    <value>Nobody can use the Tome of Magic: it goes to the stash with no effect.</value>
+  </data>
+  <data name="TomeAlreadyUsedWarning" xml:space="preserve">
+    <value>Tome of Magic already used: it has no effect on the warrior who receives it.</value>
+  </data>
 </root>

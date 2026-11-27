@@ -46,4 +46,7 @@ public class WarbandEquipment
     /// <summary>Alias for NameDisplay - ChipView binds its Label directly to Name, same idiom as
     /// WarriorEquipment.Name.</summary>
     public string Name => NameDisplay;
+
+    /// <summary>Grimoire déjà acquis : l'équiper n'a plus d'effet (Core.Rules.TomeOfMagicRules, FAQ).</summary>
+    public bool IsSpentTome => Rules.TomeOfMagicRules.IsSpentTome(Item.OfficialId);
 }

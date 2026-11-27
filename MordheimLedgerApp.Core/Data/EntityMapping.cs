@@ -1028,6 +1028,7 @@ public static class EntityMapping
         IsLeader = e.IsLeader,
         CastsAsSuccessor = e.CastsAsSuccessor,
         HasPendingSuccessorSpell = e.HasPendingSuccessorSpell,
+        ExtraMagicSchoolId = e.ExtraMagicSchoolId,
         MaxMovement = e.MaxMovement,
         MaxWeaponSkill = e.MaxWeaponSkill,
         MaxBallisticSkill = e.MaxBallisticSkill,
@@ -1089,6 +1090,7 @@ public static class EntityMapping
         IsLeader = m.IsLeader,
         CastsAsSuccessor = m.CastsAsSuccessor,
         HasPendingSuccessorSpell = m.HasPendingSuccessorSpell,
+        ExtraMagicSchoolId = m.ExtraMagicSchoolId,
         MaxMovement = m.MaxMovement,
         MaxWeaponSkill = m.MaxWeaponSkill,
         MaxBallisticSkill = m.MaxBallisticSkill,
@@ -1204,14 +1206,16 @@ public static class EntityMapping
     {
         Id = e.Id,
         WarriorId = e.WarriorId,
-        Item = item
+        Item = item,
+        DifficultyReduction = e.DifficultyReduction
     };
 
     public static WarriorSpellEntity ToEntity(this WarriorSpell m) => new()
     {
         Id = m.Id,
         WarriorId = m.WarriorId,
-        SpellId = m.Item.Id
+        SpellId = m.Item.Id,
+        DifficultyReduction = m.DifficultyReduction
     };
 
     public static Mutation ToModel(this MutationEntity e, IReadOnlyDictionary<string, string> translations,

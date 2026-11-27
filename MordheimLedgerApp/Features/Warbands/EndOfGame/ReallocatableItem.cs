@@ -95,6 +95,15 @@ public sealed class ReallocationCarrier
         _reserve = reserve;
     }
 
+    /// <summary>Un Grimoire vient d'arriver chez ce guerrier (réalloué depuis la réserve ou un autre) : il n'a pas d'effet
+    /// (Core.Rules.TomeOfMagicRules) - message ambre sous le guerrier.</summary>
+    public bool HasSpentTomeWarning => Kind switch
+    {
+        ReallocationCarrierKind.ExistingHero => Items.Any(i => i.WarriorEquipmentSource is { Id: < 0 } && Core.Rules.TomeOfMagicRules.IsSpentTome(i.Item.OfficialId)),
+        ReallocationCarrierKind.NewRecruit => Items.Any(i => Core.Rules.TomeOfMagicRules.IsSpentTome(i.Item.OfficialId)),
+        _ => false
+    };
+
     public static ReallocationCarrier ForHero(WarriorOutcomeRow row) => new(row.Name, ReallocationCarrierKind.ExistingHero, row, null, null);
     // slot.Name (pas DisplayLabel, qui retombe sur ArchetypeLabel générique pour une recrue neuve -
     // conçu pour l'étape Équipement AVANT que le nom ne soit saisi) : à l'étape Réallouer, plus tardive

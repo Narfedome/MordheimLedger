@@ -44,6 +44,7 @@ namespace MordheimLedgerApp.Converters
                 EndOfGamePageViewModel.StepKind.AvailableVeterans => new AvailableVeteransStepView(),
                 EndOfGamePageViewModel.StepKind.RareItems => new RareItemsStepView(),
                 EndOfGamePageViewModel.StepKind.RareItemPurchase => new RareItemPurchaseStepView(),
+                EndOfGamePageViewModel.StepKind.TomeOfMagic => new TomeOfMagicStepView(),
                 EndOfGamePageViewModel.StepKind.HiredSwords => new HiredSwordsStepView(),
                 EndOfGamePageViewModel.StepKind.DramatisPersonae => new DramatisPersonaeStepView(),
                 EndOfGamePageViewModel.StepKind.PairEngagement => new PairEngagementStepView(),

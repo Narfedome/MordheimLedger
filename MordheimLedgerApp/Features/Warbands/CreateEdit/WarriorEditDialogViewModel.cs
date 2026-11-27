@@ -197,6 +197,12 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// (pas soumises à Enregistrer/Annuler) - regroupées ici depuis la carte guerrier (WarbandDetailPage,
     /// qui reste lecture seule pour ces listes) plutôt que gérées à deux endroits différents.</summary>
     public ObservableCollection<WarriorEquipment> Equipment { get; }
+
+    private readonly HashSet<int> _initialEquipmentIds;
+
+    /// <summary>Un Grimoire ajouté pendant cette correction : il n'a plus d'effet (son effet ne vaut qu'à l'acquisition,
+    /// en Fin de partie) - simple message ambre.</summary>
+    public bool HasSpentTomeWarning => Equipment.Any(e => !_initialEquipmentIds.Contains(e.Id) && Core.Rules.TomeOfMagicRules.IsSpentTome(e.Item.OfficialId));
     public ObservableCollection<WarriorSkill> Skills { get; }
     public ObservableCollection<WarriorInjury> Injuries { get; }
     public ObservableCollection<WarriorSpell> Spells { get; }
@@ -226,6 +232,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _savedPhotoPath = item.PhotoPath;
 
         Equipment = new ObservableCollection<WarriorEquipment>(item.Equipment);
+        _initialEquipmentIds = item.Equipment.Select(e => e.Id).ToHashSet();
+        Equipment.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSpentTomeWarning));
         Skills = new ObservableCollection<WarriorSkill>(item.Skills);
         Injuries = new ObservableCollection<WarriorInjury>(item.Injuries);
         Spells = new ObservableCollection<WarriorSpell>(item.Spells);

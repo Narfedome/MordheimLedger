@@ -26,14 +26,19 @@ public sealed class WarriorRosterBuilder
 
     private static LocalizationService Loc => LocalizationService.Instance;
 
+    /// <summary>Catalogue des écoles, pour une école apprise en propre (Warrior.ExtraMagicSchoolId : la Magie Mineure du
+    /// Grimoire + Savoir Arcanique).</summary>
+    private readonly IReadOnlyList<MagicSchool> _allMagicSchools;
+
     /// <summary>La règle « Chef » du catalogue, prise sur un type de guerrier de la bande qui la porte.</summary>
     private SpecialRule? LeaderRule => _recruitableArchetypes.SelectMany(a => a.SpecialRules)
         .FirstOrDefault(r => r.OfficialId == Core.Data.OfficialIds.LeaderRule);
 
     public WarriorRosterBuilder(List<WarriorArchetype> recruitableArchetypes, List<HiredSword> recruitableHiredSwords,
         List<DramatisPersona> recruitableDramatisPersonae, List<SpecialRule> bandWideSpecialRules, List<MagicSchool> bandMagicSchools,
-        Dictionary<int, string> warbandArchetypeNames)
+        Dictionary<int, string> warbandArchetypeNames, IReadOnlyList<MagicSchool>? allMagicSchools = null)
     {
+        _allMagicSchools = allMagicSchools ?? Array.Empty<MagicSchool>();
         _recruitableArchetypes = recruitableArchetypes;
         _recruitableHiredSwords = recruitableHiredSwords;
         _recruitableDramatisPersonae = recruitableDramatisPersonae;
@@ -98,7 +103,8 @@ public sealed class WarriorRosterBuilder
             mergedRules = mergedRules.Append(leaderRule);
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
-        var magicSchools = archetype?.IsSpellcaster == true || warrior.CastsAsSuccessor ? _bandMagicSchools : null;
+        var magicSchools = (archetype?.IsSpellcaster == true || warrior.CastsAsSuccessor ? _bandMagicSchools : Enumerable.Empty<MagicSchool>())
+            .Concat(_allMagicSchools.Where(s => s.Id == warrior.ExtraMagicSchoolId)).DistinctBy(s => s.Id).ToList();
         var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) })
             .Concat(BuildRuleHatredChips(HatredSourceRules(warrior, mergedRules)))
             .Concat(BuildSkillHatredChips(warrior.Skills.Select(s => s.Item)));

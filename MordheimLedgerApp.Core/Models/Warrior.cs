@@ -236,6 +236,10 @@ public class Warrior
     /// les dés (errata p. 117) ; remis à faux une fois cette progression faite.</summary>
     public bool HasPendingSuccessorSpell { get; set; }
 
+    /// <summary>École de magie apprise en propre (Grimoire + Savoir Arcanique : la Magie Mineure), en plus des écoles de
+    /// la bande - fait du guerrier un lanceur de sorts. Voir Core.Rules.TomeOfMagicRules.</summary>
+    public int? ExtraMagicSchoolId { get; set; }
+
     /// <summary>Racial characteristic maximums, snapshotted from the recruiting WarriorArchetype's
     /// RacialProfile at recruitment (see EntityMapping.ToWarrior) - same snapshot-at-recruit-time
     /// convention as the rest of the stat line, not a live reference: editing the RacialProfile catalog

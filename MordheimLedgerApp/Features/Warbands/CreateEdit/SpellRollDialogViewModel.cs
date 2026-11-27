@@ -39,6 +39,18 @@ public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
     [ObservableProperty]
     private string? rollError;
 
+    /// <summary>Doublon accepté (allowDuplicate) : message informatif, le sort déjà connu verra sa difficulté baisser de 1
+    /// à l'enregistrement (Core.Rules.SpellRules). Null sinon.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasDuplicateInfo))]
+    private string? duplicateInfo;
+
+    public bool HasDuplicateInfo => DuplicateInfo is not null;
+
+    /// <summary>Progression, Grimoire, successeur : un doublon réduit la difficulté au lieu d'être relancé. Faux au
+    /// recrutement, où le sort est ajouté tel quel à la fiche.</summary>
+    private readonly bool _allowDuplicate;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasResolvedSpell))]
     private Spell? resolvedSpell;
@@ -46,8 +58,9 @@ public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
     public bool HasResolvedSpell => ResolvedSpell is not null;
 
     public SpellRollDialogViewModel(List<MagicSchool> magicSchools, ILibraryService libraryService, IDetailDialogService detailDialogs,
-        IReadOnlyCollection<int> knownSpellIds)
+        IReadOnlyCollection<int> knownSpellIds, bool allowDuplicate = false)
     {
+        _allowDuplicate = allowDuplicate;
         MagicSchools = magicSchools;
         _libraryService = libraryService;
         _detailDialogs = detailDialogs;
@@ -64,6 +77,7 @@ public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
     partial void OnSpellRollChanged(string value)
     {
         RollError = null;
+        DuplicateInfo = null;
         if (!int.TryParse(value, out var roll) || roll < 1 || roll > 6) return;
         _ = Services.UiErrors.RunAsync(() => ResolveSpellAsync(roll), nameof(SpellRollDialogViewModel));
     }
@@ -82,8 +96,14 @@ public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
 
         if (_knownSpellIds.Contains(spell.Id))
         {
-            RollError = Loc["WarbandsSpellRollAlreadyKnownMessage"];
-            return;
+            if (!_allowDuplicate)
+            {
+                RollError = Loc["WarbandsSpellRollAlreadyKnownMessage"];
+                return;
+            }
+            DuplicateInfo = spell.Difficulty is { } difficulty
+                ? string.Format(Loc["SpellRollDuplicateFormat"], spell.Name, difficulty, SpellRules.EffectiveDifficulty(difficulty, 1))
+                : string.Format(Loc["SpellRollDuplicateNoDifficultyFormat"], spell.Name);
         }
 
         RollError = null;

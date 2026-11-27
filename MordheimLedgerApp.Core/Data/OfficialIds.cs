@@ -33,6 +33,12 @@ public static class OfficialIds
     /// <summary>Gladiateur - adversaire éphémère de "Vendu aux Fosses" (Blessure Grave 65).</summary>
     public const string PitFighterHiredSword = "hiredsword.pit-fighter";
 
+    /// <summary>Grimoire (Tome of Magic) : un sort de plus pour un lanceur, ou la Magie Mineure pour un guerrier avec
+    /// Savoir Arcanique ; effet unique, à l'acquisition (FAQ). Voir Core.Rules.TomeOfMagicRules.</summary>
+    public const string TomeOfMagicItem = "equipment.tome-of-magic";
+    public const string ArcaneLoreSkill = "skill.academic.arcane-lore";
+    public const string LesserMagicSchool = "school.lesser-magic";
+
     public const string UndeadWarband = "warband.undead";
     public const string CultOfThePossessedWarband = "warband.cult-of-the-possessed";
 }

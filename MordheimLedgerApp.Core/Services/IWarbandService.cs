@@ -134,6 +134,9 @@ public interface IWarbandService
     Task<WarriorSpell> AddWarriorSpellAsync(int warriorId, Spell spell);
     Task RemoveWarriorSpellAsync(int warriorSpellId);
 
+    /// <summary>Met à jour un sort appris (réduction de difficulté d'un doublon, voir WarriorSpell.DifficultyReduction).</summary>
+    Task SaveWarriorSpellAsync(WarriorSpell spell);
+
     Task<WarriorMutation> AddWarriorMutationAsync(int warriorId, Mutation mutation);
     Task RemoveWarriorMutationAsync(int warriorMutationId);
 

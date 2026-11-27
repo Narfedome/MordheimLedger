@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.TomeOfMagicStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+    <!-- Étape : Grimoire (1.6) - voir EndOfGamePageViewModel.TomeOfMagic. Saisie informative : sans jet, aucun sort. -->
+    <VerticalStackLayout Spacing="12">
+        <VerticalStackLayout Spacing="2">
+            <Label Text="{loc:Loc TomeHeading}" FontAttributes="Bold"/>
+            <Label Text="{loc:Loc TomeIntro}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding TomeEntries}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="local:TomeUseEntry">
+                    <VerticalStackLayout Spacing="10">
+                        <!-- Personne ne peut l'utiliser : effet perdu (FAQ). -->
+                        <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsNobody}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid" FontSize="12"
+                                       TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                <Label Grid.Column="1" Text="{loc:Loc TomeNobody}" FontSize="13" TextColor="{DynamicResource AppWarning}"/>
+                            </Grid>
+                        </Border>
+
+                        <VerticalStackLayout Spacing="10" IsVisible="{Binding HasUsers}">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{Binding UsersLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Users}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:TomeUserOption">
+                                                <Grid>
+                                                    <Border Padding="12,8" StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                                                            Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppBackground}"
+                                                            AutomationProperties.IsInAccessibleTree="False" InputTransparent="True">
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                                            <Label Grid.Column="0" Text="{x:Static icons:RegularFont.Circle}" FontFamily="FontRegular" FontSize="16"
+                                                                   TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center">
+                                                                <Label.Triggers>
+                                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                                        <Setter Property="Text" Value="{x:Static icons:SolidFont.CircleDot}"/>
+                                                                        <Setter Property="FontFamily" Value="FontSolid"/>
+                                                                        <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                                                                    </DataTrigger>
+                                                                </Label.Triggers>
+                                                            </Label>
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                                <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                                                <Label Text="{Binding RoleName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </Border>
+                                                    <Button BackgroundColor="Transparent" BorderWidth="0" CornerRadius="8" Padding="0"
+                                                            SemanticProperties.Description="{Binding Name}"
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectTomeUserCommand}"
+                                                            CommandParameter="{Binding .}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                    <Label Text="{loc:Loc TomeArcaneLoreHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding IsArcaneLore}"/>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding ShowLists}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{loc:Loc TomeListLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Lists}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:TomeListOption">
+                                                <Grid>
+                                                    <Border Padding="12,10" StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                                                            Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppBackground}"
+                                                            AutomationProperties.IsInAccessibleTree="False" InputTransparent="True">
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Label Text="{Binding Label}" FontAttributes="Bold"/>
+                                                    </Border>
+                                                    <Button BackgroundColor="Transparent" BorderWidth="0" CornerRadius="8" Padding="0"
+                                                            SemanticProperties.Description="{Binding Label}"
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectTomeListCommand}"
+                                                            CommandParameter="{Binding .}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{Binding ListName, StringFormat='1D6 : {0}'}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                        <Entry AutomationId="TomeRollEntry" Grid.Column="0" Text="{Binding Roll}" Keyboard="Numeric" WidthRequest="70"
+                                               Placeholder="1D6">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                        <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                      Style="{StaticResource GhostIconButtonStyle}" VerticalOptions="Center"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollTomeCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                    </Grid>
+                                    <Label Text="{Binding ResultText}" FontAttributes="Bold" IsVisible="{Binding HasResolvedSpell}"/>
+                                    <Label Text="{Binding DuplicateText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding IsDuplicate}"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentView>

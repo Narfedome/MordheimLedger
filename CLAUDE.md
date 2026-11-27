@@ -256,6 +256,14 @@ du Codex pilote désormais `IsLeader`. **Vérifier l'UI sans Windows** : un proj
 `.xaml` de l'appli (`MauiXaml` avec `Link="%(RecursiveDir)..."`, sans `UseMaui`) compile l'appli entière sous Linux ;
 `dotnet build -c Release -p:MauiXamlInflator=XamlC` y signale les liaisons introuvables (XC0045). Ne remplace pas une
 recette sur appareil.
+Suite (2026-11-27) : **sort tiré en double** = difficulté -1, cumulable (`WarriorSpell.DifficultyReduction`, puce « (−1) »,
+`Rules/SpellRules.Learn`, `Services/SpellLearningService`, utilisé par `AdvancementService`) ; le dialog de tirage accepte le
+doublon en Fin de partie (`allowDuplicate`), pas au recrutement. **Grimoire** (Tome of Magic, livre + FAQ) : étape « Grimoire »
+quand un Grimoire est acquis pendant la Fin de partie (`EndOfGamePageViewModel.TomeOfMagic`, `Rules/TomeOfMagicRules`) - un
+lanceur gagne un sort (sa liste ou Magie Mineure), sinon un Héros avec Savoir Arcanique apprend la Magie Mineure
+(`Warrior.ExtraMagicSchoolId`) et tire son premier sort, sinon effet perdu ; effet unique à l'acquisition, message ambre
+« déjà utilisé » quand un Grimoire est donné ensuite (inventaire, Réallouer, correction). Interdit aux Chasseurs de
+Sorcières et Sœurs de Sigmar (`restrictedToWarbandIds`).
 
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 

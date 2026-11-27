@@ -37,6 +37,9 @@
                                     <Label Text="{Binding Name}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Quantity, StringFormat='x{0}'}" FontSize="12"
                                            TextColor="{DynamicResource AppTextMuted}"/>
+                                    <!-- Grimoire (1.6) : son effet ne vaut qu'à l'acquisition, l'équiper n'en a plus. -->
+                                    <Label Text="{loc:Loc TomeAlreadyUsedWarning}" FontSize="12" TextColor="{DynamicResource AppWarning}"
+                                           IsVisible="{Binding IsSpentTome}"/>
                                     <!-- Valeur de revente réelle (voir WarbandEquipment.SellValue) -
                                          invisible avant cette passe, le joueur n'avait aucun moyen de la
                                          voir avant d'appuyer sur "Vendre". -->

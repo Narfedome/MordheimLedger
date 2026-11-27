@@ -3462,4 +3462,49 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameSuccessorSpellResult" xml:space="preserve">
     <value>Sort au choix (nouveau chef)</value>
   </data>
+  <data name="SpellRollDuplicateFormat" xml:space="preserve">
+    <value>{0} est déjà connu : comme le prévoit le livre, le doublon réduit sa difficulté de 1 ({1} → {2}).</value>
+  </data>
+  <data name="SpellRollDuplicateNoDifficultyFormat" xml:space="preserve">
+    <value>{0} est déjà connu : le doublon réduit sa difficulté de 1.</value>
+  </data>
+  <data name="TomeHeading" xml:space="preserve">
+    <value>Grimoire</value>
+  </data>
+  <data name="TomeIntro" xml:space="preserve">
+    <value>Un Grimoire a été acquis à cette Fin de partie. Son effet ne vaut qu'une fois et pour un seul guerrier : le donner plus tard à un autre n'aura pas d'effet.</value>
+  </data>
+  <data name="TomeUsersWizard" xml:space="preserve">
+    <value>Lanceur de sorts qui l'utilise : un sort de plus, définitivement</value>
+  </data>
+  <data name="TomeUsersArcaneLore" xml:space="preserve">
+    <value>Héros qui l'utilise (pas de lanceur de sorts dans la bande)</value>
+  </data>
+  <data name="TomeArcaneLoreHint" xml:space="preserve">
+    <value>Grâce à Savoir Arcanique, il apprend la Magie Mineure : il devient lanceur de sorts et tire son premier sort ci-dessous.</value>
+  </data>
+  <data name="TomeListLabel" xml:space="preserve">
+    <value>Liste du sort</value>
+  </data>
+  <data name="TomeOwnListFormat" xml:space="preserve">
+    <value>{0} (sa liste)</value>
+  </data>
+  <data name="TomeNobody" xml:space="preserve">
+    <value>La bande n'a ni lanceur de sorts ni Héros avec Savoir Arcanique : personne ne peut utiliser ce Grimoire. Il rejoint la réserve sans effet (son effet ne vaut qu'à l'acquisition).</value>
+  </data>
+  <data name="HistoryTomeSpellSentence" xml:space="preserve">
+    <value>{0} apprend {1} grâce au Grimoire.</value>
+  </data>
+  <data name="HistoryTomeLesserMagicSentence" xml:space="preserve">
+    <value>{0} apprend la Magie Mineure grâce au Grimoire, et le sort {1}.</value>
+  </data>
+  <data name="HistoryTomeDuplicateSentence" xml:space="preserve">
+    <value>Le Grimoire fait baisser de 1 la difficulté de {1} pour {0}.</value>
+  </data>
+  <data name="HistoryTomeUnusedSentence" xml:space="preserve">
+    <value>Personne ne peut utiliser le Grimoire : il rejoint la réserve sans effet.</value>
+  </data>
+  <data name="TomeAlreadyUsedWarning" xml:space="preserve">
+    <value>Grimoire déjà utilisé : il n'a plus d'effet sur le guerrier qui le reçoit.</value>
+  </data>
 </root>

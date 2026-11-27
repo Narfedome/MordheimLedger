@@ -90,7 +90,16 @@ public partial class WarbandListViewModel : BaseViewModel
         // marque la version comme vue).
         if (await WhatsNewService.TakePendingItemsAsync() is { Count: > 0 } news)
             await ShowWhatsNewAsync(news);
+
+        // Messages « Nous écrire » restés en attente (hors connexion) : renvoyés en arrière-plan, une fois par lancement.
+        if (!_feedbackFlushed)
+        {
+            _feedbackFlushed = true;
+            _ = Task.Run(FeedbackService.FlushOutboxAsync);
+        }
     }
+
+    private static bool _feedbackFlushed;
 
     private int _loadedDataVersion = -1;
 

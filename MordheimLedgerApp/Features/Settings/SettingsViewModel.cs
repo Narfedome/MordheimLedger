@@ -48,9 +48,18 @@ namespace MordheimLedgerApp.Features.Settings
         public async Task OpenCoffeeLink() =>
             await Launcher.OpenAsync(new Uri("https://buymeacoffee.com/narfedome"));
 
+        /// <summary>« Nous écrire » dans l'appli dès que le relais est déployé (FeedbackService.Endpoint), l'ancien
+        /// formulaire Google en attendant.</summary>
         [RelayCommand]
-        public async Task ReportBug() =>
-            await Launcher.OpenAsync(new Uri("https://docs.google.com/forms/d/e/1FAIpQLSdg2q1o01eGZsFvd0qIwOqYEVKDwBikQ0g7FWLSWHenKqeW0g/viewform?usp=dialog"));
+        public async Task ReportBug()
+        {
+            if (!FeedbackService.IsConfigured)
+            {
+                await Launcher.OpenAsync(FeedbackService.LegacyFormUri);
+                return;
+            }
+            await ShowFormAsync(new Feedback.FeedbackForm(new Feedback.FeedbackFormViewModel(_db)));
+        }
 
         // Sources & remerciements - lien Discord repris tel quel de la page d'accueil du site de la
         // Grande Librairie (invitation publique).

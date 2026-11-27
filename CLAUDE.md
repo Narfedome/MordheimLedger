@@ -239,6 +239,19 @@ première installation (`OnboardingViewModel.FinishAsync` marque la version vue)
 les deux changelogs avant chaque release**, sinon rien ne s'affiche. Extraction et règle d'affichage dans `Core/Services/WhatsNew`
 (`WhatsNewTests`), préférence `whats_new_seen` dans `Services/WhatsNewService`. À relire depuis Paramètres › Découvrir.
 
+**« Nous écrire » (branche `claude/laughing-bardeen-bmfz3a`, 2026-11-27)** : remplace le Google Form de Paramètres (maquette
+`mockups/report-issue.html`). Message sans compte : `Features/Feedback/FeedbackForm` (FormPage) → `Services/FeedbackService`
+→ relais Cloudflare Worker (`Tools/FeedbackRelay`, TypeScript) → ticket dans un dépôt **privé** de support commun à Mordheim
+Ledger et Resonance (`app:mordheim`/`app:resonance`), tri IA par `anthropics/claude-code-action` dans ce dépôt
+(`Tools/FeedbackRelay/support-repo/` à y copier). Core : `Models/Feedback/FeedbackReport`, `Rules/FeedbackRules` (limites
+alignées sur le Worker), `Services/FeedbackClient` + `FeedbackOutbox` (file hors connexion vidée au lancement par
+`WarbandListViewModel`) ; tests `FeedbackTests.cs`. Type « Traduction à revoir » à part : le français vient surtout d'une
+traduction automatique de mordheimer.net. L'e-mail du joueur reste dans le KV du Worker, jamais dans le ticket ni chez le
+tri IA ; il est prévenu **à la sortie de la version** qui contient la correction, pas à la fermeture du ticket (décision de
+l'utilisateur) : étiquette `corrigé` posée à la main, puis le tag `v*` déclenche `.github/workflows/notify-release.yml` →
+`POST /released`. Tant que `FeedbackService.Endpoint` est nul, Paramètres ouvre encore le Google Form. Pas fait : copie de
+la bande jointe (attend l'export de la v2). Politique de confidentialité du site mise à jour (FR/EN).
+
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 
 **Tests de bout en bout (branche `feature/e2e-tests`, 2026-11-12)** : `MordheimLedgerApp.UITests` (xUnit + Appium.WebDriver, pilote UiAutomator2), en local seulement (choix de l'utilisateur, pas dans la CI) et ignorés sans `MORDHEIM_E2E=1` - mode d'emploi dans son `README.md`. Chaque test part d'une installation neuve (données effacées) avec les visites guidées coupées par l'extra d'Intent `mordheim_e2e` (`Services/E2EMode`, lu dans `MainActivity`). Repérage par `AutomationId` (exposé par MAUI comme identifiant de ressource Android, indépendant de la langue) : boutons du gabarit de formulaire, accueil, liste, assistant, ✓ des sélecteurs du Codex, lancement de partie, Historique, dés d'Exploration, et `AutoRollButton` sur les 39 boutons de dé. **L'APK doit embarquer ses assemblies** (`-p:EmbedAssembliesIntoApk=true`) : en Debug, le Fast Deployment les range dans les données de l'appli, que chaque test efface (crash « No assemblies found »). Scénarios : création d'une bande, partie complète sur la bande d'exemple (~2 min).

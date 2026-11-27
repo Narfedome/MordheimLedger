@@ -1,0 +1,17 @@
+{
+  "name": "feedback-relay",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build:dashboard": "node scripts/build-dashboard.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20250409.0",
+    "typescript": "5.8.3",
+    "wrangler": "4.10.0"
+  }
+}

@@ -1,0 +1,351 @@
+<title>Nous écrire</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Maquette « Nous écrire » : écrans de l'appli posés côte à côte sur un fond neutre fixe.
+   Tokens repris de ThemeService.GetPaletteTokens (comme mockups/warrior-photo.html). */
+:root { color-scheme: dark; --Page:#2f2c2a; --PageText:#e6e1da; --PageMuted:#b3aca2; --AppDanger:#8B3A3A; --AppWarning:#D9A441;
+  --AppBackground:#0D0B0A; --AppSurface:#1A1512; --AppSurfaceTranslucent:rgba(26,21,18,.85);
+  --AppAccent:#C9A66B; --AppText:#EDE0C0; --AppTextMuted:#9C8F72; --AppBorder:#332B22; }
+[data-palette="gold"][data-mode="light"] { --AppBackground:#E8DBB8; --AppSurface:#F2E8CC; --AppSurfaceTranslucent:rgba(242,232,204,.85);
+  --AppAccent:#8B6F1F; --AppText:#241F16; --AppTextMuted:#6B5D42; --AppBorder:#D4C79E; --AppWarning:#9A6A10; }
+[data-palette="green"][data-mode="dark"] { --AppBackground:#17151A; --AppSurface:#241F26; --AppSurfaceTranslucent:rgba(36,31,38,.85);
+  --AppAccent:#7FA34F; --AppText:#E8E4D8; --AppTextMuted:#948C7E; --AppBorder:#35303A; }
+[data-palette="green"][data-mode="light"] { --AppBackground:#EDE7D9; --AppSurface:#F5F1E6; --AppSurfaceTranslucent:rgba(245,241,230,.85);
+  --AppAccent:#4F7A34; --AppText:#201C1F; --AppTextMuted:#6B6258; --AppBorder:#D8D0BC; --AppWarning:#9A6A10; }
+[data-idiom="phone"]   { --FontBase:14px; --FontTitle:16px; --Pad:16px; --Touch:44px; --FrameW:380px; }
+[data-idiom="desktop"] { --FontBase:12px; --FontTitle:14px; --Pad:12px; --Touch:32px; --FrameW:520px; }
+
+* { box-sizing:border-box; }
+body { margin:0; background:var(--Page); color:var(--PageText); font:14px/1.45 "Open Sans", system-ui, sans-serif;
+  padding-block:16px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+h1 { font-size:18px; margin:0 0 4px; text-wrap:balance; }
+.intro { max-width:980px; margin:0 auto 12px; color:var(--PageMuted); font-size:13px; }
+.intro p { margin:4px 0; max-width:70ch; }
+.controls { max-width:980px; margin:0 auto 16px; display:flex; flex-wrap:wrap; gap:8px 18px; font-size:13px; }
+.controls label { display:flex; gap:6px; align-items:center; }
+.controls select { font:inherit; padding:3px 6px; background:#3d3936; color:var(--PageText); border:1px solid #5a544e; border-radius:4px; }
+.screens { display:flex; flex-wrap:wrap; gap:28px; justify-content:center; align-items:flex-start; }
+.screen { display:flex; flex-direction:column; gap:6px; min-width:0; max-width:100%; }
+.screen-title { font-size:12px; color:var(--PageMuted); text-align:center; letter-spacing:.02em; }
+.note { font-size:12px; color:var(--PageMuted); max-width:var(--FrameW); }
+
+/* Cadre d'appli */
+.app { width:var(--FrameW); max-width:100%; background:var(--AppBackground); color:var(--AppText); font-size:var(--FontBase);
+  border-radius:14px; overflow:hidden; display:flex; flex-direction:column; border:1px solid #000; }
+.muted { color:var(--AppTextMuted); }
+
+/* FormPageLayout : en-tête ✕/titre/sous-titre, corps défilant, pied à 2 boutons */
+.fp-head { display:grid; grid-template-columns:var(--Touch) 1fr; align-items:center; padding:8px 12px; border-bottom:1px solid var(--AppBorder); }
+.fp-close { width:var(--Touch); height:var(--Touch); border:0; background:none; color:var(--AppTextMuted); font-size:18px; cursor:pointer; }
+.fp-title { font-weight:600; font-size:var(--FontTitle); }
+.fp-sub { font-size:12px; color:var(--AppTextMuted); }
+.fp-body { padding:12px; display:flex; flex-direction:column; gap:12px; max-height:640px; overflow-y:auto; }
+.fp-foot { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; border-top:1px solid var(--AppBorder); }
+
+.card { background:var(--AppSurfaceTranslucent); border:1px solid var(--AppBorder); border-radius:8px; padding:var(--Pad); display:flex; flex-direction:column; gap:10px; }
+.card-h { font-weight:600; }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field > span { font-size:12px; color:var(--AppTextMuted); }
+.entry, .editor { font:inherit; color:var(--AppText); background:transparent; border:0; border-bottom:1px solid var(--AppTextMuted); padding:6px 4px; min-height:var(--Touch); width:100%; }
+.editor { min-height:110px; resize:vertical; border:1px solid var(--AppBorder); border-radius:6px; }
+.entry:focus, .editor:focus { outline:none; border-color:var(--AppAccent); }
+.entry::placeholder, .editor::placeholder { color:var(--AppTextMuted); opacity:.8; }
+.hint { font-size:12px; color:var(--AppTextMuted); }
+
+/* Choix du type : puces radio */
+.types { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.type { border:1px solid var(--AppBorder); border-radius:8px; padding:8px 10px; cursor:pointer; display:flex; flex-direction:column; gap:2px; background:transparent; color:var(--AppText); font:inherit; text-align:left; min-height:var(--Touch); }
+.type b { font-weight:600; }
+.type[data-type="other"] { grid-column:1 / -1; }
+.type small { color:var(--AppTextMuted); font-size:11px; }
+.type[aria-pressed="true"] { border-color:var(--AppAccent); box-shadow:inset 0 0 0 1px var(--AppAccent); }
+.type[aria-pressed="true"] b { color:var(--AppAccent); }
+.type:focus-visible, .btn:focus-visible, .link:focus-visible { outline:2px solid var(--AppAccent); outline-offset:2px; }
+
+.check { display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
+.check input { accent-color:var(--AppAccent); width:18px; height:18px; margin-top:1px; flex:none; }
+.link { background:none; border:0; padding:0; color:var(--AppAccent); font:inherit; font-size:12px; cursor:pointer; text-align:left; }
+.tech { font:12px/1.5 ui-monospace, Consolas, monospace; color:var(--AppTextMuted); background:var(--AppBackground); border:1px solid var(--AppBorder); border-radius:6px; padding:8px 10px; margin:0; overflow-x:auto; }
+
+.shots { display:flex; gap:8px; flex-wrap:wrap; }
+.shot { width:64px; height:64px; border-radius:6px; border:1px solid var(--AppBorder); position:relative;
+  background:linear-gradient(160deg, var(--AppSurface), var(--AppBackground)); display:flex; align-items:flex-end; padding:4px; font-size:10px; color:var(--AppTextMuted); }
+.shot .x { position:absolute; top:2px; right:4px; color:var(--AppTextMuted); font-size:12px; }
+.shot.add { border-style:dashed; align-items:center; justify-content:center; color:var(--AppAccent); font-size:22px; padding:0; cursor:pointer; }
+
+.select { display:flex; justify-content:space-between; align-items:center; min-height:var(--Touch); border-bottom:1px solid var(--AppTextMuted); padding:0 4px; cursor:pointer; }
+.select .muted { font-size:12px; }
+
+.warn { color:var(--AppWarning); font-size:12px; }
+.btn { min-height:var(--Touch); padding:8px 12px; border-radius:8px; font:inherit; cursor:pointer; }
+.btn.secondary { background:transparent; color:var(--AppAccent); border:1px solid var(--AppAccent); }
+.btn.primary { background:var(--AppAccent); color:var(--AppBackground); border:0; font-weight:600; }
+.btn[disabled] { opacity:.45; cursor:not-allowed; }
+
+/* Paramètres (section existante, reformulée) */
+.settings { padding:12px; display:flex; flex-direction:column; gap:12px; }
+.set-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; cursor:pointer; }
+.set-row .chev { color:var(--AppTextMuted); }
+
+/* Dialog après envoi (DialogPage centré + voile AppScrim) */
+.scrim { background:rgba(0,0,0,.55); padding:40px 16px; display:flex; justify-content:center; }
+.dialog { width:100%; max-width:340px; background:var(--AppSurface); border:1px solid var(--AppBorder); border-radius:8px; padding:20px; display:flex; flex-direction:column; gap:14px; }
+.dlg-title { font-weight:600; font-size:var(--FontTitle); }
+.dialog .btn { width:100%; }
+
+/* Côté développeur : aperçu GitHub (hors appli, couleurs fixes) */
+.gh { width:520px; max-width:100%; background:#0d1117; color:#e6edf3; border:1px solid #30363d; border-radius:8px; font:13px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; overflow:hidden; }
+.gh-head { padding:12px 14px; border-bottom:1px solid #30363d; }
+.gh-title { font-size:16px; font-weight:600; }
+.gh-title span { color:#7d8590; font-weight:400; }
+.gh-meta { color:#7d8590; font-size:12px; margin-top:4px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.lbl { border-radius:999px; padding:0 8px; font-size:11px; font-weight:600; border:1px solid; }
+.lbl.app { color:#d2a8ff; border-color:#8957e5; }
+.lbl.ty { color:#ff7b72; border-color:#da3633; }
+.lbl.pr { color:#e3b341; border-color:#9e6a03; }
+.lbl.zn { color:#79c0ff; border-color:#1f6feb; }
+.gh-body { padding:12px 14px; display:flex; flex-direction:column; gap:12px; }
+.gh-box { border:1px solid #30363d; border-radius:6px; }
+.gh-box-h { background:#161b22; padding:6px 10px; font-size:12px; color:#7d8590; border-bottom:1px solid #30363d; }
+.gh-box-b { padding:10px; }
+.gh-box-b p { margin:0 0 8px; }
+.gh-box-b ul { margin:0; padding-left:18px; }
+.gh code { font:12px ui-monospace, Consolas, monospace; background:#1f242c; padding:1px 4px; border-radius:4px; }
+.gh table { border-collapse:collapse; font-size:12px; width:100%; }
+.gh td { border-top:1px solid #30363d; padding:3px 6px; vertical-align:top; }
+.gh td:first-child { color:#7d8590; white-space:nowrap; }
+</style>
+
+<div class="intro">
+  <h1>Nous écrire : formulaire de signalement</h1>
+  <p>Remplace le lien vers le Google Form (Paramètres › Signaler un bug). Aucun compte : l'appli envoie au relais, qui crée un ticket dans le dépôt privé de support, puis le tri IA ajoute type, priorité, zone et doublons.</p>
+  <p>Les éléments marqués <b>à trancher</b> sont des propositions à valider.</p>
+</div>
+
+<div class="controls">
+  <label>Palette <select id="palette"><option value="gold">Or</option><option value="green">Vert wyrdstone</option></select></label>
+  <label>Mode <select id="mode"><option value="dark">Sombre</option><option value="light">Clair</option></select></label>
+  <label>Format <select id="idiom"><option value="phone">Téléphone</option><option value="desktop">Windows</option></select></label>
+  <label>Après « Envoyer » <select id="outcome"><option value="ok">Envoyé</option><option value="offline">Hors connexion</option><option value="error">Refusé par le serveur</option></select></label>
+</div>
+
+<div class="screens" id="root" data-palette="gold" data-mode="dark" data-idiom="phone">
+
+  <!-- 1. Paramètres -->
+  <div class="screen">
+    <div class="screen-title">1 · Paramètres (section existante, reformulée)</div>
+    <div class="app">
+      <div class="settings">
+        <div class="card">
+          <div class="set-row" tabindex="0">
+            <div>
+              <div class="card-h">Signaler un problème ou proposer une idée</div>
+              <div class="hint">Un bug, une règle mal appliquée, une donnée fausse dans le Codex, une envie : sans compte, directement depuis l'appli.</div>
+            </div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+        <div class="card"><div class="set-row"><div><div class="card-h">M'offrir un café</div><div class="hint">Soutenir le développement.</div></div><span class="chev">›</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Formulaire -->
+  <div class="screen">
+    <div class="screen-title">2 · Formulaire (gabarit FormPage)</div>
+    <div class="app">
+      <div class="fp-head">
+        <button class="fp-close" aria-label="Fermer">✕</button>
+        <div><div class="fp-title">Nous écrire</div><div class="fp-sub">Mordheim Ledger 1.5.2</div></div>
+      </div>
+      <form class="fp-body" id="form">
+        <div class="card">
+          <div class="card-h">De quoi s'agit-il ?</div>
+          <div class="types" role="radiogroup">
+            <button type="button" class="type" data-type="bug" aria-pressed="true"><b>Un problème</b><small>Plantage, blocage, mauvais affichage</small></button>
+            <button type="button" class="type" data-type="content" aria-pressed="false"><b>Règle ou donnée fausse</b><small>Profil, prix, règle mal appliquée</small></button>
+            <button type="button" class="type" data-type="translation" aria-pressed="false"><b>Traduction à revoir</b><small>Terme ou texte mal traduit</small></button>
+            <button type="button" class="type" data-type="idea" aria-pressed="false"><b>Une idée</b><small>Amélioration, nouveauté</small></button>
+            <button type="button" class="type" data-type="other" aria-pressed="false"><b>Autre chose</b><small>Question, remerciement…</small></button>
+          </div>
+          <div class="hint" id="translationNote" hidden>La version française vient en grande partie d'une traduction automatique de mordheimer.net : vos corrections sont précieuses, surtout avec le terme officiel du livre français.
+          </div>
+        </div>
+
+        <div class="card">
+          <label class="field"><span>En une phrase</span>
+            <input class="entry" id="summary" autocomplete="off" value="La Fin de partie bloque à l'étape Exploration">
+          </label>
+          <label class="field" id="whereField" hidden><span>Où ? (bande, guerrier, objet, règle)</span>
+            <input class="entry" id="where" autocomplete="off" placeholder="Ex. Répurgateurs › Fanatique">
+          </label>
+          <label class="field"><span id="detailsLabel">Ce qui s'est passé</span>
+            <textarea class="editor" id="details">J'ai lancé 4 dés d'Exploration avec la bande d'exemple, j'ai obtenu un triple 3 et le bouton Suivant reste grisé. Je pensais pouvoir passer à l'étape suivante.</textarea>
+          </label>
+          <div class="hint" id="detailsHint">Ce que vous faisiez, ce qui s'est passé, ce que vous attendiez.</div>
+        </div>
+
+        <div class="card" id="warbandCard">
+          <div class="card-h">Bande concernée <span class="muted">(facultatif)</span></div>
+          <div class="select" tabindex="0"><span>Les Loups de Talabheim</span><span class="muted">Reiklanders ▾</span></div>
+          <label class="check"><input type="checkbox" id="attachWarband" checked>
+            <span>Joindre une copie de cette bande<br><span class="hint">Pour reproduire le problème à l'identique. Seule cette bande est envoyée.</span></span>
+          </label>
+          <div class="warn"><b>À trancher :</b> l'export d'une bande n'existe pas encore (prévu avec la sauvegarde de la v2).</div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">Captures d'écran <span class="muted">(3 au maximum)</span></div>
+          <div class="shots">
+            <div class="shot">capture 1<span class="x">✕</span></div>
+            <div class="shot add" role="button" tabindex="0" aria-label="Ajouter une capture">＋</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <label class="check"><input type="checkbox" id="attachTech" checked>
+            <span>Joindre les informations techniques</span>
+          </label>
+          <button type="button" class="link" id="toggleTech">Voir ce qui est envoyé</button>
+          <pre class="tech" id="tech" hidden>Appli        Mordheim Ledger 1.5.2 (152)
+Plateforme   Android 15 · Pixel 8
+Langue       fr
+Contenu      empreinte 3f9a…c21e
+Écran        Fin de partie › Exploration
+Journal      40 dernières lignes d'erreur</pre>
+        </div>
+
+        <div class="card">
+          <label class="field"><span>Votre e-mail <span class="muted">(facultatif)</span></span>
+            <input class="entry" type="email" id="email" autocomplete="email" placeholder="Pour être prévenu quand c'est corrigé">
+          </label>
+          <div class="hint">Utilisé seulement pour vous répondre, jamais publié ni partagé.</div>
+        </div>
+
+        <div class="hint">Votre message est lu par le développeur. Il est aussi analysé par une IA (Claude, Anthropic) pour le trier ; l'e-mail ne lui est pas transmis. <span style="text-decoration:underline">Confidentialité</span></div>
+      </form>
+      <div class="fp-foot">
+        <button class="btn secondary" type="button">Annuler</button>
+        <button class="btn primary" type="button" id="send">Envoyer</button>
+      </div>
+    </div>
+    <div class="note">« Envoyer » reste grisé tant que la phrase et le détail sont vides. Annuler/✕ demandent confirmation s'il y a du texte saisi, comme les autres formulaires.</div>
+  </div>
+
+  <!-- 3. Après envoi -->
+  <div class="screen">
+    <div class="screen-title">3 · Après « Envoyer »</div>
+    <div class="app">
+      <div class="scrim">
+        <div class="dialog" id="outcomeDialog"></div>
+      </div>
+    </div>
+    <div class="note">Hors connexion, le message est gardé et réessayé au prochain lancement (une fois par jour au plus). Le serveur limite à 5 envois par heure et par appareil.</div>
+  </div>
+
+  <!-- 4. Côté développeur -->
+  <div class="screen">
+    <div class="screen-title">4 · Ce que vous recevez (dépôt privé de support)</div>
+    <div class="gh">
+      <div class="gh-head">
+        <div class="gh-title" id="ghTitle">La Fin de partie bloque à l'étape Exploration <span>#42</span></div>
+        <div class="gh-meta">
+          <span class="lbl app">app:mordheim</span>
+          <span class="lbl ty" id="ghType">bug</span>
+          <span class="lbl pr">ia:P1</span>
+          <span class="lbl zn">zone:fin-de-partie</span>
+          <span>ouvert par le relais · Android 15</span>
+        </div>
+      </div>
+      <div class="gh-body">
+        <div class="gh-box">
+          <div class="gh-box-h">Message du joueur</div>
+          <div class="gh-box-b">
+            <p id="ghDetails">J'ai lancé 4 dés d'Exploration avec la bande d'exemple, j'ai obtenu un triple 3 et le bouton Suivant reste grisé.</p>
+            <table>
+              <tr><td>Version</td><td>1.5.2 (152)</td></tr>
+              <tr><td>Appareil</td><td>Android 15 · Pixel 8 · fr</td></tr>
+              <tr><td>Pièces jointes</td><td>capture-1.jpg, bande.json</td></tr>
+              <tr><td>Réponse</td><td>le joueur souhaite être prévenu (e-mail gardé à part, pas dans le ticket)</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="gh-box">
+          <div class="gh-box-h">Tri IA · commentaire automatique</div>
+          <div class="gh-box-b">
+            <p><b>P1 : bloque une partie.</b> La Fin de partie ne peut pas être terminée ; contournement possible en relançant les dés.</p>
+            <ul>
+              <li>Zone probable : <code>EndOfGamePageViewModel.Exploration</code>, résolution d'un triple (<code>ExplorationOutcomeResolver</code>).</li>
+              <li>Hypothèse : un triple propose plusieurs branches (Sanctuaire) et aucune n'est cochée par défaut pour cette bande.</li>
+              <li>Doublon possible : aucun ticket ouvert similaire.</li>
+              <li>Infos suffisantes pour reproduire : oui (bande jointe).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">Les étiquettes <code>ia:</code> sont des propositions ; la priorité définitive reste la vôtre.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.getElementById('root');
+  ['palette', 'mode', 'idiom'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('change', function () { root.setAttribute('data-' + id, el.value); });
+  });
+
+  var texts = {
+    bug:     { label: "Ce qui s'est passé", hint: "Ce que vous faisiez, ce qui s'est passé, ce que vous attendiez.", where: false, warband: true, gh: 'bug' },
+    content: { label: "Ce qui est faux", hint: "La valeur affichée, la bonne valeur, et votre source si possible (livre, page, Town Cryer…).", where: true, warband: false, gh: 'contenu' },
+    translation: { label: "Texte actuel et votre proposition", hint: "Le texte affiché, ce que vous proposez, et le terme officiel du livre français si vous le connaissez.", where: true, warband: false, gh: 'traduction' },
+    idea:    { label: "Votre idée", hint: "Ce qui vous manque en jouant et ce que l'appli pourrait faire à la place.", where: false, warband: false, gh: 'idée' },
+    other:   { label: "Votre message", hint: "", where: false, warband: false, gh: 'autre' }
+  };
+  var types = document.querySelectorAll('.type');
+  types.forEach(function (b) {
+    b.addEventListener('click', function () {
+      types.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      var t = texts[b.dataset.type];
+      document.getElementById('detailsLabel').textContent = t.label;
+      document.getElementById('detailsHint').textContent = t.hint;
+      document.getElementById('detailsHint').hidden = !t.hint;
+      document.getElementById('whereField').hidden = !t.where;
+      document.getElementById('translationNote').hidden = b.dataset.type !== 'translation';
+      document.getElementById('warbandCard').hidden = !t.warband;
+      document.getElementById('ghType').textContent = t.gh;
+    });
+  });
+
+  var summary = document.getElementById('summary'), details = document.getElementById('details'), send = document.getElementById('send');
+  function sync() {
+    send.disabled = !summary.value.trim() || !details.value.trim();
+    document.getElementById('ghTitle').firstChild.nodeValue = (summary.value.trim() || 'Sans titre') + ' ';
+    document.getElementById('ghDetails').textContent = details.value.trim();
+  }
+  summary.addEventListener('input', sync); details.addEventListener('input', sync); sync();
+
+  document.getElementById('toggleTech').addEventListener('click', function () {
+    var pre = document.getElementById('tech');
+    pre.hidden = !pre.hidden;
+    this.textContent = pre.hidden ? 'Voir ce qui est envoyé' : 'Masquer';
+  });
+  document.getElementById('attachTech').addEventListener('change', function () {
+    document.getElementById('toggleTech').hidden = !this.checked;
+    if (!this.checked) document.getElementById('tech').hidden = true;
+  });
+
+  var outcomes = {
+    ok:      '<div class="dlg-title">Merci !</div><div>Votre message est bien arrivé. Si vous avez laissé un e-mail, vous serez prévenu quand ce sera corrigé.</div><button class="btn primary">Fermer</button>',
+    offline: '<div class="dlg-title">Pas de connexion</div><div>Votre message est gardé sur l\'appareil et sera envoyé automatiquement au prochain lancement avec une connexion.</div><div class="warn">1 message en attente d\'envoi.</div><button class="btn primary">Fermer</button>',
+    error:   '<div class="dlg-title">Envoi impossible</div><div>Le serveur a refusé le message (trop d\'envois en peu de temps). Réessayez dans une heure ; votre texte est conservé.</div><button class="btn primary">Fermer</button>'
+  };
+  var outcome = document.getElementById('outcome'), dlg = document.getElementById('outcomeDialog');
+  function showOutcome() { dlg.innerHTML = outcomes[outcome.value]; }
+  outcome.addEventListener('change', showOutcome); showOutcome();
+  send.addEventListener('click', function () { outcome.value = 'ok'; showOutcome(); dlg.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  document.getElementById('form').addEventListener('submit', function (e) { e.preventDefault(); });
+})();
+</script>

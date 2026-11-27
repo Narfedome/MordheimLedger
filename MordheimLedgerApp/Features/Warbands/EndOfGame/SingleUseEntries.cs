@@ -29,7 +29,7 @@ public partial class UsedInBattleEntry : ObservableObject
 /// saisie libre + bouton dé, résultat affiché sous le jet.</summary>
 public partial class AfterBattleRollEntry : ObservableObject
 {
-    private readonly Func<string, string?> _ruleName;
+    private readonly Func<AfterBattleOutcome, string?> _ruleName;
 
     public Warrior Warrior { get; }
     public EquipmentItem Item { get; }
@@ -41,7 +41,7 @@ public partial class AfterBattleRollEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(Outcome), nameof(ResultText), nameof(HasResult))]
     private string roll = string.Empty;
 
-    public AfterBattleRollEntry(Warrior warrior, EquipmentItem item, int diceCount, int diceSides, Func<string, string?> ruleName)
+    public AfterBattleRollEntry(Warrior warrior, EquipmentItem item, int diceCount, int diceSides, Func<AfterBattleOutcome, string?> ruleName)
     {
         Warrior = warrior;
         Item = item;
@@ -69,8 +69,8 @@ public partial class AfterBattleRollEntry : ObservableObject
                 { Kind: AfterBattleOutcomeKind.Addiction } => loc["SingleUseOutcomeAddiction"],
                 { Kind: AfterBattleOutcomeKind.CharacteristicChange, Field: { } field, Delta: { } delta } =>
                     string.Format(loc["SingleUseOutcomeCharacteristic"], loc[$"Stat{field}Abbr"], $"{delta:+0;-0}"),
-                { Kind: AfterBattleOutcomeKind.GainSpecialRule, SpecialRuleId: { } ruleId } =>
-                    string.Format(loc["SingleUseOutcomeRule"], _ruleName(ruleId) ?? ruleId),
+                { Kind: AfterBattleOutcomeKind.GainSpecialRule } outcome =>
+                    string.Format(loc["SingleUseOutcomeRule"], _ruleName(outcome) ?? "?"),
                 _ => loc["SingleUseOutcomeNone"],
             };
         }

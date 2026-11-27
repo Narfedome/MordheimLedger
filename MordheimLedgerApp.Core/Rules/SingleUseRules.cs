@@ -42,6 +42,21 @@ public static class SingleUseRules
     public static AfterBattleOutcome? ResolveAfterBattle(SingleUseProfile profile, int total) =>
         profile.AfterBattle.FirstOrDefault(o => total >= o.Min && total <= o.Max);
 
+    /// <summary>Première paire de lignes de la table dont les tranches se chevauchent (message ambre dans le Codex : à la
+    /// Fin de partie, la première ligne l'emporte), null sinon.</summary>
+    public static (AfterBattleOutcome First, AfterBattleOutcome Second)? FirstOverlap(IReadOnlyList<AfterBattleOutcome> table)
+    {
+        for (var i = 0; i < table.Count; i++)
+            for (var j = i + 1; j < table.Count; j++)
+                if (table[i].Min <= table[j].Max && table[j].Min <= table[i].Max)
+                    return (table[i], table[j]);
+        return null;
+    }
+
+    /// <summary>Ligne impossible à obtenir avec ces dés (2D6 : 2 à 12) ou à l'envers (De > À) - message ambre.</summary>
+    public static bool IsOutsideDice(AfterBattleOutcome outcome, int diceCount, int diceSides) =>
+        outcome.Min > outcome.Max || outcome.Min < diceCount || outcome.Max > diceCount * diceSides;
+
     /// <summary>Objet qui peut être perdu parce que son porteur a été mis hors de combat (Habits de soie, si c'est le chef).</summary>
     public static bool IsAtRiskAfterOutOfAction(EquipmentItem item, bool carrierIsLeader) =>
         item.LostAfterOutOfActionOn is > 0 && (carrierIsLeader || !item.LostAfterOutOfActionLeaderOnly);

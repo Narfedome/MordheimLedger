@@ -5,6 +5,7 @@ using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
 
@@ -17,7 +18,8 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
-    protected override object? EditableState => new object?[] { Item, WarbandRestriction.SelectedIds, SpecialRules.Select(r => r.Id), NoEffectOnRaces.Select(r => r.Id), SelectedSingleUseLabel };
+    protected override object? EditableState => new object?[] { Item, WarbandRestriction.SelectedIds, SpecialRules.Select(r => r.Id), NoEffectOnRaces.Select(r => r.Id),
+        SingleUseJson.Serialize(BuildProfile()), HasLoss, LossUpTo, LossLeaderOnly };
 
     public ObservableCollection<string> CategoryOptions { get; } = new();
 
@@ -66,7 +68,53 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     private readonly Dictionary<string, SingleUseTiming> _timingByLabel = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSingleUse))]
     private string selectedSingleUseLabel = string.Empty;
+
+    public bool IsSingleUse => _timingByLabel.ContainsKey(SelectedSingleUseLabel);
+
+    // --- Profil d'usage unique (maquette « Codex : effets modifiables ») ---
+
+    public List<string> TargetOptions { get; } = Enum.GetValues<SingleUseTarget>().Select(SingleUseText.Target).ToList();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TargetHint))]
+    private string selectedTargetLabel = string.Empty;
+
+    public string TargetHint => Loc[$"SingleUseTargetHint{TargetOf(SelectedTargetLabel)}"];
+
+    private static SingleUseTarget TargetOf(string label) =>
+        Enum.GetValues<SingleUseTarget>().FirstOrDefault(t => SingleUseText.Target(t) == label);
+
+    public ObservableCollection<StatModifierEditRow> Bonuses { get; } = new();
+
+    [ObservableProperty]
+    private string bonusPreview = string.Empty;
+
+    [ObservableProperty]
+    private string afterBattleDiceCount = string.Empty;
+
+    public List<string> AfterBattleDiceOptions { get; } = SingleUseChoices.Dice.Select(d => $"D{d}").ToList();
+
+    [ObservableProperty]
+    private string selectedAfterBattleDie = "D6";
+
+    public ObservableCollection<AfterBattleEditRow> AfterBattleRows { get; } = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasTableWarning))]
+    private string? tableWarning;
+
+    public bool HasTableWarning => TableWarning is not null;
+
+    [ObservableProperty]
+    private bool hasLoss;
+
+    [ObservableProperty]
+    private string lossUpTo = "3";
+
+    [ObservableProperty]
+    private bool lossLeaderOnly;
 
     public EquipmentItemEditDialogViewModel(EquipmentItem item, string title, IWarbandArchetypePickerService warbandPicker,
         IReadOnlyList<WarbandArchetype> allWarbandArchetypes, ISpecialRulePickerService specialRulePicker, ILibraryService libraryService)
@@ -94,7 +142,113 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
             SingleUseOptions.Add(label);
         }
         selectedSingleUseLabel = item.SingleUse is { } profile ? Loc[$"SingleUse{profile.Timing}"] : Loc["SingleUseNone"];
+        selectedTargetLabel = SingleUseText.Target(item.SingleUse?.Target ?? SingleUseTarget.Warrior);
+        foreach (var modifier in item.SingleUse?.StatModifiers ?? new List<GameStatModifier>())
+            Bonuses.Add(new StatModifierEditRow(modifier, RefreshSingleUse));
+        afterBattleDiceCount = item.SingleUse?.AfterBattleDiceCount?.ToString() ?? "2";
+        selectedAfterBattleDie = $"D{item.SingleUse?.AfterBattleDiceSides ?? 6}";
+        foreach (var outcome in item.SingleUse?.AfterBattle ?? new List<AfterBattleOutcome>())
+            AfterBattleRows.Add(new AfterBattleEditRow(outcome, null, RefreshSingleUse));
+        hasLoss = item.LostAfterOutOfActionOn is > 0;
+        lossUpTo = (item.LostAfterOutOfActionOn ?? 3).ToString();
+        lossLeaderOnly = item.LostAfterOutOfActionLeaderOnly;
+        _libraryService = libraryService;
+        RefreshSingleUse();
         _ = LoadRacesAsync(libraryService);
+        _ = ResolveRulesAsync(libraryService);
+    }
+
+    private readonly ILibraryService _libraryService;
+
+    /// <summary>Règles gagnées de la table : retrouvées dans le catalogue pour afficher leur nom.</summary>
+    private async Task ResolveRulesAsync(ILibraryService libraryService)
+    {
+        var outcomes = Item.SingleUse?.AfterBattle ?? new List<AfterBattleOutcome>();
+        if (outcomes.All(o => o.Kind != AfterBattleOutcomeKind.GainSpecialRule)) return;
+        var rules = await libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language);
+        for (var i = 0; i < outcomes.Count && i < AfterBattleRows.Count; i++)
+        {
+            var outcome = outcomes[i];
+            if (outcome.Kind != AfterBattleOutcomeKind.GainSpecialRule) continue;
+            AfterBattleRows[i].Rule = rules.FirstOrDefault(r => outcome.SpecialRuleId is { } official ? r.OfficialId == official : r.Id == outcome.SpecialRuleLocalId);
+        }
+    }
+
+    partial void OnAfterBattleDiceCountChanged(string value) => RefreshSingleUse();
+    partial void OnSelectedAfterBattleDieChanged(string value) => RefreshSingleUse();
+
+    private int DiceSides => SingleUseChoices.Int(SelectedAfterBattleDie.TrimStart('D')) ?? 6;
+
+    /// <summary>Aperçu des bonus et message ambre de la table (tranches qui se chevauchent ou hors des dés) - jamais bloquant.</summary>
+    private void RefreshSingleUse()
+    {
+        var mods = Bonuses.Select(b => b.ToModel()).ToList();
+        BonusPreview = mods.Count == 0 ? Loc["SingleUseNoBonus"]
+            : string.Format(Loc["SingleUseBonusPreviewFormat"], string.Join(", ", mods.Select(SingleUseText.Modifier)));
+
+        var table = AfterBattleRows.Select(r => r.ToModel()).ToList();
+        var count = SingleUseChoices.Int(AfterBattleDiceCount) ?? 0;
+        var outside = table.FirstOrDefault(o => SingleUseRules.IsOutsideDice(o, count, DiceSides));
+        TableWarning = SingleUseRules.FirstOverlap(table) is { } overlap
+            ? string.Format(Loc["SingleUseOverlapWarning"], SingleUseText.Range(overlap.First), SingleUseText.Range(overlap.Second))
+            : outside is not null
+                ? string.Format(Loc["SingleUseOutsideDiceWarning"], SingleUseText.Range(outside), count, DiceSides, count, count * DiceSides)
+                : null;
+    }
+
+    [RelayCommand]
+    private void AddBonus()
+    {
+        Bonuses.Add(new StatModifierEditRow(new GameStatModifier { Field = CharacteristicField.Initiative, Value = 1 }, RefreshSingleUse));
+        RefreshSingleUse();
+    }
+
+    [RelayCommand]
+    private void RemoveBonus(StatModifierEditRow row)
+    {
+        Bonuses.Remove(row);
+        RefreshSingleUse();
+    }
+
+    [RelayCommand]
+    private void AddAfterBattleRow()
+    {
+        var count = SingleUseChoices.Int(AfterBattleDiceCount) ?? 2;
+        var top = count * DiceSides;
+        AfterBattleRows.Add(new AfterBattleEditRow(new AfterBattleOutcome { Min = top, Max = top, Kind = AfterBattleOutcomeKind.CharacteristicChange,
+            Field = CharacteristicField.Initiative, Delta = 1 }, null, RefreshSingleUse));
+        RefreshSingleUse();
+    }
+
+    [RelayCommand]
+    private void RemoveAfterBattleRow(AfterBattleEditRow row)
+    {
+        AfterBattleRows.Remove(row);
+        RefreshSingleUse();
+    }
+
+    /// <summary>Même sélecteur de règles spéciales que le reste du Codex ; une ligne garde la première règle cochée.</summary>
+    [RelayCommand]
+    private async Task ChangeAfterBattleRule(AfterBattleEditRow row)
+    {
+        var picked = await _specialRulePicker.PickSpecialRulesAsync();
+        if (picked.FirstOrDefault() is { } rule) row.Rule = rule;
+    }
+
+    /// <summary>Profil tel qu'à l'écran, null si l'objet n'est pas à usage unique.</summary>
+    private SingleUseProfile? BuildProfile()
+    {
+        if (!_timingByLabel.TryGetValue(SelectedSingleUseLabel, out var timing)) return null;
+        var table = AfterBattleRows.Select(r => r.ToModel()).ToList();
+        return new SingleUseProfile
+        {
+            Timing = timing,
+            Target = TargetOf(SelectedTargetLabel),
+            StatModifiers = Bonuses.Select(b => b.ToModel()).ToList(),
+            AfterBattleDiceCount = table.Count > 0 ? SingleUseChoices.Int(AfterBattleDiceCount) : null,
+            AfterBattleDiceSides = table.Count > 0 ? DiceSides : null,
+            AfterBattle = table,
+        };
     }
 
     private async Task LoadRacesAsync(ILibraryService libraryService)
@@ -143,13 +297,6 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
 
-    private static SingleUseProfile WithTiming(SingleUseProfile? existing, SingleUseTiming timing)
-    {
-        var profile = SingleUseJson.Deserialize(SingleUseJson.Serialize(existing)) ?? new SingleUseProfile();
-        profile.Timing = timing;
-        return profile;
-    }
-
     private bool ValidateRequiredFields()
     {
         if (string.IsNullOrWhiteSpace(Item.Name))
@@ -173,9 +320,9 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
         Item.RestrictedToWarbandArchetypeIds = WarbandRestriction.SelectedIds;
         Item.SpecialRules = SpecialRules.ToList();
         Item.NoEffectOnRaceIds = NoEffectOnRaces.Select(r => r.Id).ToList();
-        Item.SingleUse = _timingByLabel.TryGetValue(SelectedSingleUseLabel, out var timing)
-            ? WithTiming(Item.SingleUse, timing)
-            : null;
+        Item.SingleUse = BuildProfile();
+        Item.LostAfterOutOfActionOn = HasLoss && SingleUseChoices.Int(LossUpTo) is > 0 and var upTo ? upTo : null;
+        Item.LostAfterOutOfActionLeaderOnly = HasLoss && LossLeaderOnly;
         Close(true);
     }
 }

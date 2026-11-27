@@ -2754,4 +2754,32 @@ public class RulesTests
         Assert.Equal(expected, SingleUseRules.IsLostAfterOutOfAction(new EquipmentItem { LostAfterOutOfActionOn = 3 }, roll));
         Assert.False(SingleUseRules.IsLostAfterOutOfAction(new EquipmentItem(), 1));
     }
+
+    private static AfterBattleOutcome Range(int min, int max) => new() { Min = min, Max = max };
+
+    [Fact]
+    public void SingleUse_FindsOverlappingRanges()
+    {
+        Assert.Null(SingleUseRules.FirstOverlap(new[] { Range(2, 3), Range(12, 12) }));
+        Assert.Null(SingleUseRules.FirstOverlap(new[] { Range(2, 3), Range(4, 5) }));
+        Assert.Null(SingleUseRules.FirstOverlap(Array.Empty<AfterBattleOutcome>()));
+        var a = Range(2, 5);
+        var b = Range(5, 6);
+        Assert.Equal((a, b), SingleUseRules.FirstOverlap(new[] { a, b }));
+        var c = Range(10, 12);
+        var d = Range(11, 11);
+        Assert.Equal((c, d), SingleUseRules.FirstOverlap(new[] { Range(2, 3), c, d }));
+        Assert.Equal((d, c), SingleUseRules.FirstOverlap(new[] { d, c }));
+    }
+
+    [Theory]
+    [InlineData(2, 3, false)]
+    [InlineData(12, 12, false)]
+    [InlineData(1, 3, true)]
+    [InlineData(11, 13, true)]
+    [InlineData(5, 4, true)]
+    public void SingleUse_RangeOutsideTwoD6(int min, int max, bool expected)
+    {
+        Assert.Equal(expected, SingleUseRules.IsOutsideDice(Range(min, max), 2, 6));
+    }
 }

@@ -56,17 +56,36 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
 
     private readonly IDetailDialogService _detailDialogs;
 
-    /// <summary>« À usage unique : Pris avant la bataille », null = objet ordinaire.</summary>
-    public string? SingleUseText => Item.SingleUse is { } profile ? $"{Loc["SingleUsePh"]} : {Loc[$"SingleUse{profile.Timing}"]}" : null;
+    /// <summary>« Pris avant la bataille, par le guerrier qui le porte », null = objet ordinaire.</summary>
+    public string? SingleUseText => Item.SingleUse is { } profile
+        ? $"{Loc[$"SingleUse{profile.Timing}"]} · {Services.SingleUseText.Target(profile.Target)}" : null;
     public bool HasSingleUse => Item.SingleUse is not null;
+
+    /// <summary>« I +1D3, M +1, F +1 ».</summary>
+    public string? BonusesText => Item.SingleUse is { StatModifiers.Count: > 0 } profile ? Services.SingleUseText.Bonuses(profile) : null;
+    public bool HasBonuses => BonusesText is not null;
+
+    /// <summary>« Après la bataille (2D6) » + une ligne par résultat.</summary>
+    public string? TableHeading => Item.SingleUse is { } profile ? Services.SingleUseText.TableHeading(profile) : null;
+    public List<string> TableLines { get; }
+    public bool HasTable => TableLines.Count > 0;
+
+    /// <summary>« Perdu sur 1-3 si le chef est mis hors de combat ».</summary>
+    public string? LossText => Services.SingleUseText.Loss(Item);
+    public bool HasLoss => LossText is not null;
 
     /// <summary>Races sur lesquelles l'objet n'agit pas (EquipmentItem.NoEffectOnRaceIds).</summary>
     public List<Race> NoEffectOnRaces { get; }
 
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel, List<WarbandArchetype> restrictedWarbands,
         List<WarbandArchetype> allWarbandArchetypes, List<WarriorArchetype> restrictedWarriors, IDetailDialogService detailDialogs,
-        SpecialRule? materialRule = null, int? foundValueOverride = null, SpecialRule? blessingRule = null, List<Race>? noEffectOnRaces = null)
+        SpecialRule? materialRule = null, int? foundValueOverride = null, SpecialRule? blessingRule = null, List<Race>? noEffectOnRaces = null,
+        IReadOnlyList<SpecialRule>? allSpecialRules = null)
     {
+        TableLines = item.SingleUse is { } table
+            ? Services.SingleUseText.TableLines(table, o => allSpecialRules?.FirstOrDefault(r =>
+                o.SpecialRuleId is { } official ? r.OfficialId == official : r.Id == o.SpecialRuleLocalId)?.Name)
+            : new List<string>();
         NoEffectOnRaces = noEffectOnRaces ?? new List<Race>();
         Item = item;
         var abbrs = new[] { materialRule?.Abbreviation, blessingRule?.Abbreviation }.Where(a => !string.IsNullOrEmpty(a)).ToList();

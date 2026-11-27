@@ -184,6 +184,19 @@ public class SingleUseServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task FinishGame_GainsARuleCreatedInTheCodex()
+    {
+        var (warband, klaus, _) = await ReiklandersAsync();
+        var custom = new SpecialRule { Name = "Paranoïa" };
+        await _library.SaveSpecialRuleAsync(custom, "en");
+
+        await _service.FinishGameAsync(warband.Id, await _warbands.GetWarriorsAsync(warband.Id, "en"), Array.Empty<ConsumedItem>(),
+            new[] { new AfterBattleResult(klaus.Id, 1, new AfterBattleOutcome { Kind = AfterBattleOutcomeKind.GainSpecialRule, SpecialRuleLocalId = custom.Id }) }, "en");
+
+        Assert.Equal(new[] { custom.Id }, (await ReloadAsync(warband, klaus.Id)).GainedSpecialRuleIds);
+    }
+
+    [Fact]
     public async Task FinishGame_IncompleteOutcomesWriteNothing()
     {
         var (warband, klaus, _) = await ReiklandersAsync();

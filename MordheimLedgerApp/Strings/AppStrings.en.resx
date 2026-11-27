@@ -3789,4 +3789,157 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="HistoryOutOfActionLossSentence" xml:space="preserve">
     <value>{1}'s {0} are ruined</value>
   </data>
+  <data name="StatMovementName" xml:space="preserve">
+    <value>Movement</value>
+  </data>
+  <data name="StatWeaponSkillName" xml:space="preserve">
+    <value>Weapon Skill</value>
+  </data>
+  <data name="StatBallisticSkillName" xml:space="preserve">
+    <value>Ballistic Skill</value>
+  </data>
+  <data name="StatStrengthName" xml:space="preserve">
+    <value>Strength</value>
+  </data>
+  <data name="StatToughnessName" xml:space="preserve">
+    <value>Toughness</value>
+  </data>
+  <data name="StatWoundsName" xml:space="preserve">
+    <value>Wounds</value>
+  </data>
+  <data name="StatInitiativeName" xml:space="preserve">
+    <value>Initiative</value>
+  </data>
+  <data name="StatAttacksName" xml:space="preserve">
+    <value>Attacks</value>
+  </data>
+  <data name="StatLeadershipName" xml:space="preserve">
+    <value>Leadership</value>
+  </data>
+  <data name="SingleUseNoDie" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="SingleUseKindAddiction" xml:space="preserve">
+    <value>Addiction</value>
+  </data>
+  <data name="SingleUseKindCharacteristicChange" xml:space="preserve">
+    <value>Characteristic</value>
+  </data>
+  <data name="SingleUseKindGainSpecialRule" xml:space="preserve">
+    <value>Special rule</value>
+  </data>
+  <data name="SingleUseRemoveBonusFormat" xml:space="preserve">
+    <value>Remove the {0} bonus</value>
+  </data>
+  <data name="SingleUseRemoveRowFormat" xml:space="preserve">
+    <value>Remove row {0}-{1}</value>
+  </data>
+  <data name="SingleUseNoRuleChosen" xml:space="preserve">
+    <value>No rule chosen</value>
+  </data>
+  <data name="SingleUseTargetWarrior" xml:space="preserve">
+    <value>Warrior</value>
+  </data>
+  <data name="SingleUseTargetWeapon" xml:space="preserve">
+    <value>Weapon</value>
+  </data>
+  <data name="SingleUseTargetWarband" xml:space="preserve">
+    <value>Warband</value>
+  </data>
+  <data name="SingleUseTargetHintWarrior" xml:space="preserve">
+    <value>The warrior carrying the item (Crimson Shade, Mandrake Root).</value>
+  </data>
+  <data name="SingleUseTargetHintWeapon" xml:space="preserve">
+    <value>Poison: one of the carrier's weapons, picked at the start of the game (never blackpowder).</value>
+  </data>
+  <data name="SingleUseTargetHintWarband" xml:space="preserve">
+    <value>The whole warband (Bugman's Ale): banner on the sheet.</value>
+  </data>
+  <data name="SingleUseTargetPh" xml:space="preserve">
+    <value>Taken by</value>
+  </data>
+  <data name="SingleUseBonusesHeading" xml:space="preserve">
+    <value>Bonuses for the game</value>
+  </data>
+  <data name="SingleUseStatPh" xml:space="preserve">
+    <value>Characteristic</value>
+  </data>
+  <data name="SingleUseFixedValuePh" xml:space="preserve">
+    <value>Fixed value</value>
+  </data>
+  <data name="SingleUseDiePh" xml:space="preserve">
+    <value>Die</value>
+  </data>
+  <data name="SingleUseAddBonus" xml:space="preserve">
+    <value>Add a bonus</value>
+  </data>
+  <data name="SingleUseNoBonus" xml:space="preserve">
+    <value>No bonus for the game.</value>
+  </data>
+  <data name="SingleUseBonusPreviewFormat" xml:space="preserve">
+    <value>Preview: {0} for the game</value>
+  </data>
+  <data name="SingleUseAfterBattleTableHeading" xml:space="preserve">
+    <value>Roll after the battle</value>
+  </data>
+  <data name="SingleUseDiceCountPh" xml:space="preserve">
+    <value>Number of dice</value>
+  </data>
+  <data name="SingleUseFromPh" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="SingleUseToPh" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="SingleUseEffectPh" xml:space="preserve">
+    <value>Effect</value>
+  </data>
+  <data name="SingleUseDeltaPh" xml:space="preserve">
+    <value>Value (+ or −)</value>
+  </data>
+  <data name="SingleUseChangeRule" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="SingleUseAddRow" xml:space="preserve">
+    <value>Add a row</value>
+  </data>
+  <data name="SingleUseTableHint" xml:space="preserve">
+    <value>Results missing from the table have no effect. No row: no roll after the battle.</value>
+  </data>
+  <data name="SingleUseOverlapWarning" xml:space="preserve">
+    <value>Rows {0} and {1} overlap: the first one wins.</value>
+  </data>
+  <data name="SingleUseOutsideDiceWarning" xml:space="preserve">
+    <value>Row {0} can't come up on {1}D{2} (results from {3} to {4}).</value>
+  </data>
+  <data name="SingleUseLossPh" xml:space="preserve">
+    <value>Lost if the carrier is taken out of action</value>
+  </data>
+  <data name="SingleUseLossUpToPh" xml:space="preserve">
+    <value>On 1D6, lost from 1 to</value>
+  </data>
+  <data name="SingleUseLossLeaderOnlyPh" xml:space="preserve">
+    <value>Only when carried by the leader</value>
+  </data>
+  <data name="SingleUseOutcomeShortAddiction" xml:space="preserve">
+    <value>addicted</value>
+  </data>
+  <data name="SingleUseOutcomeShortCharacteristic" xml:space="preserve">
+    <value>{0} {1} permanently</value>
+  </data>
+  <data name="SingleUseOutcomeShortRule" xml:space="preserve">
+    <value>gains {0}</value>
+  </data>
+  <data name="SingleUseAfterBattleDiceFormat" xml:space="preserve">
+    <value>After the battle ({0}D{1})</value>
+  </data>
+  <data name="SingleUseLossFormat" xml:space="preserve">
+    <value>Lost on 1-{0} if the carrier is taken out of action.</value>
+  </data>
+  <data name="SingleUseLossLeaderFormat" xml:space="preserve">
+    <value>Lost on 1-{0} if the leader carrying it is taken out of action.</value>
+  </data>
+  <data name="SingleUseOtherResultsNone" xml:space="preserve">
+    <value>Other results: no effect.</value>
+  </data>
 </root>

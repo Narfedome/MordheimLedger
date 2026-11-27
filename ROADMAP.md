@@ -47,8 +47,11 @@ bloquant) ; compagnon de jeu, pas calculatrice de partie.
   partie : étape qui retire les objets pris, fait cocher ceux utilisés pendant, et lance les tables de conséquences
   (Ombre Cramoisie, Racine de Mandragore, Champignons). Habits de soie : 1D6 après une partie où le chef a été mis hors de
   combat (1-3 : détruits). Valeurs de la partie en bleu (`AppGameModifier`).
-- Plus tard : éditer dans le Codex les bonus de partie et les tables de conséquences (seuls le moment d'usage et « Sans
-  effet sur » le sont) ; remplacer « Retraité » par un statut « Hors course » avec une couleur par cause (dépendance,
+- **Codex, effets modifiables** (maquettes 5-7 du même canevas) : onglet Règles de l'objet - pris par (Guerrier/Arme/
+  Bande), bonus pour la partie (caractéristique, valeur fixe, dé), jet après la bataille (dés, lignes De-À → dépendance,
+  caractéristique ou règle gagnée via le sélecteur de règles), perte hors de combat ; messages ambre si des tranches se
+  chevauchent ou sortent des dés ; même résumé dans la fiche récap et l'écran des conflits de synchro.
+- Plus tard : remplacer « Retraité » par un statut « Hors course » avec une couleur par cause (dépendance,
   œil perdu…) - à définir. Écarté : déroute, catalogue de scénarios.
 
 ## V2 — Partage entre joueurs (ébauche validée le 2026-11-15)

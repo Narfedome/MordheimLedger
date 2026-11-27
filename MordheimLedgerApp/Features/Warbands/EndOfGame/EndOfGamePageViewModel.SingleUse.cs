@@ -44,8 +44,18 @@ public partial class EndOfGamePageViewModel
 
     private string ItemName(int itemId) => _localizedEquipmentCatalog.FirstOrDefault(i => i.Id == itemId)?.Name ?? "?";
 
+    private IReadOnlyList<SpecialRule> _allSpecialRules = Array.Empty<SpecialRule>();
+
+    /// <summary>Règle gagnée d'une ligne de table : par id officiel, sinon id local (règle créée dans le Codex).</summary>
+    private string? RuleName(AfterBattleOutcome outcome) =>
+        outcome.SpecialRuleId is { } official && _specialRulesByOfficialId.TryGetValue(official, out var rule) ? rule.Name
+        : _allSpecialRules.FirstOrDefault(r => r.Id == outcome.SpecialRuleLocalId)?.Name;
+
     private void LoadSingleUses(List<GameItemUse> uses)
     {
+        if (uses.Count > 0)
+            _ = Services.UiErrors.RunAsync(async () =>
+                _allSpecialRules = await _libraryService.GetSpecialRulesAsync(Services.LocalizationService.Instance.Language), nameof(LoadSingleUses));
         _gameItemUses = uses;
         var names = _allActiveWarriorRows.ToDictionary(r => r.Warrior.Id, r => r.Warrior.Name);
         TakenItemLines = uses.Select(u => $"{ItemName(u.EquipmentItemId)} · {(u.WarriorId is { } id && names.TryGetValue(id, out var name) ? name : Loc["SingleUseTheWarband"])}").ToList();
@@ -72,8 +82,7 @@ public partial class EndOfGamePageViewModel
             if (use.WarriorId is not { } warriorId || !warriors.TryGetValue(warriorId, out var warrior)) continue;
             if (!catalog.TryGetValue(use.EquipmentItemId, out var item) || item.SingleUse is null) continue;
             if (SingleUseRules.AfterBattleDice(item.SingleUse) is not { } dice) continue;
-            var entry = new AfterBattleRollEntry(warrior, item, dice.Count, dice.Sides,
-                id => _specialRulesByOfficialId.TryGetValue(id, out var rule) ? rule.Name : null);
+            var entry = new AfterBattleRollEntry(warrior, item, dice.Count, dice.Sides, RuleName);
             if (previous.TryGetValue((warrior.Id, item.Id), out var roll)) entry.Roll = roll;
             AfterBattleRolls.Add(entry);
         }

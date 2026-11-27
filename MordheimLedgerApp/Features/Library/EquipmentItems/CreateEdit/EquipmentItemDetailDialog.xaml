@@ -62,7 +62,26 @@
                                               IconGlyph="{x:Static icons:SolidFont.User}"
                                               Command="{Binding ShowWarriorDetailCommand}"/>
 
-                    <Label Text="{Binding SingleUseText}" IsVisible="{Binding HasSingleUse}" FontSize="13"/>
+                    <VerticalStackLayout Spacing="2" IsVisible="{Binding HasSingleUse}">
+                        <Label Text="{loc:Loc SingleUsePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding SingleUseText}" FontSize="13"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="2" IsVisible="{Binding HasBonuses}">
+                        <Label Text="{loc:Loc SingleUseBonusesHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding BonusesText}" FontSize="13"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="2" IsVisible="{Binding HasTable}">
+                        <Label Text="{Binding TableHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding TableLines}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="system:String">
+                                    <Label Text="{Binding .}" FontSize="13"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label Text="{loc:Loc SingleUseOtherResultsNone}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    </VerticalStackLayout>
+                    <Label Text="{Binding LossText}" IsVisible="{Binding HasLoss}" FontSize="13"/>
 
                     <components:ChipListView HeaderText="{loc:Loc NoEffectOnRacesPh}"
                                               ItemsSource="{Binding NoEffectOnRaces}"

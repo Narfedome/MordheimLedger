@@ -66,6 +66,10 @@ public sealed class SingleUseService
         else if (warbandEquipmentId is { } stored) await _warbands.ConsumeOneWarbandEquipmentAsync(stored);
     }
 
+    /// <summary>Id officiel d'abord (contenu officiel), sinon l'id local d'une règle créée dans le Codex.</summary>
+    private static int? ResolveRule(AfterBattleOutcome outcome, IReadOnlyDictionary<string, int> rulesByOfficialId) =>
+        outcome.SpecialRuleId is { } officialId && rulesByOfficialId.TryGetValue(officialId, out var id) ? id : outcome.SpecialRuleLocalId;
+
     private static bool Apply(Warrior warrior, AfterBattleResult result, IReadOnlyDictionary<string, int> rulesByOfficialId)
     {
         var outcome = result.Outcome;
@@ -77,8 +81,8 @@ public sealed class SingleUseService
             case AfterBattleOutcomeKind.CharacteristicChange when outcome.Field is { } field && outcome.Delta is { } delta:
                 CharacteristicModifier.Apply(warrior, field, delta);
                 return true;
-            case AfterBattleOutcomeKind.GainSpecialRule when outcome.SpecialRuleId is { } officialId
-                && rulesByOfficialId.TryGetValue(officialId, out var ruleId) && !warrior.GainedSpecialRuleIds.Contains(ruleId):
+            case AfterBattleOutcomeKind.GainSpecialRule when ResolveRule(outcome, rulesByOfficialId) is { } ruleId
+                && !warrior.GainedSpecialRuleIds.Contains(ruleId):
                 warrior.GainedSpecialRuleIds.Add(ruleId);
                 return true;
             default:

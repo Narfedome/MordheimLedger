@@ -75,7 +75,7 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
     private static string ValueText(string field, string value)
     {
         if (field == "SingleUseJson" && !string.IsNullOrWhiteSpace(value))
-            return SingleUseJson.Deserialize(value) is { } profile ? LocalizationService.Instance[$"SingleUse{profile.Timing}"] : value;
+            return SingleUseJson.Deserialize(value) is { } profile ? SingleUseText.Summary(profile, o => o.SpecialRuleId) : value;
         if (field != "EffectsJson" || string.IsNullOrWhiteSpace(value)) return value;
         try
         {
@@ -116,6 +116,8 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
             "EffectsJson" => Loc["EffectsHeading"],
             "SingleUseJson" => Loc["SingleUsePh"],
             "NoEffectOnRaceIds" => Loc["NoEffectOnRacesPh"],
+            "LostAfterOutOfActionOn" => Loc["SingleUseLossUpToPh"],
+            "LostAfterOutOfActionLeaderOnly" => Loc["SingleUseLossLeaderOnlyPh"],
             "IsDesignatedSuccessor" => Loc["WarriorArchetypeIsDesignatedSuccessor"],
             "CanBeRehiredAfterDeath" => Loc["WarriorArchetypeCanBeRehiredAfterDeath"],
             "SuccessorLearnsMagic" => Loc["WarbandArchetypeSuccessorLearnsMagic"],

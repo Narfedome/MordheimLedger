@@ -121,7 +121,9 @@ public class DetailDialogService : IDetailDialogService
 
         await ShowAsync(new EquipmentItemDetailDialog(
             new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors, this, materialRule, foundValueOverride, blessingRule,
-                noEffectOnRaces)));
+                noEffectOnRaces,
+                item.SingleUse?.AfterBattle.Any(o => o.Kind == AfterBattleOutcomeKind.GainSpecialRule) == true
+                    ? await _libraryService.GetSpecialRulesAsync(language) : null)));
     }
 
     public async Task ShowSkillDetailDialogAsync(Skill item)

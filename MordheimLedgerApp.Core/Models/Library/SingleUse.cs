@@ -56,7 +56,12 @@ public sealed class AfterBattleOutcome
     [JsonConverter(typeof(JsonStringEnumConverter<CharacteristicField>))]
     public CharacteristicField? Field { get; set; }
     public int? Delta { get; set; }
+
+    /// <summary>Règle gagnée, par id officiel (contenu officiel, ex. « rule.stupidity »)…</summary>
     public string? SpecialRuleId { get; set; }
+
+    /// <summary>… ou par id local pour une règle créée dans le Codex (sans id officiel).</summary>
+    public int? SpecialRuleLocalId { get; set; }
 }
 
 /// <summary>Profil d'un objet à usage unique (EquipmentItem.SingleUse, null = objet ordinaire). Stocké en JSON dans

@@ -33,7 +33,7 @@ internal static class OfficialContentSchema
         new(typeof(SpecialRuleEntity), NameAndDescription, [], [("HatredTargetWarbandArchetypeIds", typeof(WarbandArchetypeEntity))]),
         new(typeof(SkillEntity), NameAndDescription, [], [("HatredTargetWarbandArchetypeIds", typeof(WarbandArchetypeEntity))]),
         new(typeof(MutationEntity), NameAndDescription, [], []),
-        new(typeof(EquipmentItemEntity), NameAndDescription, [], []),
+        new(typeof(EquipmentItemEntity), NameAndDescription, [], [("NoEffectOnRaceIds", typeof(RaceEntity))]),
         new(typeof(EquipmentListEntity), ["NameKey"], [("WarbandArchetypeId", typeof(WarbandArchetypeEntity))], []),
         new(typeof(WarriorArchetypeEntity), NameAndDescription,
         [

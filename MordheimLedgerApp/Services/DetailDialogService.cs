@@ -110,13 +110,18 @@ public class DetailDialogService : IDetailDialogService
             ? new List<WarbandArchetype>()
             : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
+        var noEffectOnRaces = item.NoEffectOnRaceIds.Count == 0
+            ? new List<Race>()
+            : (await _libraryService.GetRacesAsync(language)).Where(r => item.NoEffectOnRaceIds.Contains(r.Id)).ToList();
+
         var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0 || item.RestrictedToWarriorArchetypeIds.Count == 0
             ? new List<WarriorArchetype>()
             : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, language))
                 .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
 
         await ShowAsync(new EquipmentItemDetailDialog(
-            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors, this, materialRule, foundValueOverride, blessingRule)));
+            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors, this, materialRule, foundValueOverride, blessingRule,
+                noEffectOnRaces)));
     }
 
     public async Task ShowSkillDetailDialogAsync(Skill item)

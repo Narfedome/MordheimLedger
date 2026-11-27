@@ -74,6 +74,8 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
     /// et s'affichent comme dans le Codex, un effet par ligne (« Achat · Réduction 2D6 CO (1 fois par après-bataille) »).</summary>
     private static string ValueText(string field, string value)
     {
+        if (field == "SingleUseJson" && !string.IsNullOrWhiteSpace(value))
+            return SingleUseJson.Deserialize(value) is { } profile ? LocalizationService.Instance[$"SingleUse{profile.Timing}"] : value;
         if (field != "EffectsJson" || string.IsNullOrWhiteSpace(value)) return value;
         try
         {
@@ -112,6 +114,8 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
             "Difficulty" => Loc["LibDifficultyAbbr"],
             // Effets d'une compétence, stockés en JSON (SkillEntity.EffectsJson) - « Effects json » sinon.
             "EffectsJson" => Loc["EffectsHeading"],
+            "SingleUseJson" => Loc["SingleUsePh"],
+            "NoEffectOnRaceIds" => Loc["NoEffectOnRacesPh"],
             "IsDesignatedSuccessor" => Loc["WarriorArchetypeIsDesignatedSuccessor"],
             "CanBeRehiredAfterDeath" => Loc["WarriorArchetypeCanBeRehiredAfterDeath"],
             "SuccessorLearnsMagic" => Loc["WarbandArchetypeSuccessorLearnsMagic"],

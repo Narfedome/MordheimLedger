@@ -146,4 +146,12 @@ public class EquipmentItem
     /// same idiom as GrantsSkillCategory - see Core.Rules.CharacteristicIncreaseRules.
     /// WithEquipmentBonuses.</summary>
     public Rules.CharacteristicField? RaisesCharacteristicMax { get; set; }
+
+    /// <summary>Objet à usage unique (drogue, poison, Ail…) : quand il sert et ce qu'il fait - null = objet ordinaire.
+    /// Voir Core.Rules.SingleUseRules.</summary>
+    public SingleUseProfile? SingleUse { get; set; }
+
+    /// <summary>« Sans effet sur » ces races (Ombre Cramoisie : Morts-Vivants, Possédés). Informatif : le début de partie
+    /// affiche un message ambre, sans bloquer. Voir Core.Rules.RaceRules.IsWithoutEffect.</summary>
+    public List<int> NoEffectOnRaceIds { get; set; } = new();
 }

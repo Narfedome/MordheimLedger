@@ -17,10 +17,11 @@
       "**/Rules/TomeOfMagicRules.cs",
       "**/Services/SpellLearningService.cs",
       "**/Rules/InjuryCatalogLookup.cs",
-      "**/Rules/RaceRules.cs"
+      "**/Rules/RaceRules.cs",
+      "**/Rules/SingleUseRules.cs"
     ],
     "coverage-analysis": "off",
-    "test-case-filter": "FullyQualifiedName~AdvancementServiceTests|FullyQualifiedName~ExplorationRewardServiceTests|FullyQualifiedName~PostBattleTradingServiceTests|FullyQualifiedName~RosterChangeServiceTests|FullyQualifiedName~InjuryServiceTests|FullyQualifiedName~PostBattleSequenceServiceTests|FullyQualifiedName~LeaderSuccessionServiceTests|FullyQualifiedName~RulesTests.UnderdogExperience|FullyQualifiedName~RulesTests.ExperiencePrefill|FullyQualifiedName~RulesTests.LeaderSuccession|FullyQualifiedName~RulesTests.WarbandRating|FullyQualifiedName~RulesTests.SpellRules|FullyQualifiedName~RulesTests.TomeOfMagic|FullyQualifiedName~SpellLearningServiceTests|FullyQualifiedName~WarbandMutationTests.EquipStashItem|FullyQualifiedName~RaceTests",
+    "test-case-filter": "FullyQualifiedName~AdvancementServiceTests|FullyQualifiedName~ExplorationRewardServiceTests|FullyQualifiedName~PostBattleTradingServiceTests|FullyQualifiedName~RosterChangeServiceTests|FullyQualifiedName~InjuryServiceTests|FullyQualifiedName~PostBattleSequenceServiceTests|FullyQualifiedName~LeaderSuccessionServiceTests|FullyQualifiedName~RulesTests.UnderdogExperience|FullyQualifiedName~RulesTests.ExperiencePrefill|FullyQualifiedName~RulesTests.LeaderSuccession|FullyQualifiedName~RulesTests.WarbandRating|FullyQualifiedName~RulesTests.SpellRules|FullyQualifiedName~RulesTests.TomeOfMagic|FullyQualifiedName~SpellLearningServiceTests|FullyQualifiedName~WarbandMutationTests.EquipStashItem|FullyQualifiedName~RaceTests|FullyQualifiedName~RulesTests.SingleUse",
     "reporters": [ "html", "json", "progress" ],
     "concurrency": 4,
     "thresholds": { "high": 90, "low": 80, "break": 80 }

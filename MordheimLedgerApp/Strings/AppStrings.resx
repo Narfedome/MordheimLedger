@@ -3663,4 +3663,28 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="RaceUsageItems" xml:space="preserve">
     <value>{0} objet(s)</value>
   </data>
+  <data name="SingleUsePh" xml:space="preserve">
+    <value>À usage unique</value>
+  </data>
+  <data name="SingleUseNone" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="SingleUseBeforeBattle" xml:space="preserve">
+    <value>Pris avant la bataille</value>
+  </data>
+  <data name="SingleUseLastsOneGame" xml:space="preserve">
+    <value>Dure une partie (utilisé ou non)</value>
+  </data>
+  <data name="SingleUseDuringBattle" xml:space="preserve">
+    <value>Utilisé pendant la bataille</value>
+  </data>
+  <data name="SingleUseHint" xml:space="preserve">
+    <value>Proposé au début de partie (pris avant la bataille, dure une partie) ou à cocher en Fin de partie (utilisé pendant la bataille).</value>
+  </data>
+  <data name="NoEffectOnRacesPh" xml:space="preserve">
+    <value>Sans effet sur</value>
+  </data>
+  <data name="NoEffectOnRacesEmpty" xml:space="preserve">
+    <value>Agit sur toutes les races.</value>
+  </data>
 </root>

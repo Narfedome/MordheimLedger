@@ -1115,6 +1115,13 @@ public class LibraryService : ILibraryService
                 persona.RaceId = null;
                 connection.Update(persona);
             }
+            foreach (var item in connection.Table<EquipmentItemEntity>().Where(i => i.NoEffectOnRaceIds != null).ToList())
+            {
+                var ids = Core.Rules.RaceRules.ParseIds(item.NoEffectOnRaceIds);
+                if (!ids.Remove(raceId)) continue;
+                item.NoEffectOnRaceIds = ids.Count == 0 ? null : string.Join(',', ids);
+                connection.Update(item);
+            }
             connection.Delete<RaceEntity>(raceId);
         });
     }
@@ -1127,7 +1134,7 @@ public class LibraryService : ILibraryService
             (await _db.CachedTableAsync<WarriorArchetypeEntity>()).Count(w => w.RaceId == raceId),
             (await _db.CachedTableAsync<HiredSwordEntity>()).Count(h => h.RaceId == raceId),
             (await _db.CachedTableAsync<DramatisPersonaEntity>()).Count(p => p.RaceId == raceId),
-            0);
+            (await _db.CachedTableAsync<EquipmentItemEntity>()).Count(i => Core.Rules.RaceRules.ParseIds(i.NoEffectOnRaceIds).Contains(raceId)));
     }
 
     public async Task DeleteRacialProfileAsync(int racialProfileId)

@@ -613,6 +613,21 @@
         "fr": "Champignons bonnets de fou"
       },
       "category": "DrugsAndPoisons",
+      "singleUse": {
+        "timing": "BeforeBattle",
+        "target": "Warrior",
+        "afterBattleDiceCount": 1,
+        "afterBattleDiceSides": 6,
+        "afterBattle": [
+          {
+            "min": 1,
+            "max": 1,
+            "kind": "GainSpecialRule",
+            "specialRuleId": "rule.stupidity"
+          }
+        ]
+      },
+      "noEffectOnRaceIds": ["race.undead", "race.possessed"],
       "cost": 30,
       "costRandomMax": 18,
       "rarity": 9,

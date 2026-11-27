@@ -3,7 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
@@ -15,7 +17,7 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
-    protected override object? EditableState => new object?[] { Item, WarbandRestriction.SelectedIds, SpecialRules.Select(r => r.Id) };
+    protected override object? EditableState => new object?[] { Item, WarbandRestriction.SelectedIds, SpecialRules.Select(r => r.Id), NoEffectOnRaces.Select(r => r.Id), SelectedSingleUseLabel };
 
     public ObservableCollection<string> CategoryOptions { get; } = new();
 
@@ -54,8 +56,20 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 
     public ObservableCollection<SpecialRule> SpecialRules { get; }
 
+    /// <summary>« Sans effet sur » (EquipmentItem.NoEffectOnRaceIds), recopié à la sauvegarde.</summary>
+    public ObservableCollection<Race> NoEffectOnRaces { get; } = new();
+    private IReadOnlyList<Race> _allRaces = Array.Empty<Race>();
+
+    /// <summary>« À usage unique » : Non, puis les 3 moments (SingleUseTiming). Changer de moment garde le reste du
+    /// profil (bonus, table de conséquences) ; « Non » le retire à la sauvegarde.</summary>
+    public ObservableCollection<string> SingleUseOptions { get; } = new();
+    private readonly Dictionary<string, SingleUseTiming> _timingByLabel = new();
+
+    [ObservableProperty]
+    private string selectedSingleUseLabel = string.Empty;
+
     public EquipmentItemEditDialogViewModel(EquipmentItem item, string title, IWarbandArchetypePickerService warbandPicker,
-        IReadOnlyList<WarbandArchetype> allWarbandArchetypes, ISpecialRulePickerService specialRulePicker)
+        IReadOnlyList<WarbandArchetype> allWarbandArchetypes, ISpecialRulePickerService specialRulePicker, ILibraryService libraryService)
     {
         this.item = item;
         this.title = title;
@@ -71,7 +85,36 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
         selectedCategoryLabel = Loc[$"EquipmentCategory{item.Category}"];
         WarbandRestriction = new WarbandRestrictionEditor(item.RestrictedToWarbandArchetypeIds, allWarbandArchetypes, warbandPicker);
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
+
+        SingleUseOptions.Add(Loc["SingleUseNone"]);
+        foreach (var timing in Enum.GetValues<SingleUseTiming>())
+        {
+            var label = Loc[$"SingleUse{timing}"];
+            _timingByLabel[label] = timing;
+            SingleUseOptions.Add(label);
+        }
+        selectedSingleUseLabel = item.SingleUse is { } profile ? Loc[$"SingleUse{profile.Timing}"] : Loc["SingleUseNone"];
+        _ = LoadRacesAsync(libraryService);
     }
+
+    private async Task LoadRacesAsync(ILibraryService libraryService)
+    {
+        _allRaces = await libraryService.GetRacesAsync(LocalizationService.Instance.Language);
+        foreach (var race in _allRaces.Where(r => Item.NoEffectOnRaceIds.Contains(r.Id)))
+            NoEffectOnRaces.Add(race);
+    }
+
+    [RelayCommand]
+    private async Task AddNoEffectRace()
+    {
+        var available = _allRaces.Where(r => NoEffectOnRaces.All(c => c.Id != r.Id)).ToList();
+        if (available.Count == 0) return;
+        var picked = await ShowActionSheetAsync(Loc["NoEffectOnRacesPh"], available.Select(r => r.Name).ToArray());
+        if (available.FirstOrDefault(r => r.Name == picked) is { } race) NoEffectOnRaces.Add(race);
+    }
+
+    [RelayCommand]
+    private void RemoveNoEffectRace(Race race) => NoEffectOnRaces.Remove(race);
 
     partial void OnSelectedCategoryLabelChanged(string value)
     {
@@ -100,6 +143,13 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
 
+    private static SingleUseProfile WithTiming(SingleUseProfile? existing, SingleUseTiming timing)
+    {
+        var profile = SingleUseJson.Deserialize(SingleUseJson.Serialize(existing)) ?? new SingleUseProfile();
+        profile.Timing = timing;
+        return profile;
+    }
+
     private bool ValidateRequiredFields()
     {
         if (string.IsNullOrWhiteSpace(Item.Name))
@@ -122,6 +172,10 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 
         Item.RestrictedToWarbandArchetypeIds = WarbandRestriction.SelectedIds;
         Item.SpecialRules = SpecialRules.ToList();
+        Item.NoEffectOnRaceIds = NoEffectOnRaces.Select(r => r.Id).ToList();
+        Item.SingleUse = _timingByLabel.TryGetValue(SelectedSingleUseLabel, out var timing)
+            ? WithTiming(Item.SingleUse, timing)
+            : null;
         Close(true);
     }
 }

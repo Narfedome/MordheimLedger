@@ -337,4 +337,18 @@ public class ContentSyncTests : IAsyncLifetime
         Assert.Equal(localHuman.Id, (await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.necromancer")).RaceId);
         Assert.Null((await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.zombie")).RaceId);
     }
+
+    [Fact]
+    public async Task ItemRacesWithoutEffect_ReachAnInstalledDatabase_AsLocalIds()
+    {
+        await _local.Connection.ExecuteAsync("UPDATE EquipmentItemEntity SET NoEffectOnRaceIds = NULL, SingleUseJson = NULL");
+
+        await SyncAsync();
+
+        var undead = await ByOfficialIdAsync<RaceEntity>(_local, "race.undead");
+        var possessed = await ByOfficialIdAsync<RaceEntity>(_local, "race.possessed");
+        var crimson = await ByOfficialIdAsync<EquipmentItemEntity>(_local, "equipment.crimson-shade");
+        Assert.Equal(new[] { undead.Id, possessed.Id }.Order(), MordheimLedgerApp.Core.Rules.RaceRules.ParseIds(crimson.NoEffectOnRaceIds).Order());
+        Assert.NotNull(crimson.SingleUseJson);
+    }
 }

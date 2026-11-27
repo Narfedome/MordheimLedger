@@ -82,6 +82,23 @@
                          RestrictedToWarbandArchetypeIds). Contrôle unique factorisant chips + bascule
                          Inclure/Exclure (ex. Chien de guerre "toutes sauf Skavens"). -->
                     <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>
+
+                    <!-- Objets à usage unique (drogues, poisons, Ail...) : moment d'usage, puis races sur lesquelles l'objet
+                         n'agit pas (message ambre au début de partie, jamais bloquant). -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc SingleUsePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:SelectFieldView Title="{loc:Loc SingleUsePh}" ItemsSource="{Binding SingleUseOptions}"
+                                SelectedItem="{Binding SelectedSingleUseLabel}"/>
+                        <Label Text="{loc:Loc SingleUseHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    </VerticalStackLayout>
+
+                    <components:ChipListView HeaderText="{loc:Loc NoEffectOnRacesPh}"
+                                              ItemsSource="{Binding NoEffectOnRaces}"
+                                              IconGlyph="{x:Static icons:SolidFont.Ban}"
+                                              AlwaysShowSection="True"
+                                              EmptyHintText="{loc:Loc NoEffectOnRacesEmpty}"
+                                              AddCommand="{Binding AddNoEffectRaceCommand}"
+                                              RemoveCommand="{Binding RemoveNoEffectRaceCommand}"/>
                 </VerticalStackLayout>
 
                 <!-- Règles spéciales propres à l'objet (ex. "Parry", "Cutting Edge"). -->

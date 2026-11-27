@@ -39,6 +39,12 @@ public class EquipmentItemEntity
     public int? GrantsBonusExplorationDice { get; set; }
     public Rules.CharacteristicField? RaisesCharacteristicMax { get; set; }
 
+    /// <summary>EquipmentItem.SingleUse sérialisé (SingleUseJson), null = objet ordinaire.</summary>
+    public string? SingleUseJson { get; set; }
+
+    /// <summary>Ids de Race séparés par des virgules - voir EquipmentItem.NoEffectOnRaceIds.</summary>
+    public string? NoEffectOnRaceIds { get; set; }
+
     /// <summary>See Models.Library.EquipmentItem.IsUniqueArtefact.</summary>
     public bool IsUniqueArtefact { get; set; }
 

@@ -56,10 +56,18 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
 
     private readonly IDetailDialogService _detailDialogs;
 
+    /// <summary>« À usage unique : Pris avant la bataille », null = objet ordinaire.</summary>
+    public string? SingleUseText => Item.SingleUse is { } profile ? $"{Loc["SingleUsePh"]} : {Loc[$"SingleUse{profile.Timing}"]}" : null;
+    public bool HasSingleUse => Item.SingleUse is not null;
+
+    /// <summary>Races sur lesquelles l'objet n'agit pas (EquipmentItem.NoEffectOnRaceIds).</summary>
+    public List<Race> NoEffectOnRaces { get; }
+
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel, List<WarbandArchetype> restrictedWarbands,
         List<WarbandArchetype> allWarbandArchetypes, List<WarriorArchetype> restrictedWarriors, IDetailDialogService detailDialogs,
-        SpecialRule? materialRule = null, int? foundValueOverride = null, SpecialRule? blessingRule = null)
+        SpecialRule? materialRule = null, int? foundValueOverride = null, SpecialRule? blessingRule = null, List<Race>? noEffectOnRaces = null)
     {
+        NoEffectOnRaces = noEffectOnRaces ?? new List<Race>();
         Item = item;
         var abbrs = new[] { materialRule?.Abbreviation, blessingRule?.Abbreviation }.Where(a => !string.IsNullOrEmpty(a)).ToList();
         Title = abbrs.Count > 0 ? $"{item.Name} ({string.Join(", ", abbrs)})" : item.Name;
@@ -78,6 +86,9 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
 
     [RelayCommand]
     private Task ShowWarbandDetail(WarbandArchetype warband) => ShowChipDetailAsync(warband.Name, warband.Description);
+
+    [RelayCommand]
+    private Task ShowRaceDetail(Race race) => ShowChipDetailAsync(race.Name, race.Description);
 
     [RelayCommand]
     private Task ShowWarriorDetail(WarriorArchetype warrior) => ShowChipDetailAsync(warrior.Name, warrior.Description);

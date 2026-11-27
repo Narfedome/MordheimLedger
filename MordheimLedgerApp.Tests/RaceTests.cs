@@ -113,4 +113,65 @@ public class RaceTests : IDisposable
         Assert.Null((await WarriorAsync("warband.undead", "warrior.undead.necromancer")).RaceId);
         Assert.Equal(0, (await _library.GetWarbandArchetypesAsync("en")).Single(w => w.OfficialId == "warband.reiklanders").RaceId);
     }
+
+    private async Task<EquipmentItem> ItemAsync(string officialId) =>
+        (await _library.GetEquipmentItemsAsync("en")).Single(i => i.OfficialId == officialId);
+
+    [Fact]
+    public async Task OfficialContent_SingleUseItems()
+    {
+        var races = await RaceIdsAsync();
+        var crimson = await ItemAsync("equipment.crimson-shade");
+        Assert.Equal(SingleUseTiming.BeforeBattle, crimson.SingleUse!.Timing);
+        Assert.Equal(3, crimson.SingleUse.StatModifiers.Single(m => m.Field == CharacteristicField.Initiative).DiceSides);
+        Assert.Equal((2, 6), SingleUseRules.AfterBattleDice(crimson.SingleUse));
+        Assert.Equal(AfterBattleOutcomeKind.Addiction, SingleUseRules.ResolveAfterBattle(crimson.SingleUse, 2)!.Kind);
+        Assert.Equal(new[] { races["race.undead"], races["race.possessed"] }.Order(), crimson.NoEffectOnRaceIds.Order());
+
+        Assert.Equal(new[] { races["race.elf"] }, (await ItemAsync("equipment.bugman-s-ale")).NoEffectOnRaceIds);
+        Assert.Equal(SingleUseTarget.Warband, (await ItemAsync("equipment.bugman-s-ale")).SingleUse!.Target);
+        Assert.Equal(SingleUseTarget.Weapon, (await ItemAsync("equipment.dark-venom")).SingleUse!.Target);
+        Assert.True(SingleUseRules.IsPreChecked(await ItemAsync("equipment.garlic")));
+        Assert.True(SingleUseRules.IsAskedAfterBattle(await ItemAsync("equipment.healing-herbs")));
+        Assert.Null((await ItemAsync("equipment.sword")).SingleUse);
+
+        // Objet déclaré dans un fichier de bande.
+        var madCap = await ItemAsync("equipment.mad-cap-mushrooms");
+        Assert.Equal("rule.stupidity", SingleUseRules.ResolveAfterBattle(madCap.SingleUse!, 1)!.SpecialRuleId);
+        Assert.Contains(races["race.possessed"], madCap.NoEffectOnRaceIds);
+        Assert.Contains(races["race.undead"], (await ItemAsync("equipment.blessed-water")).NoEffectOnRaceIds);
+    }
+
+    [Fact]
+    public async Task DeleteRace_RemovesItFromItemsWithoutEffect()
+    {
+        var races = await RaceIdsAsync();
+        var undead = races["race.undead"];
+        Assert.True((await _library.GetRaceUsageAsync(undead)).EquipmentItems >= 4);
+
+        await _library.DeleteRaceAsync(undead);
+
+        Assert.Equal(new[] { races["race.possessed"] }, (await ItemAsync("equipment.crimson-shade")).NoEffectOnRaceIds);
+        Assert.DoesNotContain(undead, (await ItemAsync("equipment.bugman-s-ale")).NoEffectOnRaceIds);
+        Assert.Equal(0, (await _library.GetRaceUsageAsync(undead)).EquipmentItems);
+        Assert.Equal(1, (await _library.GetRaceUsageAsync(races["race.elf"])).EquipmentItems);
+    }
+
+    [Fact]
+    public async Task SaveEquipmentItem_KeepsSingleUseAndRaces()
+    {
+        var races = await RaceIdsAsync();
+        var item = new EquipmentItem
+        {
+            Name = "Potion",
+            Category = EquipmentCategory.Consumable,
+            SingleUse = new SingleUseProfile { Timing = SingleUseTiming.DuringBattle },
+            NoEffectOnRaceIds = { races["race.dwarf"] },
+        };
+        await _library.SaveEquipmentItemAsync(item, "en");
+
+        var saved = (await _library.GetEquipmentItemsAsync("en")).Single(i => i.Id == item.Id);
+        Assert.Equal(SingleUseTiming.DuringBattle, saved.SingleUse!.Timing);
+        Assert.Equal(new[] { races["race.dwarf"] }, saved.NoEffectOnRaceIds);
+    }
 }

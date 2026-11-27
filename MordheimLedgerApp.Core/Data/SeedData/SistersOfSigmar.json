@@ -362,6 +362,11 @@
         "fr": "Eau Bénite"
       },
       "category": "MiscellaneousEquipment",
+      "singleUse": {
+        "timing": "DuringBattle",
+        "target": "Warrior"
+      },
+      "noEffectOnRaceIds": ["race.undead", "race.possessed"],
       "cost": 10,
       "costRandomMax": 18,
       "description": {

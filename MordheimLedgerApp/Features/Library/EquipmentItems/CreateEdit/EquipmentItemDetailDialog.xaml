@@ -62,6 +62,13 @@
                                               IconGlyph="{x:Static icons:SolidFont.User}"
                                               Command="{Binding ShowWarriorDetailCommand}"/>
 
+                    <Label Text="{Binding SingleUseText}" IsVisible="{Binding HasSingleUse}" FontSize="13"/>
+
+                    <components:ChipListView HeaderText="{loc:Loc NoEffectOnRacesPh}"
+                                              ItemsSource="{Binding NoEffectOnRaces}"
+                                              IconGlyph="{x:Static icons:SolidFont.Ban}"
+                                              Command="{Binding ShowRaceDetailCommand}"/>
+
                     <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
                                               ItemsSource="{Binding DisplayedSpecialRules}"
                                               IconGlyph="{x:Static icons:SolidFont.Scroll}"

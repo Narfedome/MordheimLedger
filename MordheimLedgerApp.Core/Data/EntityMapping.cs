@@ -803,6 +803,10 @@ public static class EntityMapping
         IsSellable = e.IsSellable,
         GrantsBonusExplorationDice = e.GrantsBonusExplorationDice,
         RaisesCharacteristicMax = e.RaisesCharacteristicMax,
+        SingleUse = SingleUseJson.Deserialize(e.SingleUseJson),
+        NoEffectOnRaceIds = string.IsNullOrEmpty(e.NoEffectOnRaceIds)
+            ? new List<int>()
+            : e.NoEffectOnRaceIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList(),
         IsUniqueArtefact = e.IsUniqueArtefact,
         IsExplorationOnly = e.IsExplorationOnly
     };
@@ -968,6 +972,8 @@ public static class EntityMapping
         IsSellable = m.IsSellable,
         GrantsBonusExplorationDice = m.GrantsBonusExplorationDice,
         RaisesCharacteristicMax = m.RaisesCharacteristicMax,
+        SingleUseJson = SingleUseJson.Serialize(m.SingleUse),
+        NoEffectOnRaceIds = m.NoEffectOnRaceIds.Count == 0 ? null : string.Join(',', m.NoEffectOnRaceIds),
         IsUniqueArtefact = m.IsUniqueArtefact,
         IsExplorationOnly = m.IsExplorationOnly
     };

@@ -1418,6 +1418,11 @@
       "fr": "Bière de Bugman"
     },
     "category": "Consumable",
+    "singleUse": {
+      "timing": "BeforeBattle",
+      "target": "Warband"
+    },
+    "noEffectOnRaceIds": ["race.elf"],
     "cost": 50,
     "costRandomMax": 18,
     "rarity": 9,
@@ -1446,6 +1451,10 @@
       "fr": "Chausse-trapes"
     },
     "category": "Ammunition",
+    "singleUse": {
+      "timing": "DuringBattle",
+      "target": "Warrior"
+    },
     "cost": 15,
     "costRandomMax": 12,
     "rarity": 6,
@@ -1558,6 +1567,10 @@
       "fr": "Bombe Incendiaire"
     },
     "category": "Ammunition",
+    "singleUse": {
+      "timing": "DuringBattle",
+      "target": "Warrior"
+    },
     "cost": 35,
     "costRandomMax": 12,
     "rarity": 9,
@@ -1744,6 +1757,42 @@
       "fr": "Ombre Cramoisie"
     },
     "category": "DrugsAndPoisons",
+    "singleUse": {
+      "timing": "BeforeBattle",
+      "target": "Warrior",
+      "statModifiers": [
+        {
+          "field": "Initiative",
+          "value": 0,
+          "diceSides": 3
+        },
+        {
+          "field": "Movement",
+          "value": 1
+        },
+        {
+          "field": "Strength",
+          "value": 1
+        }
+      ],
+      "afterBattleDiceCount": 2,
+      "afterBattleDiceSides": 6,
+      "afterBattle": [
+        {
+          "min": 2,
+          "max": 3,
+          "kind": "Addiction"
+        },
+        {
+          "min": 12,
+          "max": 12,
+          "kind": "CharacteristicChange",
+          "field": "Initiative",
+          "delta": 1
+        }
+      ]
+    },
+    "noEffectOnRaceIds": ["race.undead", "race.possessed"],
     "cost": 35,
     "costRandomMax": 6,
     "rarity": 8,
@@ -1783,6 +1832,28 @@
       "fr": "Racine de Mandragore"
     },
     "category": "DrugsAndPoisons",
+    "singleUse": {
+      "timing": "BeforeBattle",
+      "target": "Warrior",
+      "statModifiers": [
+        {
+          "field": "Toughness",
+          "value": 1
+        }
+      ],
+      "afterBattleDiceCount": 2,
+      "afterBattleDiceSides": 6,
+      "afterBattle": [
+        {
+          "min": 2,
+          "max": 3,
+          "kind": "CharacteristicChange",
+          "field": "Toughness",
+          "delta": -1
+        }
+      ]
+    },
+    "noEffectOnRaceIds": ["race.undead", "race.possessed"],
     "cost": 25,
     "costRandomMax": 6,
     "rarity": 8,
@@ -1875,6 +1946,10 @@
       "fr": "Poudre Noire Supérieure"
     },
     "category": "Ammunition",
+    "singleUse": {
+      "timing": "LastsOneGame",
+      "target": "Warrior"
+    },
     "cost": 30,
     "rarity": 11,
     "description": {
@@ -1930,6 +2005,10 @@
       "fr": "Torche"
     },
     "category": "MiscellaneousEquipment",
+    "singleUse": {
+      "timing": "LastsOneGame",
+      "target": "Warrior"
+    },
     "cost": 2,
     "description": {
       "en": "Warriors lacking the funds for a lantern may have to make do with torches.",
@@ -2012,6 +2091,10 @@
       "fr": "Ail"
     },
     "category": "MiscellaneousEquipment",
+    "singleUse": {
+      "timing": "LastsOneGame",
+      "target": "Warrior"
+    },
     "cost": 1,
     "description": {
       "en": "Garlic is a common herb grown in most gardens of the Empire. It is said to ward off Vampires and other denizens of the dark.",
@@ -2066,6 +2149,10 @@
       "fr": "Lotus Noir"
     },
     "category": "DrugsAndPoisons",
+    "singleUse": {
+      "timing": "BeforeBattle",
+      "target": "Weapon"
+    },
     "cost": 10,
     "costRandomMax": 6,
     "rarity": 9,
@@ -2094,6 +2181,10 @@
       "fr": "Venin Sombre"
     },
     "category": "DrugsAndPoisons",
+    "singleUse": {
+      "timing": "BeforeBattle",
+      "target": "Weapon"
+    },
     "cost": 30,
     "costRandomMax": 12,
     "rarity": 8,
@@ -2122,6 +2213,11 @@
       "fr": "Larmes de Shallaya"
     },
     "category": "Consumable",
+    "singleUse": {
+      "timing": "BeforeBattle",
+      "target": "Warrior"
+    },
+    "noEffectOnRaceIds": ["race.undead", "race.possessed"],
     "cost": 10,
     "costRandomMax": 12,
     "rarity": 7,
@@ -2367,6 +2463,10 @@
       "fr": "Herbes Curatives"
     },
     "category": "Consumable",
+    "singleUse": {
+      "timing": "DuringBattle",
+      "target": "Warrior"
+    },
     "cost": 20,
     "costRandomMax": 12,
     "rarity": 8,

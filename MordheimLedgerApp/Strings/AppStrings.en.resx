@@ -3663,4 +3663,28 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="RaceUsageItems" xml:space="preserve">
     <value>{0} item(s)</value>
   </data>
+  <data name="SingleUsePh" xml:space="preserve">
+    <value>Single use</value>
+  </data>
+  <data name="SingleUseNone" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="SingleUseBeforeBattle" xml:space="preserve">
+    <value>Taken before the battle</value>
+  </data>
+  <data name="SingleUseLastsOneGame" xml:space="preserve">
+    <value>Lasts one game (used or not)</value>
+  </data>
+  <data name="SingleUseDuringBattle" xml:space="preserve">
+    <value>Used during the battle</value>
+  </data>
+  <data name="SingleUseHint" xml:space="preserve">
+    <value>Offered at the start of a game (taken before the battle, lasts one game) or ticked at the end of the game (used during the battle).</value>
+  </data>
+  <data name="NoEffectOnRacesPh" xml:space="preserve">
+    <value>No effect on</value>
+  </data>
+  <data name="NoEffectOnRacesEmpty" xml:space="preserve">
+    <value>Works on every race.</value>
+  </data>
 </root>

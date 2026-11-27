@@ -21,4 +21,8 @@ public static class RaceRules
     /// l'objet agit, rien n'est signalé).</summary>
     public static bool IsWithoutEffect(int? raceId, IReadOnlyCollection<int> noEffectOnRaceIds) =>
         raceId is { } id && noEffectOnRaceIds.Contains(id);
+
+    /// <summary>Liste d'ids stockée en colonne CSV (« 3,7 ») ; vide ou null = aucune.</summary>
+    public static List<int> ParseIds(string? csv) =>
+        string.IsNullOrEmpty(csv) ? new List<int>() : csv.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
 }

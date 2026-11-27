@@ -718,4 +718,37 @@ public class EntityMappingTests
         Assert.Equal(4, new HiredSword { NameKey = "n", RaceId = 4 }.ToEntity().ToModel(names).RaceId);
         Assert.Equal(5, new DramatisPersona { NameKey = "n", RaceId = 5 }.ToEntity().ToModel(names).RaceId);
     }
+
+    [Fact]
+    public void SingleUseAndNoEffectRaces_RoundTrip()
+    {
+        var names = new Dictionary<string, string> { ["n"] = "x" };
+        var item = new EquipmentItem
+        {
+            NameKey = "n",
+            SingleUse = new SingleUseProfile
+            {
+                Timing = SingleUseTiming.BeforeBattle,
+                Target = SingleUseTarget.Weapon,
+                StatModifiers = { new GameStatModifier { Field = MordheimLedgerApp.Core.Rules.CharacteristicField.Toughness, Value = 1 } },
+                AfterBattleDiceCount = 2,
+                AfterBattleDiceSides = 6,
+                AfterBattle = { new AfterBattleOutcome { Min = 2, Max = 3, Kind = AfterBattleOutcomeKind.CharacteristicChange, Field = MordheimLedgerApp.Core.Rules.CharacteristicField.Toughness, Delta = -1 } },
+            },
+            NoEffectOnRaceIds = { 4, 9 },
+        };
+        var entity = item.ToEntity();
+        Assert.Equal("4,9", entity.NoEffectOnRaceIds);
+        var back = entity.ToModel(names);
+        Assert.Equal(new[] { 4, 9 }, back.NoEffectOnRaceIds);
+        Assert.Equal(SingleUseTarget.Weapon, back.SingleUse!.Target);
+        Assert.Equal(-1, back.SingleUse.AfterBattle.Single().Delta);
+        Assert.Equal(entity.SingleUseJson, back.ToEntity().SingleUseJson);
+
+        var plain = new EquipmentItem { NameKey = "n" }.ToEntity();
+        Assert.Null(plain.SingleUseJson);
+        Assert.Null(plain.NoEffectOnRaceIds);
+        Assert.Null(plain.ToModel(names).SingleUse);
+        Assert.Null(SingleUseJson.Deserialize("{not json"));
+    }
 }

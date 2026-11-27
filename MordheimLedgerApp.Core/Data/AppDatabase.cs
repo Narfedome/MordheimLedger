@@ -332,6 +332,13 @@ public partial class AppDatabase
         }
     }
 
+    /// <summary>Usage unique et « Sans effet sur » d'un objet de seed (catalogue commun ou fichier de bande).</summary>
+    private void ApplySingleUse(EquipmentItem item, EquipmentSeedData eq)
+    {
+        item.SingleUse = eq.SingleUse;
+        item.NoEffectOnRaceIds = eq.NoEffectOnRaceIds?.Select(id => _raceIdsByOfficialId[id]).ToList() ?? new List<int>();
+    }
+
     /// <summary>Objet du catalogue commun (Equipment.json) tel que le seed l'insère.</summary>
     private static EquipmentItem NewCommonEquipmentItem(EquipmentSeedData eq) => new()
     {
@@ -554,6 +561,8 @@ public partial class AppDatabase
         // guerre, EquipmentCategory.Animal) carry RestrictedToWarbandNames instead of a single-band flag
         // - band-only mounts (e.g. Orc Mob's Sanglier de guerre) stay declared directly in their own
         // warband file, same split as any other band-declared equipment.
+        // Races en premier : objets (« Sans effet sur »), Francs-Tireurs, types de guerrier et Dramatis Personae en citent.
+        await SeedRacesAsync();
         await SeedSpecialRulesAsync();
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
@@ -569,8 +578,6 @@ public partial class AppDatabase
         // MagicSchools_AllHaveBilingualDescriptions) : Lesser Magic seedait sans description tant que
         // HiredSwords seedait en premier.
         await SeedMagicSchoolsAsync();
-        // Races avant les Francs-Tireurs : ils en référencent une (RaceId).
-        await SeedRacesAsync();
         await SeedHiredSwordsAsync();
         await SeedRacialProfilesAsync();
         // Pas ici : voir ResyncExplorationResultsAsync, appelée inconditionnellement depuis
@@ -752,6 +759,7 @@ public partial class AppDatabase
                     CostRandomMax = eq.CostRandomMax,
                     Source = ContentSource.Official
                 };
+                ApplySingleUse(item, eq);
                 item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
                 item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
                 var itemEntity = item.ToEntity();
@@ -934,6 +942,7 @@ public partial class AppDatabase
         foreach (var eq in await LoadSeedArrayAsync<EquipmentSeedData>("Equipment.json"))
         {
             var item = NewCommonEquipmentItem(eq);
+            ApplySingleUse(item, eq);
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
             var itemEntity = item.ToEntity();

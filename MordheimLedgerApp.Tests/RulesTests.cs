@@ -2604,4 +2604,108 @@ public class RulesTests
         Assert.False(TomeOfMagicRules.IsSpentTome("equipment.lucky-charm"));
         Assert.False(TomeOfMagicRules.IsSpentTome(null));
     }
+
+    private static EquipmentItem SingleUseItem(SingleUseTiming? timing, EquipmentCategory category = EquipmentCategory.DrugsAndPoisons) =>
+        new() { Category = category, SingleUse = timing is { } t ? new SingleUseProfile { Timing = t } : null };
+
+    [Fact]
+    public void SingleUse_TimingDecidesWhereItIsOffered()
+    {
+        Assert.False(SingleUseRules.IsSingleUse(SingleUseItem(null)));
+        Assert.True(SingleUseRules.IsSingleUse(SingleUseItem(SingleUseTiming.DuringBattle)));
+
+        Assert.True(SingleUseRules.IsOfferedBeforeBattle(SingleUseItem(SingleUseTiming.BeforeBattle)));
+        Assert.True(SingleUseRules.IsOfferedBeforeBattle(SingleUseItem(SingleUseTiming.LastsOneGame)));
+        Assert.False(SingleUseRules.IsOfferedBeforeBattle(SingleUseItem(SingleUseTiming.DuringBattle)));
+        Assert.False(SingleUseRules.IsOfferedBeforeBattle(SingleUseItem(null)));
+
+        Assert.True(SingleUseRules.IsPreChecked(SingleUseItem(SingleUseTiming.LastsOneGame)));
+        Assert.False(SingleUseRules.IsPreChecked(SingleUseItem(SingleUseTiming.BeforeBattle)));
+
+        Assert.True(SingleUseRules.IsAskedAfterBattle(SingleUseItem(SingleUseTiming.DuringBattle)));
+        Assert.False(SingleUseRules.IsAskedAfterBattle(SingleUseItem(SingleUseTiming.LastsOneGame)));
+    }
+
+    [Theory]
+    [InlineData(EquipmentCategory.MeleeWeapon, true)]
+    [InlineData(EquipmentCategory.MissileWeapon, true)]
+    [InlineData(EquipmentCategory.BlackPowderWeapon, false)]
+    [InlineData(EquipmentCategory.Armour, false)]
+    public void SingleUse_PoisonNeverOnBlackpowder(EquipmentCategory category, bool expected)
+    {
+        Assert.Equal(expected, SingleUseRules.IsPoisonable(new EquipmentItem { Category = category }));
+    }
+
+    private static SingleUseProfile CrimsonShade() => new()
+    {
+        Timing = SingleUseTiming.BeforeBattle,
+        StatModifiers =
+        {
+            new GameStatModifier { Field = CharacteristicField.Initiative, DiceSides = 3 },
+            new GameStatModifier { Field = CharacteristicField.Movement, Value = 1 },
+            new GameStatModifier { Field = CharacteristicField.Strength, Value = 1 },
+            new GameStatModifier { Field = CharacteristicField.Attacks, Value = 0 },
+        },
+        AfterBattleDiceCount = 2,
+        AfterBattleDiceSides = 6,
+        AfterBattle =
+        {
+            new AfterBattleOutcome { Min = 2, Max = 3, Kind = AfterBattleOutcomeKind.Addiction },
+            new AfterBattleOutcome { Min = 12, Max = 12, Kind = AfterBattleOutcomeKind.CharacteristicChange, Field = CharacteristicField.Initiative, Delta = 1 },
+        },
+    };
+
+    [Fact]
+    public void SingleUse_RollsDiceForTheGame_AndDropsZeroBonuses()
+    {
+        var sides = new List<int>();
+        var mods = SingleUseRules.RollStatModifiers(CrimsonShade(), s => { sides.Add(s); return 2; });
+
+        Assert.Equal(new[] { 3 }, sides);
+        Assert.Equal(new[]
+        {
+            new RolledStatModifier(CharacteristicField.Initiative, 2),
+            new RolledStatModifier(CharacteristicField.Movement, 1),
+            new RolledStatModifier(CharacteristicField.Strength, 1),
+        }, mods);
+        Assert.Equal(6, SingleUseRules.GameValue(4, CharacteristicField.Initiative, mods));
+        Assert.Equal(3, SingleUseRules.GameValue(3, CharacteristicField.Toughness, mods));
+    }
+
+    [Theory]
+    [InlineData(1, null)]
+    [InlineData(2, AfterBattleOutcomeKind.Addiction)]
+    [InlineData(3, AfterBattleOutcomeKind.Addiction)]
+    [InlineData(4, null)]
+    [InlineData(11, null)]
+    [InlineData(12, AfterBattleOutcomeKind.CharacteristicChange)]
+    public void SingleUse_AfterBattleTable(int total, AfterBattleOutcomeKind? expected)
+    {
+        Assert.Equal(expected, SingleUseRules.ResolveAfterBattle(CrimsonShade(), total)?.Kind);
+    }
+
+    [Fact]
+    public void SingleUse_AfterBattleDice_OnlyWithATable()
+    {
+        Assert.Equal((2, 6), SingleUseRules.AfterBattleDice(CrimsonShade()));
+        Assert.Null(SingleUseRules.AfterBattleDice(new SingleUseProfile { AfterBattleDiceCount = 2, AfterBattleDiceSides = 6 }));
+        var noDice = CrimsonShade();
+        noDice.AfterBattleDiceCount = null;
+        Assert.Null(SingleUseRules.AfterBattleDice(noDice));
+        noDice = CrimsonShade();
+        noDice.AfterBattleDiceSides = 0;
+        Assert.Null(SingleUseRules.AfterBattleDice(noDice));
+        noDice = CrimsonShade();
+        noDice.AfterBattleDiceCount = 0;
+        Assert.Null(SingleUseRules.AfterBattleDice(noDice));
+    }
+
+    [Theory]
+    [InlineData(null, new int[0])]
+    [InlineData("", new int[0])]
+    [InlineData("3,7", new[] { 3, 7 })]
+    public void SingleUse_RaceCsvParsing(string? csv, int[] expected)
+    {
+        Assert.Equal(expected, RaceRules.ParseIds(csv));
+    }
 }

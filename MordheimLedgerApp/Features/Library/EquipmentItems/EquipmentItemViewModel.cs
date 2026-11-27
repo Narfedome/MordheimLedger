@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Components;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Rules;
@@ -540,7 +541,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new EquipmentItem();
-        var dialogViewModel = new EquipmentItemEditDialogViewModel(newItem, Loc["EquipmentItemCreateTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
+        var dialogViewModel = new EquipmentItemEditDialogViewModel(newItem, Loc["EquipmentItemCreateTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker, _libraryService);
         if (await ShowFormAsync(new EquipmentItemEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveEquipmentItemAsync(newItem, LocalizationService.Instance.Language);
@@ -600,10 +601,14 @@ public partial class EquipmentItemViewModel : BaseViewModel
             GrantsRareItemSearchBonus = s.GrantsRareItemSearchBonus,
             IsSellable = s.IsSellable,
             GrantsBonusExplorationDice = s.GrantsBonusExplorationDice,
-            RaisesCharacteristicMax = s.RaisesCharacteristicMax
+            RaisesCharacteristicMax = s.RaisesCharacteristicMax,
+            IsUniqueArtefact = s.IsUniqueArtefact,
+            IsExplorationOnly = s.IsExplorationOnly,
+            SingleUse = SingleUseJson.Deserialize(SingleUseJson.Serialize(s.SingleUse)),
+            NoEffectOnRaceIds = new List<int>(s.NoEffectOnRaceIds)
         };
 
-        var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
+        var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker, _libraryService);
         if (await ShowFormAsync(new EquipmentItemEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveEquipmentItemAsync(copy, LocalizationService.Instance.Language);

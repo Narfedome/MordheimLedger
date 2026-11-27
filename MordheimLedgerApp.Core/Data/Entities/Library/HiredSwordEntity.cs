@@ -36,4 +36,5 @@ public class HiredSwordEntity
     /// <summary>See Models.Library.HiredSword.MagicSchoolId. Null for almost every Hired Sword.</summary>
     [Indexed]
     public int? MagicSchoolId { get; set; }
+    public int? RaceId { get; set; }
 }

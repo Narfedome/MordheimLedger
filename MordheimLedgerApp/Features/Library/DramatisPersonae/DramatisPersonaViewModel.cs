@@ -202,6 +202,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
             SpecialRules = new List<SpecialRule>(s.SpecialRules),
             StartingEquipmentIds = new List<int>(s.StartingEquipmentIds),
             Skills = new List<Skill>(s.Skills),
+            RaceId = s.RaceId,
             MagicSchoolId = s.MagicSchoolId,
             MagicSchool = s.MagicSchool,
             // Bug trouvé en passant (2026-09-01) : manquaient déjà tous les deux depuis l'ajout du

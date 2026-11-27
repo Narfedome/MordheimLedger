@@ -1093,7 +1093,41 @@ public class LibraryService : ILibraryService
     public async Task DeleteRaceAsync(int raceId)
     {
         await _db.Initialization;
-        await _db.Connection.DeleteAsync<RaceEntity>(raceId);
+        await _db.Connection.RunInTransactionAsync(connection =>
+        {
+            foreach (var warband in connection.Table<WarbandArchetypeEntity>().Where(w => w.RaceId == raceId).ToList())
+            {
+                warband.RaceId = 0;
+                connection.Update(warband);
+            }
+            foreach (var warrior in connection.Table<WarriorArchetypeEntity>().Where(w => w.RaceId == raceId).ToList())
+            {
+                warrior.RaceId = null;
+                connection.Update(warrior);
+            }
+            foreach (var hiredSword in connection.Table<HiredSwordEntity>().Where(h => h.RaceId == raceId).ToList())
+            {
+                hiredSword.RaceId = null;
+                connection.Update(hiredSword);
+            }
+            foreach (var persona in connection.Table<DramatisPersonaEntity>().Where(p => p.RaceId == raceId).ToList())
+            {
+                persona.RaceId = null;
+                connection.Update(persona);
+            }
+            connection.Delete<RaceEntity>(raceId);
+        });
+    }
+
+    public async Task<Core.Rules.RaceUsage> GetRaceUsageAsync(int raceId)
+    {
+        await _db.Initialization;
+        return new Core.Rules.RaceUsage(
+            (await _db.CachedTableAsync<WarbandArchetypeEntity>()).Count(w => w.RaceId == raceId),
+            (await _db.CachedTableAsync<WarriorArchetypeEntity>()).Count(w => w.RaceId == raceId),
+            (await _db.CachedTableAsync<HiredSwordEntity>()).Count(h => h.RaceId == raceId),
+            (await _db.CachedTableAsync<DramatisPersonaEntity>()).Count(p => p.RaceId == raceId),
+            0);
     }
 
     public async Task DeleteRacialProfileAsync(int racialProfileId)

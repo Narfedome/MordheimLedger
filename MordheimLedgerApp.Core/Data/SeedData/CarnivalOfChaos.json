@@ -191,6 +191,7 @@
     },
     {
       "id": "warrior.carnival-of-chaos.plague-bearer",
+      "raceId": "race.daemon",
       "name": {
         "en": "Plague Bearer",
         "fr": "Portepeste"
@@ -302,6 +303,7 @@
     },
     {
       "id": "warrior.carnival-of-chaos.nurgling",
+      "raceId": "race.daemon",
       "name": {
         "en": "Nurgling",
         "fr": "Nurgling"

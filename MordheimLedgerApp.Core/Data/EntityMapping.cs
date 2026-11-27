@@ -140,7 +140,8 @@ public static class EntityMapping
         IsDesignatedSuccessor = e.IsDesignatedSuccessor,
         CanBeRehiredAfterDeath = e.CanBeRehiredAfterDeath,
         RacialProfileId = e.RacialProfileId,
-        RacialProfile = racialProfilesById?.GetValueOrDefault(e.RacialProfileId)
+        RacialProfile = racialProfilesById?.GetValueOrDefault(e.RacialProfileId),
+        RaceId = e.RaceId
     };
 
     private static List<int> ParseRatings(string? csv) =>
@@ -186,7 +187,8 @@ public static class EntityMapping
         IsLeader = m.IsLeader,
         IsDesignatedSuccessor = m.IsDesignatedSuccessor,
         CanBeRehiredAfterDeath = m.CanBeRehiredAfterDeath,
-        RacialProfileId = m.RacialProfileId
+        RacialProfileId = m.RacialProfileId,
+        RaceId = m.RaceId
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
@@ -476,6 +478,7 @@ public static class EntityMapping
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
         SpecialRules = specialRulesByHiredSwordId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
         MagicSchoolId = e.MagicSchoolId,
+        RaceId = e.RaceId,
         MagicSchool = e.MagicSchoolId is { } magicSchoolId ? magicSchoolsById?.GetValueOrDefault(magicSchoolId) : null
     };
 
@@ -500,6 +503,7 @@ public static class EntityMapping
         Attacks = m.Attacks,
         Leadership = m.Leadership,
         MagicSchoolId = m.MagicSchoolId,
+        RaceId = m.RaceId,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
     };
 
@@ -544,6 +548,7 @@ public static class EntityMapping
         StartingEquipmentIds = startingEquipmentByDramatisPersonaId?.GetValueOrDefault(e.Id) ?? new List<int>(),
         Skills = skillsByDramatisPersonaId?.GetValueOrDefault(e.Id) ?? new List<Skill>(),
         MagicSchoolId = e.MagicSchoolId,
+        RaceId = e.RaceId,
         MagicSchool = e.MagicSchoolId is { } magicSchoolId ? magicSchoolsById?.GetValueOrDefault(magicSchoolId) : null,
         AlternativePaymentItemId = e.AlternativePaymentItemId,
         AlternativePaymentItem = e.AlternativePaymentItemId is { } altItemId ? equipmentById?.GetValueOrDefault(altItemId) : null
@@ -577,6 +582,7 @@ public static class EntityMapping
         PairedWithDramatisPersonaId = m.PairedWithDramatisPersonaId,
         IsHiddenFromSearchPicker = m.IsHiddenFromSearchPicker,
         MagicSchoolId = m.MagicSchoolId,
+        RaceId = m.RaceId,
         AlternativePaymentItemId = m.AlternativePaymentItemId
     };
 

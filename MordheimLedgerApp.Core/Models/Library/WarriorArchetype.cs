@@ -152,4 +152,8 @@ public class WarriorArchetype
     /// etc.), same convention as the rest of the stat line.</summary>
     public int RacialProfileId { get; set; }
     public RacialProfile? RacialProfile { get; set; }
+
+    /// <summary>Race propre à ce type (ex. Nécromancien : Humain dans une bande de Morts-Vivants), null = celle de la bande.
+    /// Sert aux règles qui visent une race (« Sans effet sur » des objets). Voir Core.Rules.RaceRules.</summary>
+    public int? RaceId { get; set; }
 }

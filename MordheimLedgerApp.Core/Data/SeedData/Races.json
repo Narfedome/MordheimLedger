@@ -62,5 +62,21 @@
       "en": "Chaos-spawned hybrids of man and beast, roaming Mordheim's ruins in savage warbands.",
       "fr": "Hybrides d'homme et de bête engendrés par le Chaos, rôdant dans les ruines de Mordheim en bandes sauvages."
     }
+  },
+  {
+    "id": "race.possessed",
+    "name": { "en": "Possessed", "fr": "Possédé" },
+    "description": {
+      "en": "Mortals whose body has been taken over by a Daemon - the Possessed of the Cult. Drugs and potions that work on the living have no effect on them.",
+      "fr": "Mortels dont le corps a été pris par un Démon - les Possédés du Culte. Les drogues et potions qui agissent sur les vivants sont sans effet sur eux."
+    }
+  },
+  {
+    "id": "race.daemon",
+    "name": { "en": "Daemon", "fr": "Démon" },
+    "description": {
+      "en": "Creatures of the Realm of Chaos given form in the mortal world, such as the Plague Bearers and Nurglings of the Carnival of Chaos.",
+      "fr": "Créatures du Royaume du Chaos incarnées dans le monde mortel, comme les Porte-Peste et les Nurglings de la Kermesse du Chaos."
+    }
   }
 ]

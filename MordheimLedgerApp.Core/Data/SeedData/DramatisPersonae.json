@@ -1,6 +1,7 @@
 [
   {
     "id": "persona.aenur-the-sword-of-twilight",
+    "raceId": "race.elf",
     "name": { "en": "Aenur, the Sword of Twilight", "fr": "Aenur, l'Épée du Crépuscule" },
     "description": {
       "en": "A tall, pale Elf swordsman of unknown origin, Aenur single-handedly slew the entire Possessed warband of Karl Zimmeran and cleansed the Beastmen-overrun Rat Hole. He appears unannounced at a warband's camp whenever they prepare to explore the inner city, offering his services - what he truly seeks in the ruins, no-one knows.",
@@ -33,6 +34,7 @@
   },
   {
     "id": "persona.bertha-bestraufrung-high-matriarch-of-the-sisterhood",
+    "raceId": "race.human",
     "name": { "en": "Bertha Bestraufrung, High Matriarch of the Sisterhood", "fr": "Bertha Bestraufrung, Haute Matriarche de la Confrérie" },
     "description": {
       "en": "Bertha rose rapidly through the ranks of the Sisters of Sigmar to become High Matriarch and Abedissa of Sigmar's Rock, of pure Unberogen blood and unwavering devotion.\n\nHire Fee: none in gold. A Sisters of Sigmar warband may send one or more Heroines to seek an audience with Bertha (roll under their Initiative, as a normal special-character search). She only agrees to personally join the battle if the enemy warband's Rating is higher than the Sisters' own - roll a D6 per the table below, once per battle the player wishes her aid: 0-49 points difference = will not come; 50-99 = 6+; 100-149 = 5+; 150-199 = 4+; 200+ = 3+.",
@@ -69,6 +71,7 @@
   },
   {
     "id": "persona.countess-marianna-chevaux-vampire-assassin",
+    "raceId": "race.undead",
     "name": { "en": "Countess Marianna Chevaux, Vampire Assassin", "fr": "Comtesse Marianna Chevaux, Assassin Vampire" },
     "description": {
       "en": "Once an assassin-thief, Marianna was tainted with Vampirism by the ancient Lahmian Serutat while stealing the gem known as the Noctu from her crypt. A half-vampire now hiding in Mordheim, she hunts the city's Undead for information on Serutat's whereabouts while hiring out her assassin's skills. Her blades are coated in essence of garlic, which acts as Black Lotus against Vampires.",
@@ -123,6 +126,7 @@
   },
   {
     "id": "persona.johann-the-knife",
+    "raceId": "race.human",
     "name": { "en": "Johann the Knife", "fr": "Johann le Couteau" },
     "description": {
       "en": "The most famous of Mordheim's cutthroats and assassins for hire, Johann carries countless lethal daggers and a purse heavy with the gold of the many wealthy but unskilful opponents he has despatched. His blades are coated with Black Lotus. He is addicted to Crimson Shade.",
@@ -156,6 +160,7 @@
   },
   {
     "id": "persona.nicodemus-the-cursed-pilgrim",
+    "raceId": "race.human",
     "name": { "en": "Nicodemus, the Cursed Pilgrim", "fr": "Nicodemus, le Pèlerin Maudit" },
     "description": {
       "en": "Once a wizard's apprentice, Nicodemus freed a Chaos Daemon from a magic lantern and wished to become the greatest wizard known to Mankind - the Daemon granted his wish all too literally, cursing him to grow larger by the week. Only a potion needing regular infusions of wyrdstone delays the effect, drawing him ever back to Mordheim.",
@@ -186,6 +191,7 @@
   },
   {
     "id": "persona.marquand-volker",
+    "raceId": "race.human",
     "name": { "en": "Marquand Volker", "fr": "Marquand Volker" },
     "description": {
       "en": "Reputedly the son of wealthy Marienburg merchants, what made Marquand embark on a career as a gambler and then a mercenary and assassin is unknown. What is known about this apparent 'fop' is that his appearance belies his true nature for he is quite deadly and entirely devoid of any morals. Marquand personifies Mordheim 'The City of the Damned' for he is corrupt and rotten to the core - just like that place he calls his 'home'. An expert swordsman and master of the throwing knife, there are few who have crossed him and lived. In the darkened corners of taverns, tales are told in nervous whispers about this cold-hearted killer's reputation: that he killed his first victim before he was ten; that he cut the heart out of the Duke of Suddenland while the Duke's wife slept on beside him. His deadliest foe is the Witch Hunter captain Gottlieb, 'The Flayer', whose face Marquand horribly disfigured whilst the erstwhile servant of Sigmar was attempting to redeem Marquand of his sins.",
@@ -231,6 +237,7 @@
   },
   {
     "id": "persona.ulli-leitpold",
+    "raceId": "race.human",
     "name": { "en": "Ulli Leitpold", "fr": "Ulli Leitpold" },
     "description": {
       "en": "Marquand's sidekick and partner in crime. Little is known about this huge framed Middenheimer, apart from it is unwise to be caught anywhere near the business end of his massive warhammer! The tales tell that Ulli Leitpold started out as a mercenary soldier, often in the service of the armies of the Count of Stirland, and that he was present at the slaughter that ensued at the third siege of Nuln. Life as a mercenary is presumably where he derives his unthinking greed and cold nature, no doubt. Ulli spent some time as a bandit and thief and teamed up with Marquand when they were captured by bounty hunters and sentenced to live out their days in the penal battalions of the Count of Stirland. Neither as subtle or as flash as his Marienburg colleague, Ulli prefers to use a combination of brute force and low cunning to achieve his goals.",
@@ -273,6 +280,7 @@
   },
   {
     "id": "persona.veskit-high-executioner-of-clan-eshin",
+    "raceId": "race.skaven",
     "name": { "en": "Veskit, High Executioner of Clan Eshin", "fr": "Veskit, Bourreau Suprême du Clan Eshin" },
     "description": {
       "en": "Once a talented Clan Eshin assassin, Veskit was rebuilt by Clan Skryre's Warlock Engineers after nearly dying on a mission for Clan Skryre, becoming more machine than living thing. The Nightmaster now sends him to Mordheim to deter man-things from exploring the city the Skaven consider rightfully theirs. His metallic body accounts for his unusually high Toughness and 3+ armour save.\n\nHire Fee: 80 gc to hire, +35 gc upkeep.",

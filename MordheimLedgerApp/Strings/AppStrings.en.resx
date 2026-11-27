@@ -3630,4 +3630,37 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="TomeAlreadyUsedWarning" xml:space="preserve">
     <value>Tome of Magic already used: it has no effect on the warrior who receives it.</value>
   </data>
+  <data name="RacePickerLabel" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="RaceOfWarband" xml:space="preserve">
+    <value>Warband's race</value>
+  </data>
+  <data name="RaceUnspecified" xml:space="preserve">
+    <value>Not specified</value>
+  </data>
+  <data name="RaceOfTypeHint" xml:space="preserve">
+    <value>Empty = the warband's race. Useful when a type isn't of its warband's race (Necromancer: Human among the Undead). Used by items with "No effect on".</value>
+  </data>
+  <data name="RaceOfCharacterHint" xml:space="preserve">
+    <value>Used by items with "No effect on".</value>
+  </data>
+  <data name="RaceDeleteUsedConfirm" xml:space="preserve">
+    <value>Delete "{0}"? It is used by {1}. They will have no race any more (a warrior type falls back to its warband's).</value>
+  </data>
+  <data name="RaceUsageWarbands" xml:space="preserve">
+    <value>{0} warband(s)</value>
+  </data>
+  <data name="RaceUsageWarriorTypes" xml:space="preserve">
+    <value>{0} warrior type(s)</value>
+  </data>
+  <data name="RaceUsageHiredSwords" xml:space="preserve">
+    <value>{0} Hired Sword(s)</value>
+  </data>
+  <data name="RaceUsagePersonae" xml:space="preserve">
+    <value>{0} Dramatis Persona(e)</value>
+  </data>
+  <data name="RaceUsageItems" xml:space="preserve">
+    <value>{0} item(s)</value>
+  </data>
 </root>

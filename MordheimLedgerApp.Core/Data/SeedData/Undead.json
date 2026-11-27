@@ -103,6 +103,7 @@
     },
     {
       "id": "warrior.undead.necromancer",
+      "raceId": "race.human",
       "name": {
         "en": "Necromancer",
         "fr": "Nécromancien"
@@ -144,6 +145,7 @@
     },
     {
       "id": "warrior.undead.dreg",
+      "raceId": "race.human",
       "name": {
         "en": "Dreg",
         "fr": "Paria"

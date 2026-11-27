@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.Races.CreateEdit;
 using MordheimLedgerApp.Services;
@@ -100,10 +101,28 @@ public partial class RaceViewModel : BaseViewModel
     private async Task Delete()
     {
         if (SelectedRow is not { } row) return;
-        if (!await ConfirmDeleteAsync(row.Item.Name)) return;
+        // Une race citée par une bande, un type, un Franc-Tireur ou un objet : dire où avant de la retirer partout.
+        var usage = await _libraryService.GetRaceUsageAsync(row.Item.Id);
+        var confirmed = usage.IsUsed
+            ? await ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["RaceDeleteUsedConfirm"], row.Item.Name, UsageText(usage)),
+                Loc["BtnDelete"], Loc["BtnCancel"], destructive: true)
+            : await ConfirmDeleteAsync(row.Item.Name);
+        if (!confirmed) return;
 
         await _libraryService.DeleteRaceAsync(row.Item.Id);
         await LoadData();
+    }
+
+    private string UsageText(RaceUsage usage)
+    {
+        var parts = new List<string>();
+        void Add(int count, string key) { if (count > 0) parts.Add(string.Format(Loc[key], count)); }
+        Add(usage.WarbandArchetypes, "RaceUsageWarbands");
+        Add(usage.WarriorArchetypes, "RaceUsageWarriorTypes");
+        Add(usage.HiredSwords, "RaceUsageHiredSwords");
+        Add(usage.DramatisPersonae, "RaceUsagePersonae");
+        Add(usage.EquipmentItems, "RaceUsageItems");
+        return string.Join(", ", parts);
     }
 
     /// <summary>Only bound when this ViewModel backs the standalone RaceListPage (reached from the

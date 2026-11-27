@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -54,6 +54,14 @@
                 <VerticalStackLayout Spacing="4">
                     <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Editor Text="{Binding Item.Description}" HeightRequest="90"/>
+                </VerticalStackLayout>
+
+                <!-- Race (objets « Sans effet sur »), vide = non précisée. -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc RacePickerLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <components:SelectFieldView Title="{loc:Loc RacePickerLabel}" ItemsSource="{Binding Race.Options}"
+                            SelectedItem="{Binding Race.SelectedLabel}"/>
+                    <Label Text="{loc:Loc RaceOfCharacterHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </VerticalStackLayout>
 
                 <!-- Profil - même composant/mode édition que WarriorArchetypeEditDialog. Pas de surcharge de

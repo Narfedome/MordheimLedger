@@ -1,6 +1,7 @@
 [
   {
     "id": "hiredsword.pit-fighter",
+    "raceId": "race.human",
     "name": { "en": "Pit Fighter", "fr": "Gladiateur" },
     "hireCost": 30,
     "upkeep": 15,
@@ -21,6 +22,7 @@
   },
   {
     "id": "hiredsword.arabian-merchant",
+    "raceId": "race.human",
     "name": { "en": "Arabian Merchant", "fr": "Marchand d'Arabie" },
     "hireCost": 20,
     "upkeep": 10,
@@ -40,6 +42,7 @@
   },
   {
     "id": "hiredsword.beast-hunter",
+    "raceId": "race.human",
     "name": { "en": "Beast Hunter", "fr": "Chasseur de Bêtes" },
     "hireCost": 35,
     "upkeep": 15,
@@ -59,6 +62,7 @@
   },
   {
     "id": "hiredsword.dwarf-troll-slayer",
+    "raceId": "race.dwarf",
     "name": { "en": "Dwarf Troll Slayer", "fr": "Tueur de Troll Nain" },
     "hireCost": 25,
     "upkeep": 10,
@@ -103,6 +107,7 @@
   },
   {
     "id": "hiredsword.elf-ranger",
+    "raceId": "race.elf",
     "name": { "en": "Elf Ranger", "fr": "Rôdeur Elfe" },
     "hireCost": 40,
     "upkeep": 20,
@@ -140,6 +145,7 @@
   },
   {
     "id": "hiredsword.freelancer",
+    "raceId": "race.human",
     "name": { "en": "Freelancer", "fr": "Chevalier Errant" },
     "hireCost": 50,
     "upkeep": 20,
@@ -188,6 +194,7 @@
   },
   {
     "id": "hiredsword.highwayman",
+    "raceId": "race.human",
     "name": { "en": "Highwayman", "fr": "Bandit de Grand Chemin" },
     "hireCost": 35,
     "upkeep": 20,
@@ -234,6 +241,7 @@
   },
   {
     "id": "hiredsword.imperial-assassin",
+    "raceId": "race.human",
     "name": { "en": "Imperial Assassin", "fr": "Assassin Impérial" },
     "hireCost": 40,
     "upkeep": 20,
@@ -295,6 +303,7 @@
   },
   {
     "id": "hiredsword.roadwarden",
+    "raceId": "race.human",
     "name": { "en": "Roadwarden", "fr": "Gardien des Routes" },
     "hireCost": 40,
     "upkeep": 20,
@@ -340,6 +349,7 @@
   },
   {
     "id": "hiredsword.tilean-marksman",
+    "raceId": "race.human",
     "name": { "en": "Tilean Marksman", "fr": "Tireur Tiléen" },
     "hireCost": 30,
     "upkeep": 15,
@@ -378,6 +388,7 @@
   },
   {
     "id": "hiredsword.warlock",
+    "raceId": "race.human",
     "name": { "en": "Warlock", "fr": "Sorcier" },
     "hireCost": 30,
     "upkeep": 15,

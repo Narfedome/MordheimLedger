@@ -79,6 +79,9 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
     /// (voir sa doc).</summary>
     public ObservableCollection<MagicSchool> MagicSchools { get; }
 
+    /// <summary>Race du personnage (objets « Sans effet sur ») - voir RaceRules.</summary>
+    public RaceChoice Race { get; }
+
     public HiredSwordEditDialogViewModel(HiredSword item, string title, IWarbandArchetypePickerService warbandPicker,
         IEquipmentPickerService equipmentPicker, ISpecialRulePickerService specialRulePicker, IMagicSchoolPickerService magicSchoolPicker,
         IDetailDialogService detailDialogs, ILibraryService libraryService, IReadOnlyList<WarbandArchetype> allWarbandArchetypes,
@@ -101,6 +104,7 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
         WarbandRestriction = new WarbandRestrictionEditor(item.RestrictedToWarbandArchetypeIds, allWarbandArchetypes, warbandPicker);
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
         MagicSchools = new ObservableCollection<MagicSchool>(item.MagicSchool is { } school ? new[] { school } : Array.Empty<MagicSchool>());
+        Race = new RaceChoice(item.RaceId, Loc["RaceUnspecified"], libraryService, id => Item.RaceId = id);
     }
 
     [RelayCommand]

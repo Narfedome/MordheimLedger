@@ -66,6 +66,9 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
     /// HiredSwordEditDialogViewModel.MagicSchools.</summary>
     public ObservableCollection<MagicSchool> MagicSchools { get; }
 
+    /// <summary>Race du personnage (objets « Sans effet sur ») - voir RaceRules.</summary>
+    public RaceChoice Race { get; }
+
     /// <summary>0 ou 1 élément (voir DramatisPersona.AlternativePaymentItemId, ex. Johann/Ombre
     /// Cramoisie) - même principe 0/1-élément que MagicSchools ci-dessus.</summary>
     public ObservableCollection<EquipmentItem> AlternativePaymentItems { get; }
@@ -99,6 +102,7 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
         StartingEquipment = new ObservableCollection<EquipmentItem>(initialStartingEquipment);
         Skills = new ObservableCollection<Skill>(item.Skills);
         MagicSchools = new ObservableCollection<MagicSchool>(item.MagicSchool is { } school ? new[] { school } : Array.Empty<MagicSchool>());
+        Race = new RaceChoice(item.RaceId, Loc["RaceUnspecified"], libraryService, id => Item.RaceId = id);
         AlternativePaymentItems = new ObservableCollection<EquipmentItem>(item.AlternativePaymentItem is { } altItem ? new[] { altItem } : Array.Empty<EquipmentItem>());
 
         _originalPartnerId = item.PairedWithDramatisPersonaId;

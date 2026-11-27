@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models.Library;
@@ -50,6 +51,9 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     /// ManageRacialProfiles) au même titre que Race, un simple Picker suffit (un archétype n'a jamais
     /// qu'un seul profil racial).</summary>
     public ObservableCollection<string> RacialProfileOptions { get; } = new();
+
+    /// <summary>Race propre au type (vide = celle de la bande) - voir WarriorArchetype.RaceId.</summary>
+    public RaceChoice Race { get; }
 
     [ObservableProperty]
     private string selectedRacialProfileLabel = string.Empty;
@@ -148,6 +152,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
             RacialProfileOptions.Add(profile.Name);
         }
         selectedRacialProfileLabel = allRacialProfiles.FirstOrDefault(p => p.Id == item.RacialProfileId)?.Name ?? string.Empty;
+        Race = new RaceChoice(item.RaceId, Loc["RaceOfWarband"], libraryService, id => Item.RaceId = id);
     }
 
     partial void OnSelectedEquipmentListLabelChanged(string value) =>

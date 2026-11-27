@@ -54,6 +54,7 @@ public class DramatisPersonaEntity
     /// <summary>See Models.Library.DramatisPersona.MagicSchoolId. Null for most Dramatis Personae.</summary>
     [Indexed]
     public int? MagicSchoolId { get; set; }
+    public int? RaceId { get; set; }
 
     /// <summary>See Models.Library.DramatisPersona.AlternativePaymentItemId. Null for most Dramatis
     /// Personae.</summary>

@@ -83,5 +83,8 @@ public class HiredSword
     /// WHATEVER magic school(s) the parent WarbandArchetype grants. A single nullable FK (not a list like
     /// WarbandArchetype.MagicSchools) since no Hired Sword in the book draws from more than one school.</summary>
     public int? MagicSchoolId { get; set; }
+
+    /// <summary>Race du Franc-Tireur (ex. Rôdeur elfe : Elfe), null = inconnue. Voir Core.Rules.RaceRules.</summary>
+    public int? RaceId { get; set; }
     public MagicSchool? MagicSchool { get; set; }
 }

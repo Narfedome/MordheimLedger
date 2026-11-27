@@ -374,7 +374,8 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             IsLeader = warrior.IsLeader,
             IsDesignatedSuccessor = warrior.IsDesignatedSuccessor,
             CanBeRehiredAfterDeath = warrior.CanBeRehiredAfterDeath,
-            RacialProfileId = warrior.RacialProfileId
+            RacialProfileId = warrior.RacialProfileId,
+            RaceId = warrior.RaceId
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"],

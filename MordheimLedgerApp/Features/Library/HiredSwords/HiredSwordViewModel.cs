@@ -168,6 +168,7 @@ public partial class HiredSwordViewModel : BaseViewModel
             StartingEquipmentIds = new List<int>(s.StartingEquipmentIds),
             RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
             SpecialRules = new List<SpecialRule>(s.SpecialRules),
+            RaceId = s.RaceId,
             MagicSchoolId = s.MagicSchoolId,
             MagicSchool = s.MagicSchool
         };

@@ -78,6 +78,7 @@
     },
     {
       "id": "warrior.cult-of-the-possessed.the-possessed",
+      "raceId": "race.possessed",
       "name": {
         "en": "The Possessed",
         "fr": "Possédé"
@@ -197,6 +198,7 @@
     },
     {
       "id": "warrior.cult-of-the-possessed.beastman",
+      "raceId": "race.beastman",
       "name": {
         "en": "Beastman",
         "fr": "Homme-Bête"

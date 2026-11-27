@@ -569,8 +569,9 @@ public partial class AppDatabase
         // MagicSchools_AllHaveBilingualDescriptions) : Lesser Magic seedait sans description tant que
         // HiredSwords seedait en premier.
         await SeedMagicSchoolsAsync();
-        await SeedHiredSwordsAsync();
+        // Races avant les Francs-Tireurs : ils en référencent une (RaceId).
         await SeedRacesAsync();
+        await SeedHiredSwordsAsync();
         await SeedRacialProfilesAsync();
         // Pas ici : voir ResyncExplorationResultsAsync, appelée inconditionnellement depuis
         // InitializeAsync plutôt que gardée derrière le garde-fou "catalogue vide" de cette méthode.
@@ -837,7 +838,9 @@ public partial class AppDatabase
                 RacialProfileId = w.RacialProfileId is { } racialProfileOfficialId
                     && _racialProfileIdsByOfficialId.TryGetValue(racialProfileOfficialId, out var racialProfileId)
                         ? racialProfileId
-                        : 0
+                        : 0,
+                // Races.json est seedé avant les bandes : une race inconnue est une faute de frappe, fail-fast.
+                RaceId = w.RaceId is { } warriorRaceOfficialId ? _raceIdsByOfficialId[warriorRaceOfficialId] : null
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
@@ -1011,6 +1014,8 @@ public partial class AppDatabase
             // est une faute de frappe dans le JSON, fail-fast.
             if (hs.MagicSchoolId is { } magicSchoolOfficialId)
                 hiredSword.MagicSchoolId = _magicSchoolIdsByOfficialId[magicSchoolOfficialId];
+            if (hs.RaceId is { } hiredSwordRaceOfficialId)
+                hiredSword.RaceId = _raceIdsByOfficialId[hiredSwordRaceOfficialId];
             hiredSword.NameKey = await SeedTranslationAsync(hs.Name.En, hs.Name.Fr);
             hiredSword.DescriptionKey = hs.Description is null ? null : await SeedTranslationAsync(hs.Description.En, hs.Description.Fr);
             var entity = hiredSword.ToEntity();
@@ -1076,6 +1081,8 @@ public partial class AppDatabase
             };
             if (dp.MagicSchoolId is { } magicSchoolOfficialId)
                 persona.MagicSchoolId = _magicSchoolIdsByOfficialId[magicSchoolOfficialId];
+            if (dp.RaceId is { } personaRaceOfficialId)
+                persona.RaceId = _raceIdsByOfficialId[personaRaceOfficialId];
             if (dp.AlternativePaymentItemId is { } alternativePaymentItemOfficialId)
             {
                 if (!_equipmentIdsByOfficialId.TryGetValue(alternativePaymentItemOfficialId, out var alternativePaymentItemId))

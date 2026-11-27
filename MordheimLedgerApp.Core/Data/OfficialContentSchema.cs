@@ -40,14 +40,16 @@ internal static class OfficialContentSchema
             ("WarbandArchetypeId", typeof(WarbandArchetypeEntity)),
             ("EquipmentListId", typeof(EquipmentListEntity)),
             ("RacialProfileId", typeof(RacialProfileEntity)),
+            ("RaceId", typeof(RaceEntity)),
         ], []),
         new(typeof(InjuryEntity), NameAndDescription, [], []),
-        new(typeof(HiredSwordEntity), NameAndDescription, [("MagicSchoolId", typeof(MagicSchoolEntity))], []),
+        new(typeof(HiredSwordEntity), NameAndDescription, [("MagicSchoolId", typeof(MagicSchoolEntity)), ("RaceId", typeof(RaceEntity))], []),
         new(typeof(DramatisPersonaEntity), ["NameKey", "DescriptionKey", "PairDescriptionKey"],
         [
             ("PairedWithDramatisPersonaId", typeof(DramatisPersonaEntity)),
             ("MagicSchoolId", typeof(MagicSchoolEntity)),
             ("AlternativePaymentItemId", typeof(EquipmentItemEntity)),
+            ("RaceId", typeof(RaceEntity)),
         ], []),
     ];
 

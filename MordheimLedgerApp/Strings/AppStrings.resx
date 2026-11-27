@@ -3630,4 +3630,37 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="TomeAlreadyUsedWarning" xml:space="preserve">
     <value>Grimoire déjà utilisé : il n'a plus d'effet sur le guerrier qui le reçoit.</value>
   </data>
+  <data name="RacePickerLabel" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="RaceOfWarband" xml:space="preserve">
+    <value>Race de la bande</value>
+  </data>
+  <data name="RaceUnspecified" xml:space="preserve">
+    <value>Non précisée</value>
+  </data>
+  <data name="RaceOfTypeHint" xml:space="preserve">
+    <value>Vide = race de la bande. Utile quand un type n'est pas de la race de sa bande (Nécromancien : Humain chez les Morts-Vivants). Sert aux objets « Sans effet sur ».</value>
+  </data>
+  <data name="RaceOfCharacterHint" xml:space="preserve">
+    <value>Sert aux objets « Sans effet sur ».</value>
+  </data>
+  <data name="RaceDeleteUsedConfirm" xml:space="preserve">
+    <value>Supprimer « {0} » ? Elle est utilisée par {1}. Ceux-ci n'auront plus de race (un type de guerrier reprendra celle de sa bande).</value>
+  </data>
+  <data name="RaceUsageWarbands" xml:space="preserve">
+    <value>{0} bande(s)</value>
+  </data>
+  <data name="RaceUsageWarriorTypes" xml:space="preserve">
+    <value>{0} type(s) de guerrier</value>
+  </data>
+  <data name="RaceUsageHiredSwords" xml:space="preserve">
+    <value>{0} Franc(s)-Tireur(s)</value>
+  </data>
+  <data name="RaceUsagePersonae" xml:space="preserve">
+    <value>{0} Dramatis Persona(e)</value>
+  </data>
+  <data name="RaceUsageItems" xml:space="preserve">
+    <value>{0} objet(s)</value>
+  </data>
 </root>

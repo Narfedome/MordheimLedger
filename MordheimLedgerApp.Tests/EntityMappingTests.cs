@@ -708,4 +708,14 @@ public class EntityMappingTests
 
         Assert.Equal(schoolId, roundTripped.ExtraMagicSchoolId);
     }
+
+    [Fact]
+    public void Races_OfTypesHiredSwordsAndPersonae_RoundTrip()
+    {
+        var names = new Dictionary<string, string> { ["n"] = "x" };
+        Assert.Equal(3, new WarriorArchetype { NameKey = "n", RaceId = 3 }.ToEntity().ToModel(names).RaceId);
+        Assert.Null(new WarriorArchetype { NameKey = "n" }.ToEntity().ToModel(names).RaceId);
+        Assert.Equal(4, new HiredSword { NameKey = "n", RaceId = 4 }.ToEntity().ToModel(names).RaceId);
+        Assert.Equal(5, new DramatisPersona { NameKey = "n", RaceId = 5 }.ToEntity().ToModel(names).RaceId);
+    }
 }

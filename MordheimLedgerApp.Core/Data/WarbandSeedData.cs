@@ -176,6 +176,9 @@ public class WarriorSeedData
     /// already owns everything else specific to its own archetypes, and this keeps a wrong/missing
     /// assignment a one-line fix in the file that actually needs it.</summary>
     public string? RacialProfileId { get; set; }
+
+    /// <summary>Race propre au type (id de Races.json), absent = race de la bande.</summary>
+    public string? RaceId { get; set; }
 }
 
 public class EquipmentSeedData
@@ -501,6 +504,9 @@ public class HiredSwordSeedData
     /// resolved via the same FindOrCreateMagicSchoolAsync cache SeedMagicSchoolsAsync already populates
     /// from MagicSchools.json, whichever of the two seeds first.</summary>
     public string? MagicSchoolId { get; set; }
+
+    /// <summary>Race (id de Races.json), absent = inconnue.</summary>
+    public string? RaceId { get; set; }
 }
 
 /// <summary>One named "Dramatis Persona"/special character (Data/SeedData/DramatisPersonae.json, a
@@ -580,6 +586,9 @@ public class DramatisPersonaSeedData
     /// <summary>See Models.Library.DramatisPersona.MagicSchoolId - same name-only stub idiom as
     /// HiredSwordSeedData.MagicSchoolName.</summary>
     public string? MagicSchoolId { get; set; }
+
+    /// <summary>Race (id de Races.json), absent = inconnue.</summary>
+    public string? RaceId { get; set; }
 
     /// <summary>Id of an EquipmentSeedData/Equipment.json entry - see Models.Library.
     /// DramatisPersona.AlternativePaymentItemId. Same resolution as StartingEquipmentIds (runs after

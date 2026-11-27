@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models.Library;
@@ -323,5 +323,18 @@ public class ContentSyncTests : IAsyncLifetime
         Assert.Equal("warrior.undead.necromancer", conflict.OfficialId);
         Assert.Contains(conflict.Differences, d => d.Field == nameof(WarriorArchetypeEntity.IsDesignatedSuccessor));
         Assert.False((await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.necromancer")).IsDesignatedSuccessor);
+    }
+
+    [Fact]
+    public async Task TypeRace_ReachesAnInstalledDatabase_AsALocalId()
+    {
+        // Base installée avant la 1.6 : pas de race par type. La seed la porte, avec ses propres Id de race.
+        await _local.Connection.ExecuteAsync("UPDATE WarriorArchetypeEntity SET RaceId = NULL");
+
+        await SyncAsync();
+
+        var localHuman = await ByOfficialIdAsync<RaceEntity>(_local, "race.human");
+        Assert.Equal(localHuman.Id, (await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.necromancer")).RaceId);
+        Assert.Null((await ByOfficialIdAsync<WarriorArchetypeEntity>(_local, "warrior.undead.zombie")).RaceId);
     }
 }

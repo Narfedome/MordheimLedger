@@ -183,5 +183,8 @@ public class DramatisPersona
     /// Prayers of Sigmar - both already exist as common MagicSchools.json entries) - same idiom as
     /// HiredSword.MagicSchoolId.</summary>
     public int? MagicSchoolId { get; set; }
+
+    /// <summary>Race du personnage (ex. Aenur : Elfe), null = inconnue. Voir Core.Rules.RaceRules.</summary>
+    public int? RaceId { get; set; }
     public MagicSchool? MagicSchool { get; set; }
 }

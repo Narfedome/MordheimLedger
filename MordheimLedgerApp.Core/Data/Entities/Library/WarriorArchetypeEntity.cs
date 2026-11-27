@@ -55,4 +55,5 @@ public class WarriorArchetypeEntity
 
     [Indexed]
     public int RacialProfileId { get; set; }
+    public int? RaceId { get; set; }
 }

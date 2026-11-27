@@ -142,6 +142,11 @@ public interface ILibraryService
     Task DeleteSpecialRuleAsync(int specialRuleId);
     Task DeleteMutationAsync(int mutationId);
     Task DeleteMagicSchoolAsync(int magicSchoolId);
+    /// <summary>Supprime une race et vide ses références : un type de guerrier, Franc-Tireur ou Dramatis Persona retombe sur
+    /// « race de la bande », une bande sur aucune race. Voir GetRaceUsageAsync pour prévenir avant.</summary>
     Task DeleteRaceAsync(int raceId);
+
+    /// <summary>Où une race est citée (bandes, types de guerrier, Francs-Tireurs, Dramatis Personae).</summary>
+    Task<Core.Rules.RaceUsage> GetRaceUsageAsync(int raceId);
     Task DeleteRacialProfileAsync(int racialProfileId);
 }

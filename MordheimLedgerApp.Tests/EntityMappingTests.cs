@@ -751,4 +751,13 @@ public class EntityMappingTests
         Assert.Null(plain.ToModel(names).SingleUse);
         Assert.Null(SingleUseJson.Deserialize("{not json"));
     }
+
+    [Fact]
+    public void Warrior_OutReasonAndEquipmentAtDeparture_RoundTrip()
+    {
+        var warrior = new Warrior { Name = "x", OutReason = OutOfPlayReason.Unpaid, EquipmentAtDeparture = "Sword, Shield" };
+        var back = warrior.ToEntity().ToModel();
+        Assert.Equal(OutOfPlayReason.Unpaid, back.OutReason);
+        Assert.Equal("Sword, Shield", back.EquipmentAtDeparture);
+    }
 }

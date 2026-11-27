@@ -29,6 +29,21 @@
                     <Border.Behaviors>
                         <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardKey}"/>
                     </Border.Behaviors>
+                    <!-- Mentions honorables : bordure de la couleur de la cause (WarriorRow.MentionKind). -->
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Died">
+                            <Setter Property="Stroke" Value="{DynamicResource AppDanger}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Left">
+                            <Setter Property="Stroke" Value="{DynamicResource AppWarning}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Dismissed">
+                            <Setter Property="Stroke" Value="{DynamicResource AppGameModifier}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Lost">
+                            <Setter Property="Stroke" Value="{DynamicResource AppTextMuted}"/>
+                        </DataTrigger>
+                    </Border.Triggers>
                     <VerticalStackLayout Spacing="2">
                         <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" VerticalOptions="Start">
                             <!-- Miniature de la figurine (Warrior.PhotoPath, voir WarriorRow.PhotoSource) -
@@ -49,6 +64,41 @@
                                            TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center" VerticalOptions="Center"/>
                                     <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}"/>
                                 </Grid>
+                            </Border>
+                            <!-- Pastille de cause des Mentions honorables (Mort, Parti, Renvoyé, Perdu), en haut à droite :
+                                 les boutons de la carte y sont masqués pour un guerrier qui ne combat plus. -->
+                            <Border Grid.Column="2" Grid.ColumnSpan="2" Style="{StaticResource ChipBorderStyle}" Padding="8,2"
+                                    HorizontalOptions="End" VerticalOptions="Start" IsVisible="{Binding IsHonorableMention}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Died">
+                                        <Setter Property="Stroke" Value="{DynamicResource AppDanger}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Left">
+                                        <Setter Property="Stroke" Value="{DynamicResource AppWarning}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Dismissed">
+                                        <Setter Property="Stroke" Value="{DynamicResource AppGameModifier}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Border" Binding="{Binding MentionKind}" Value="Lost">
+                                        <Setter Property="Stroke" Value="{DynamicResource AppTextMuted}"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="{Binding MentionLabel}" FontSize="11" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding MentionKind}" Value="Died">
+                                            <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding MentionKind}" Value="Left">
+                                            <Setter Property="TextColor" Value="{DynamicResource AppWarning}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding MentionKind}" Value="Dismissed">
+                                            <Setter Property="TextColor" Value="{DynamicResource AppGameModifier}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding MentionKind}" Value="Lost">
+                                            <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
                             </Border>
                             <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                 <!-- Nom + effectif d'un groupe d'Hommes de main (Warrior.HeadCount > 1, vide pour un
@@ -144,6 +194,8 @@
 
                         <!-- Objets à usage unique pris pour la partie en cours (début de partie) : valeurs de la partie en
                              bleu (AppGameModifier) dans le profil ci-dessus, détail et puces ici ; retirés à la Fin de partie. -->
+                        <Label Text="{Binding EquipmentAtDepartureText}" IsVisible="{Binding HasEquipmentAtDeparture}" FontSize="12"
+                               TextColor="{DynamicResource AppTextMuted}" Margin="0,0,0,4"/>
                         <Label Text="{Binding GameProfileText}" IsVisible="{Binding HasGameProfile}" FontSize="11"
                                TextColor="{DynamicResource AppGameModifier}" Margin="0,0,0,4"/>
                         <components:ChipListView HeaderText="{loc:Loc SingleUseThisGameHeading}"
@@ -515,53 +567,27 @@
                                      BindableLayout.ItemsSource="{Binding DramatisPersonae}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
-                <!-- Morts : lecture seule (le bouton Éditer est masqué sur la carte via
-                     WarriorRow.IsEditable), regroupe Héros et Hommes de main morts ensemble - conservés
-                     dans le roster pour l'historique de la bande plutôt que retirés à la fin de partie.
-                     Masqué entièrement si vide (HasDeadWarriors, retour utilisateur 2026-09-01) - même
-                     raison que Francs-Tireurs/Dramatis Personae ci-dessus. -->
-                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasDeadWarriors}">
+                <!-- Mentions honorables : morts et départs (renvoyés, partis, perdus) en un seul groupe, cartes en lecture
+                     seule (WarriorRow.IsEditable) avec une pastille de cause et une bordure de sa couleur
+                     (WarriorRow.MentionKind). Masqué entièrement si vide. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasHonorableMentions}">
                     <Grid.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ToggleDeadCommand}"/>
+                        <TapGestureRecognizer Command="{Binding ToggleHonorableMentionsCommand}"/>
                     </Grid.GestureRecognizers>
                     <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
                         <Label.FormattedText>
                             <FormattedString>
-                                <Span Text="{loc:Loc WarriorsGroupDead}"/>
-                                <Span Text="{Binding DeadWarriors.Count, StringFormat=' · {0}'}"/>
+                                <Span Text="{loc:Loc WarriorsGroupHonorableMentions}"/>
+                                <Span Text="{Binding HonorableMentions.Count, StringFormat=' · {0}'}"/>
                             </FormattedString>
                         </Label.FormattedText>
                     </Label>
                     <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Icon="{Binding DeadExpanded, Converter={StaticResource BoolToChevronConverter}}"
-                                                  Command="{Binding ToggleDeadCommand}"/>
+                                                  Icon="{Binding HonorableMentionsExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleHonorableMentionsCommand}"/>
                 </Grid>
-                <VerticalStackLayout IsVisible="{Binding DeadExpanded}"
-                                     BindableLayout.ItemsSource="{Binding DeadWarriors}"
-                                     BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
-
-                <!-- Retraités : même traitement lecture seule que Morts (WarriorRow.IsRetired), mais un
-                     guerrier retraité n'est jamais mort - actuellement uniquement via Œil crevé (31)
-                     perdu une seconde fois, voir Core.Rules.SeriousInjuryEffectKind.ForcedRetirement.
-                     Masqué entièrement si vide (HasRetiredWarriors), même raison que Morts ci-dessus. -->
-                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasRetiredWarriors}">
-                    <Grid.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ToggleRetiredCommand}"/>
-                    </Grid.GestureRecognizers>
-                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="{loc:Loc WarriorsGroupRetired}"/>
-                                <Span Text="{Binding RetiredWarriors.Count, StringFormat=' · {0}'}"/>
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Icon="{Binding RetiredExpanded, Converter={StaticResource BoolToChevronConverter}}"
-                                                  Command="{Binding ToggleRetiredCommand}"/>
-                </Grid>
-                <VerticalStackLayout IsVisible="{Binding RetiredExpanded}"
-                                     BindableLayout.ItemsSource="{Binding RetiredWarriors}"
+                <VerticalStackLayout IsVisible="{Binding HonorableMentionsExpanded}"
+                                     BindableLayout.ItemsSource="{Binding HonorableMentions}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
             </VerticalStackLayout>

@@ -99,6 +99,9 @@ public class WarriorEntity
 
     /// <summary>Ids de SpecialRule séparés par des virgules - voir Warrior.GainedSpecialRuleIds.</summary>
     public string? GainedSpecialRuleIds { get; set; }
+
+    public OutOfPlayReason OutReason { get; set; }
+    public string? EquipmentAtDeparture { get; set; }
     public int? ExtraMagicSchoolId { get; set; }
 
     /// <summary>See Models.Warrior's racial-maximum snapshot fields (copied from the recruiting

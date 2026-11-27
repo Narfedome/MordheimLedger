@@ -3948,4 +3948,22 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="LibTabRacialProfiles" xml:space="preserve">
     <value>Profils raciaux</value>
   </data>
+  <data name="WarriorsGroupHonorableMentions" xml:space="preserve">
+    <value>Mentions honorables</value>
+  </data>
+  <data name="HonorableMentionDied" xml:space="preserve">
+    <value>Mort</value>
+  </data>
+  <data name="HonorableMentionLeft" xml:space="preserve">
+    <value>Parti</value>
+  </data>
+  <data name="HonorableMentionDismissed" xml:space="preserve">
+    <value>Renvoyé</value>
+  </data>
+  <data name="HonorableMentionLost" xml:space="preserve">
+    <value>Perdu</value>
+  </data>
+  <data name="HonorableMentionEquipmentFormat" xml:space="preserve">
+    <value>Équipement au départ : {0}</value>
+  </data>
 </root>

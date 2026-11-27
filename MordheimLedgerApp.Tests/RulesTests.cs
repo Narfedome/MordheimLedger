@@ -2782,4 +2782,23 @@ public class RulesTests
     {
         Assert.Equal(expected, SingleUseRules.IsOutsideDice(Range(min, max), 2, 6));
     }
+
+    [Theory]
+    [InlineData(WarriorStatus.Active, OutOfPlayReason.Unspecified, null)]
+    [InlineData(WarriorStatus.Sick, OutOfPlayReason.Unspecified, null)]
+    [InlineData(WarriorStatus.Dead, OutOfPlayReason.Unspecified, HonorableMentionKind.Died)]
+    [InlineData(WarriorStatus.Dead, OutOfPlayReason.Captured, HonorableMentionKind.Lost)]
+    [InlineData(WarriorStatus.Retired, OutOfPlayReason.Dismissed, HonorableMentionKind.Dismissed)]
+    [InlineData(WarriorStatus.Retired, OutOfPlayReason.Addiction, HonorableMentionKind.Left)]
+    [InlineData(WarriorStatus.Retired, OutOfPlayReason.Unpaid, HonorableMentionKind.Left)]
+    [InlineData(WarriorStatus.Retired, OutOfPlayReason.WandererLeft, HonorableMentionKind.Left)]
+    [InlineData(WarriorStatus.Retired, OutOfPlayReason.DidNotJoin, HonorableMentionKind.Left)]
+    [InlineData(WarriorStatus.Retired, OutOfPlayReason.ForcedRetirement, HonorableMentionKind.Lost)]
+    [InlineData(WarriorStatus.Retired, OutOfPlayReason.Unspecified, HonorableMentionKind.Lost)]
+    public void HonorableMention_KindFromStatusAndReason(WarriorStatus status, OutOfPlayReason reason, HonorableMentionKind? expected)
+    {
+        var warrior = new Warrior { Status = status, OutReason = reason };
+        Assert.Equal(expected, HonorableMentionRules.Kind(warrior));
+        Assert.Equal(expected is not null, HonorableMentionRules.IsHonorableMention(warrior));
+    }
 }

@@ -117,6 +117,22 @@ public partial class WarriorRow : ObservableObject
     /// wizard, same as Dead.</summary>
     public bool IsRetired => Warrior.Status == WarriorStatus.Retired;
 
+    // --- Mentions honorables (morts et départs, voir Core.Rules.HonorableMentionRules) ---
+
+    public bool IsHonorableMention => HonorableMentionRules.IsHonorableMention(Warrior);
+
+    /// <summary>« Died », « Left », « Dismissed », « Lost » (HonorableMentionKind) : la carte et sa pastille prennent la
+    /// couleur de la famille par DataTrigger, null pour un guerrier qui combat encore.</summary>
+    public string? MentionKind => HonorableMentionRules.Kind(Warrior)?.ToString();
+
+    /// <summary>Texte de la pastille : Mort, Parti, Renvoyé, Perdu.</summary>
+    public string? MentionLabel => MentionKind is { } kind ? LocalizationService.Instance[$"HonorableMention{kind}"] : null;
+
+    /// <summary>« Équipement au départ : Épée, Bouclier » - l'équipement réel a quitté la bande avec lui.</summary>
+    public string? EquipmentAtDepartureText => string.IsNullOrEmpty(Warrior.EquipmentAtDeparture) ? null
+        : string.Format(LocalizationService.Instance["HonorableMentionEquipmentFormat"], Warrior.EquipmentAtDeparture);
+    public bool HasEquipmentAtDeparture => EquipmentAtDepartureText is not null;
+
     /// <summary>Drives the roster card's Edit (Pen) button - both permanent statuses freeze the card
     /// the same way, see IsDead/IsRetired.</summary>
     public bool IsEditable => !IsDead && !IsRetired && !IsWarbandArchived;

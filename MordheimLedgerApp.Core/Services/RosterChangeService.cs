@@ -54,14 +54,11 @@ public sealed class RosterChangeService
 
         if (dismissCount >= warrior.HeadCount)
         {
-            foreach (var equipment in warrior.Equipment.Where(e => e.Id > 0).ToList())
-                await _warbands.RemoveWarriorEquipmentAsync(equipment.Id);
-            warrior.Status = WarriorStatus.Retired;
+            // Mentions honorables : renvoyé, l'équipement part dans la réserve (calculée par le wizard).
+            await new WarriorDepartureService(_warbands).RetireAsync(warrior, OutOfPlayReason.Dismissed);
+            return true;
         }
-        else
-        {
-            warrior.HeadCount -= dismissCount;
-        }
+        warrior.HeadCount -= dismissCount;
         await _warbands.SaveWarriorAsync(warrior);
         return true;
     }

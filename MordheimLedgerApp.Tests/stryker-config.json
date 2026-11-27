@@ -20,10 +20,12 @@
       "**/Rules/RaceRules.cs",
       "**/Rules/SingleUseRules.cs",
       "**/Services/SingleUseService.cs",
-      "**/Rules/CharacteristicModifier.cs"
+      "**/Rules/CharacteristicModifier.cs",
+      "**/Rules/HonorableMentionRules.cs",
+      "**/Services/WarriorDepartureService.cs"
     ],
     "coverage-analysis": "off",
-    "test-case-filter": "FullyQualifiedName~AdvancementServiceTests|FullyQualifiedName~ExplorationRewardServiceTests|FullyQualifiedName~PostBattleTradingServiceTests|FullyQualifiedName~RosterChangeServiceTests|FullyQualifiedName~InjuryServiceTests|FullyQualifiedName~PostBattleSequenceServiceTests|FullyQualifiedName~LeaderSuccessionServiceTests|FullyQualifiedName~RulesTests.UnderdogExperience|FullyQualifiedName~RulesTests.ExperiencePrefill|FullyQualifiedName~RulesTests.LeaderSuccession|FullyQualifiedName~RulesTests.WarbandRating|FullyQualifiedName~RulesTests.SpellRules|FullyQualifiedName~RulesTests.TomeOfMagic|FullyQualifiedName~SpellLearningServiceTests|FullyQualifiedName~WarbandMutationTests.EquipStashItem|FullyQualifiedName~RaceTests|FullyQualifiedName~RulesTests.SingleUse|FullyQualifiedName~SingleUseServiceTests",
+    "test-case-filter": "FullyQualifiedName~AdvancementServiceTests|FullyQualifiedName~ExplorationRewardServiceTests|FullyQualifiedName~PostBattleTradingServiceTests|FullyQualifiedName~RosterChangeServiceTests|FullyQualifiedName~InjuryServiceTests|FullyQualifiedName~PostBattleSequenceServiceTests|FullyQualifiedName~LeaderSuccessionServiceTests|FullyQualifiedName~RulesTests.UnderdogExperience|FullyQualifiedName~RulesTests.ExperiencePrefill|FullyQualifiedName~RulesTests.LeaderSuccession|FullyQualifiedName~RulesTests.WarbandRating|FullyQualifiedName~RulesTests.SpellRules|FullyQualifiedName~RulesTests.TomeOfMagic|FullyQualifiedName~SpellLearningServiceTests|FullyQualifiedName~WarbandMutationTests.EquipStashItem|FullyQualifiedName~RaceTests|FullyQualifiedName~RulesTests.SingleUse|FullyQualifiedName~SingleUseServiceTests|FullyQualifiedName~RulesTests.HonorableMention",
     "reporters": [ "html", "json", "progress" ],
     "concurrency": 4,
     "thresholds": { "high": 90, "low": 80, "break": 80 }

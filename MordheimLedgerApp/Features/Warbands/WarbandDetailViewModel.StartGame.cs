@@ -91,7 +91,7 @@ public partial class WarbandDetailViewModel
             // n'a jamais rejoint la bande pour cette partie, retour utilisateur 2026-09-01).
             foreach (var entry in dialogViewModel.AidEntries.Where(e => e.WontFight))
             {
-                await _warbandService.DeleteWarriorAsync(entry.Warrior.Id);
+                await new WarriorDepartureService(_warbandService).RetireAsync(entry.Warrior, OutOfPlayReason.DidNotJoin);
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaDepartedSentence"], entry.Warrior.Name));
             }
 

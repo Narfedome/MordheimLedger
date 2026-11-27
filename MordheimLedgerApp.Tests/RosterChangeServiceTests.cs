@@ -120,6 +120,8 @@ public class RosterChangeServiceTests : IDisposable
         var reloaded = await ReloadAsync(warband, hero.Id);
         Assert.Equal(WarriorStatus.Retired, reloaded.Status);
         Assert.Empty(reloaded.Equipment);
+        Assert.Equal(OutOfPlayReason.Dismissed, reloaded.OutReason);
+        Assert.Contains("Sword", reloaded.EquipmentAtDeparture);
     }
 
     [Fact]

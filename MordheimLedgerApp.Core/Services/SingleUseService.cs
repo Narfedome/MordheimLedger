@@ -30,11 +30,8 @@ public sealed class SingleUseService
     public Task StartGameAsync(int warbandId, IReadOnlyList<GameItemUse> uses) => _warbands.ReplaceGameItemUsesAsync(warbandId, uses);
 
     /// <summary>Un dépendant sans dose quitte la bande (coché au début de partie) : il reste sur la fiche, Retiré.</summary>
-    public async Task LeaveForAddictionAsync(Warrior warrior)
-    {
-        warrior.Status = WarriorStatus.Retired;
-        await _warbands.SaveWarriorAsync(warrior);
-    }
+    public Task LeaveForAddictionAsync(Warrior warrior) =>
+        new WarriorDepartureService(_warbands).RetireAsync(warrior, OutOfPlayReason.Addiction);
 
     /// <summary>Fin de partie : retire de l'équipement les objets pris avant la bataille et ceux cochés comme utilisés
     /// pendant, applique les conséquences tirées, puis oublie la partie. Les conséquences s'appliquent aux guerriers de

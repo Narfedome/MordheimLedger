@@ -243,6 +243,13 @@ public class Warrior
     /// <summary>Règles spéciales gagnées en cours de campagne hors type (Champignons bonnets de fou : Stupidité permanente).</summary>
     public List<int> GainedSpecialRuleIds { get; set; } = new();
 
+    /// <summary>Cause de sortie d'un guerrier Mort ou Retraité (Mentions honorables) - voir Core.Rules.HonorableMentionRules.</summary>
+    public OutOfPlayReason OutReason { get; set; }
+
+    /// <summary>Rappel de l'équipement qu'il portait en partant (noms séparés par des virgules) : l'équipement réel a quitté
+    /// la bande avec lui, la carte des Mentions honorables n'en garde que le souvenir.</summary>
+    public string? EquipmentAtDeparture { get; set; }
+
     /// <summary>École de magie apprise en propre (Grimoire + Savoir Arcanique : la Magie Mineure), en plus des écoles de
     /// la bande - fait du guerrier un lanceur de sorts. Voir Core.Rules.TomeOfMagicRules.</summary>
     public int? ExtraMagicSchoolId { get; set; }

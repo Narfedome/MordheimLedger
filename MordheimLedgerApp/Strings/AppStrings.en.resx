@@ -3948,4 +3948,22 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="LibTabRacialProfiles" xml:space="preserve">
     <value>Racial profiles</value>
   </data>
+  <data name="WarriorsGroupHonorableMentions" xml:space="preserve">
+    <value>Honourable mentions</value>
+  </data>
+  <data name="HonorableMentionDied" xml:space="preserve">
+    <value>Dead</value>
+  </data>
+  <data name="HonorableMentionLeft" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="HonorableMentionDismissed" xml:space="preserve">
+    <value>Dismissed</value>
+  </data>
+  <data name="HonorableMentionLost" xml:space="preserve">
+    <value>Lost</value>
+  </data>
+  <data name="HonorableMentionEquipmentFormat" xml:space="preserve">
+    <value>Equipment when leaving: {0}</value>
+  </data>
 </root>

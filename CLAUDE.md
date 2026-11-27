@@ -299,6 +299,14 @@ Tout est éditable dans l'onglet Règles du formulaire d'objet (`StatModifierEdi
 ambre via `SingleUseRules.FirstOverlap`/`IsOutsideDice`, jamais bloquants) ; une règle gagnée est gardée par id officiel, ou
 `AfterBattleOutcome.SpecialRuleLocalId` pour une règle créée dans le Codex. Textes partagés (récap, conflits de synchro, Fin de
 partie) : `Services/SingleUseText`.
+**Mentions honorables** (canevas « Hors course et Codex », écran 7) : un seul groupe de la fiche pour les morts et les départs,
+cartes quasi complètes en lecture seule, pastille de cause en haut à droite et bordure de sa couleur (Mort = `AppDanger`,
+Parti = `AppWarning`, Renvoyé = `AppGameModifier`, Perdu = `AppTextMuted` ; `Rules/HonorableMentionRules`, cause dans
+`Warrior.OutReason`, le statut Mort/Retraité reste la vérité des règles). Les départs ne sont plus supprimés de la base :
+`Services/WarriorDepartureService.RetireAsync` (renvoi, dépendant sans dose, solde refusée, vagabond reparti, Dramatis Persona
+qui n'est pas venu) retire l'équipement réel de la bande et n'en garde que le rappel (`Warrior.EquipmentAtDeparture`) ; un
+groupe d'Hommes de main anéanti reste aussi, Mort, avec son dernier effectif (`InjuryService.RemoveDeadFigures`). Les
+guerriers supprimés avant la 1.6 ne reviennent pas.
 
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.
 

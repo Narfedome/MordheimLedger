@@ -140,6 +140,7 @@ public class InjuryServiceTests : IDisposable
         var reloaded = await ReloadAsync(warband, hero.Id);
         Assert.Equal(xp + 1, reloaded.Experience);
         Assert.Equal(WarriorStatus.Retired, reloaded.Status);
+        Assert.Equal(OutOfPlayReason.ForcedRetirement, reloaded.OutReason);
     }
 
     [Fact]
@@ -193,6 +194,7 @@ public class InjuryServiceTests : IDisposable
 
         var reloaded = await ReloadAsync(warband, hero.Id);
         Assert.Equal(WarriorStatus.Dead, reloaded.Status);
+        Assert.Equal(OutOfPlayReason.Captured, reloaded.OutReason);
         Assert.Empty(reloaded.Equipment);
     }
 
@@ -254,14 +256,28 @@ public class InjuryServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task HenchmanGroup_Wiped_IsDeleted()
+    public async Task HenchmanGroup_Wiped_IsKeptAsDead()
     {
         var (warband, _, group) = await WarbandAsync(groupSize: 2);
-        var wiped = InjuryService.RemoveDeadFigures(group, 2);
+        var wiped = InjuryService.RemoveDeadFigures(group, 3);
         await _service.FinishWarriorAsync(group, true);
 
         Assert.True(wiped);
-        Assert.DoesNotContain(await _warbands.GetWarriorsAsync(warband.Id, "en"), w => w.Id == group.Id);
+        var saved = Assert.Single(await _warbands.GetWarriorsAsync(warband.Id, "en"), w => w.Id == group.Id);
+        Assert.Equal(WarriorStatus.Dead, saved.Status);
+        Assert.Equal(2, saved.HeadCount);
+    }
+
+    [Fact]
+    public void HenchmanGroup_PartialDeaths_LowerTheHeadCount()
+    {
+        var group = new Warrior { HeadCount = 3 };
+        Assert.False(InjuryService.RemoveDeadFigures(group, 2));
+        Assert.Equal(1, group.HeadCount);
+        Assert.Equal(WarriorStatus.Active, group.Status);
+        Assert.False(InjuryService.RemoveDeadFigures(group, 0));
+        Assert.False(InjuryService.RemoveDeadFigures(group, -1));
+        Assert.Equal(1, group.HeadCount);
     }
 
     [Fact]

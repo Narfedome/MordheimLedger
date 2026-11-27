@@ -117,6 +117,20 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(HasRetiredWarriors))]
     private ObservableCollection<WarriorRow> retiredWarriors = new();
 
+    /// <summary>Mentions honorables : un seul groupe pour les morts et les départs (renvoyés, partis, perdus), chacun avec
+    /// sa pastille de cause - remplace les groupes Morts et Retraités à l'écran.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasHonorableMentions))]
+    private ObservableCollection<WarriorRow> honorableMentions = new();
+
+    public bool HasHonorableMentions => HonorableMentions.Count > 0;
+
+    [ObservableProperty]
+    private bool honorableMentionsExpanded;
+
+    [RelayCommand]
+    private void ToggleHonorableMentions() => HonorableMentionsExpanded = !HonorableMentionsExpanded;
+
     public bool HasHiredSwords => HiredSwords.Count > 0;
     public bool HasDramatisPersonae => DramatisPersonae.Count > 0;
 
@@ -264,6 +278,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             DramatisPersonae = new ObservableCollection<WarriorRow>(alive.Where(r => r.Warrior.IsDramatisPersona));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
             RetiredWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsRetired));
+            HonorableMentions = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsHonorableMention).OrderBy(r => r.Warrior.Id));
             // Exclut du calcul tout guerrier basculé "hostile" via "Une Poignée d'Or" (2026-09-01, Ulli &
             // Marquand corrompus par l'adversaire pour cette bataille - voir Warrior.IsHostileThisBattle) :
             // il reste dans le roster (pas supprimé), juste sans contribution à la Valeur tant que le

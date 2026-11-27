@@ -51,8 +51,9 @@ bloquant) ; compagnon de jeu, pas calculatrice de partie.
   Bande), bonus pour la partie (caractéristique, valeur fixe, dé), jet après la bataille (dés, lignes De-À → dépendance,
   caractéristique ou règle gagnée via le sélecteur de règles), perte hors de combat ; messages ambre si des tranches se
   chevauchent ou sortent des dés ; même résumé dans la fiche récap et l'écran des conflits de synchro.
-- Plus tard : remplacer « Retraité » par un statut « Hors course » avec une couleur par cause (dépendance,
-  œil perdu…) - à définir. Écarté : déroute, catalogue de scénarios.
+- **Mentions honorables** : un seul groupe de la fiche pour les morts et les départs, pastille de cause (Mort, Parti,
+  Renvoyé, Perdu) et bordure de couleur ; les départs restent sur la fiche (équipement retiré, rappel sur la carte).
+- **Codex** : section « Races » (races et profils raciaux) à la place des deux icônes de la section Bandes. Écarté : déroute, catalogue de scénarios.
 
 ## V2 — Partage entre joueurs (ébauche validée le 2026-11-15)
 Trois thèmes : **sauvegarde**, **partage de bandes/contenu**, **partie connectée en lobby local**. Tout reste local,

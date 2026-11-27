@@ -83,6 +83,7 @@ public sealed class InjuryService
                 return true;
             case SeriousInjuryEffectKind.ForcedRetirement:
                 warrior.Status = WarriorStatus.Retired;
+                warrior.OutReason = OutOfPlayReason.ForcedRetirement;
                 return true;
             default:
                 return false;
@@ -103,6 +104,7 @@ public sealed class InjuryService
             return;
         }
         warrior.Status = WarriorStatus.Dead;
+        warrior.OutReason = OutOfPlayReason.Captured;
         await StripEquipmentAsync(warrior);
     }
 
@@ -125,8 +127,14 @@ public sealed class InjuryService
     /// 2026-11-11). Renvoie true si le groupe est anéanti.</summary>
     public static bool RemoveDeadFigures(Warrior group, int deaths)
     {
+        if (deaths > 0 && deaths >= group.HeadCount)
+        {
+            // Groupe anéanti : il rejoint les Mentions honorables (Mort), avec son dernier effectif.
+            group.Status = WarriorStatus.Dead;
+            return true;
+        }
         group.HeadCount -= Math.Max(0, deaths);
-        return group.HeadCount <= 0;
+        return false;
     }
 
     /// <summary>Fin du traitement d'un guerrier : un groupe vide (morts, dernier membre promu) est supprimé,

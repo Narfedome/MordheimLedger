@@ -210,7 +210,9 @@ public class PostBattleSequenceServiceTests : IDisposable
         Assert.Equal(treasury - 15, saved.Treasury);
         Assert.Equal(2, saved.WyrdstoneShards);
         var roster = await RosterAsync(warband);
-        Assert.DoesNotContain(roster, w => w.Id == refused.Id);
+        var left = roster.Single(w => w.Id == refused.Id);
+        Assert.Equal(WarriorStatus.Retired, left.Status);
+        Assert.Equal(OutOfPlayReason.Unpaid, left.OutReason);
         Assert.False(roster.Single(w => w.Id == prepaid.Id).HiredSwordUpkeepPrepaid);
         Assert.Contains(roster, w => w.Id == paid.Id);
     }
@@ -238,8 +240,14 @@ public class PostBattleSequenceServiceTests : IDisposable
 
         await _service.DepartWanderersAsync(warband.Id, [new(first, personae[0].Id), new(second, null)]);
 
+        // Mentions honorables : gardés sur la fiche, partis.
         var roster = await RosterAsync(warband);
-        Assert.DoesNotContain(roster, w => w.Id == first.Id || w.Id == second.Id);
+        Assert.All(roster.Where(w => w.Id == first.Id || w.Id == second.Id), w =>
+        {
+            Assert.Equal(WarriorStatus.Retired, w.Status);
+            Assert.Equal(OutOfPlayReason.WandererLeft, w.OutReason);
+        });
+        Assert.Equal(2, roster.Count(w => w.Id == first.Id || w.Id == second.Id));
         Assert.Equal([personae[0].Id], await _warbands.GetDramatisPersonaCooldownIdsAsync(warband.Id));
     }
 

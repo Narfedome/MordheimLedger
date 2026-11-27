@@ -219,8 +219,13 @@ public class SingleUseServiceTests : IDisposable
     public async Task LeaveForAddiction_RetiresTheWarrior()
     {
         var (warband, klaus, _) = await ReiklandersAsync();
-        await _service.LeaveForAddictionAsync(klaus);
-        Assert.Equal(WarriorStatus.Retired, (await ReloadAsync(warband, klaus.Id)).Status);
+        await _warbands.AddWarriorEquipmentAsync(klaus.Id, await ItemAsync("equipment.crimson-shade"), quantity: 2);
+        await _service.LeaveForAddictionAsync(await ReloadAsync(warband, klaus.Id));
+        var left = await ReloadAsync(warband, klaus.Id);
+        Assert.Equal(WarriorStatus.Retired, left.Status);
+        Assert.Equal(OutOfPlayReason.Addiction, left.OutReason);
+        Assert.Empty(left.Equipment);
+        Assert.Equal("Crimson Shade x2", left.EquipmentAtDeparture);
     }
 
     [Fact]

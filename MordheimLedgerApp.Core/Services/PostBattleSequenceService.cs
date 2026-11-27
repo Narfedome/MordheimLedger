@@ -132,7 +132,7 @@ public sealed class PostBattleSequenceService
                     warbandChanged = true;
                     break;
                 case UpkeepChoice.Refuse:
-                    await _warbands.DeleteWarriorAsync(decision.Warrior.Id);
+                    await new WarriorDepartureService(_warbands).RetireAsync(decision.Warrior, OutOfPlayReason.Unpaid);
                     break;
             }
         }
@@ -149,12 +149,12 @@ public sealed class PostBattleSequenceService
         return recruited;
     }
 
-    /// <summary>Vagabonds qui repartent : fiche supprimée, et délai de re-recherche posé si besoin.</summary>
+    /// <summary>Vagabonds qui repartent : gardés parmi les Mentions honorables (Parti), et délai de re-recherche posé si besoin.</summary>
     public async Task DepartWanderersAsync(int warbandId, IEnumerable<WandererDeparture> departures)
     {
         foreach (var departure in departures)
         {
-            await _warbands.DeleteWarriorAsync(departure.Warrior.Id);
+            await new WarriorDepartureService(_warbands).RetireAsync(departure.Warrior, OutOfPlayReason.WandererLeft);
             if (departure.CooldownPersonaId is { } personaId)
                 await _warbands.AddDramatisPersonaCooldownAsync(warbandId, personaId);
         }

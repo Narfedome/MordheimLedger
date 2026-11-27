@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data.Entities;
+﻿using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
@@ -1040,6 +1040,8 @@ public static class EntityMapping
         IsLeader = e.IsLeader,
         CastsAsSuccessor = e.CastsAsSuccessor,
         HasPendingSuccessorSpell = e.HasPendingSuccessorSpell,
+        AddictedToEquipmentItemId = e.AddictedToEquipmentItemId,
+        GainedSpecialRuleIds = Rules.RaceRules.ParseIds(e.GainedSpecialRuleIds),
         ExtraMagicSchoolId = e.ExtraMagicSchoolId,
         MaxMovement = e.MaxMovement,
         MaxWeaponSkill = e.MaxWeaponSkill,
@@ -1102,6 +1104,8 @@ public static class EntityMapping
         IsLeader = m.IsLeader,
         CastsAsSuccessor = m.CastsAsSuccessor,
         HasPendingSuccessorSpell = m.HasPendingSuccessorSpell,
+        AddictedToEquipmentItemId = m.AddictedToEquipmentItemId,
+        GainedSpecialRuleIds = m.GainedSpecialRuleIds.Count == 0 ? null : string.Join(',', m.GainedSpecialRuleIds),
         ExtraMagicSchoolId = m.ExtraMagicSchoolId,
         MaxMovement = m.MaxMovement,
         MaxWeaponSkill = m.MaxWeaponSkill,
@@ -1285,5 +1289,37 @@ public static class EntityMapping
         WarbandId = m.WarbandId,
         Date = m.Date,
         Text = m.Text
+    };
+
+    public static GameItemUse ToModel(this GameItemUseEntity e) => new()
+    {
+        Id = e.Id,
+        WarbandId = e.WarbandId,
+        WarriorId = e.WarriorId,
+        EquipmentItemId = e.EquipmentItemId,
+        WarriorEquipmentId = e.WarriorEquipmentId,
+        WarbandEquipmentId = e.WarbandEquipmentId,
+        WeaponName = e.WeaponName,
+        StatModifiers = string.IsNullOrEmpty(e.StatModifiers)
+            ? new List<Rules.RolledStatModifier>()
+            : e.StatModifiers.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => part.Split(':'))
+                .Where(kv => kv.Length == 2 && Enum.TryParse<Rules.CharacteristicField>(kv[0], out _) && int.TryParse(kv[1], out _))
+                .Select(kv => new Rules.RolledStatModifier(Enum.Parse<Rules.CharacteristicField>(kv[0]), int.Parse(kv[1])))
+                .ToList(),
+        WithoutEffect = e.WithoutEffect
+    };
+
+    public static GameItemUseEntity ToEntity(this GameItemUse m) => new()
+    {
+        Id = m.Id,
+        WarbandId = m.WarbandId,
+        WarriorId = m.WarriorId,
+        EquipmentItemId = m.EquipmentItemId,
+        WarriorEquipmentId = m.WarriorEquipmentId,
+        WarbandEquipmentId = m.WarbandEquipmentId,
+        WeaponName = m.WeaponName,
+        StatModifiers = m.StatModifiers.Count == 0 ? null : string.Join(';', m.StatModifiers.Select(x => $"{x.Field}:{x.Value}")),
+        WithoutEffect = m.WithoutEffect
     };
 }

@@ -397,6 +397,53 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
     }
 
+    public async Task ConsumeOneWarriorEquipmentAsync(int warriorEquipmentId)
+    {
+        await _db.Initialization;
+        var row = await _db.Connection.FindAsync<WarriorEquipmentEntity>(warriorEquipmentId);
+        if (row is null) return;
+        if (row.Quantity > 1)
+        {
+            row.Quantity--;
+            await _db.Connection.UpdateAsync(row);
+        }
+        else await _db.Connection.DeleteAsync<WarriorEquipmentEntity>(warriorEquipmentId);
+    }
+
+    public async Task ConsumeOneWarbandEquipmentAsync(int warbandEquipmentId)
+    {
+        await _db.Initialization;
+        var row = await _db.Connection.FindAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+        if (row is null) return;
+        if (row.Quantity > 1)
+        {
+            row.Quantity--;
+            await _db.Connection.UpdateAsync(row);
+        }
+        else await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+    }
+
+    public async Task<List<GameItemUse>> GetGameItemUsesAsync(int warbandId)
+    {
+        await _db.Initialization;
+        return (await _db.Connection.Table<GameItemUseEntity>().Where(u => u.WarbandId == warbandId).ToListAsync())
+            .OrderBy(u => u.Id).Select(u => u.ToModel()).ToList();
+    }
+
+    public async Task ReplaceGameItemUsesAsync(int warbandId, IReadOnlyList<GameItemUse> uses)
+    {
+        await _db.Initialization;
+        await _db.Connection.ExecuteAsync($"DELETE FROM {nameof(GameItemUseEntity)} WHERE WarbandId = ?", warbandId);
+        foreach (var use in uses)
+        {
+            use.WarbandId = warbandId;
+            var entity = use.ToEntity();
+            entity.Id = 0;
+            await _db.Connection.InsertAsync(entity);
+            use.Id = entity.Id;
+        }
+    }
+
     public async Task<int> SellWarbandItemAsync(int warbandEquipmentId)
     {
         await _db.Initialization;

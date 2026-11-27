@@ -93,6 +93,17 @@ public interface IWarbandService
     Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null);
     Task RemoveWarbandEquipmentAsync(int warbandEquipmentId);
 
+    /// <summary>Un exemplaire consommé (objet à usage unique) : quantité - 1, ligne supprimée au dernier. Ligne déjà
+    /// disparue (vendue, donnée entre-temps) : rien.</summary>
+    Task ConsumeOneWarriorEquipmentAsync(int warriorEquipmentId);
+    Task ConsumeOneWarbandEquipmentAsync(int warbandEquipmentId);
+
+    /// <summary>Objets à usage unique pris pour la partie en cours (voir Models.GameItemUse).</summary>
+    Task<List<GameItemUse>> GetGameItemUsesAsync(int warbandId);
+
+    /// <summary>Remplace ceux de la bande (une seule partie en cours à la fois) ; liste vide = efface.</summary>
+    Task ReplaceGameItemUsesAsync(int warbandId, IReadOnlyList<GameItemUse> uses);
+
     /// <summary>Hero: moves an entire WarbandEquipment row (its full Quantity) onto him - deletes the stash
     /// row, creates the equivalent WarriorEquipment row. Henchman group: takes ONE identical item (same
     /// item, material and found value) PER MODEL from the stash, across rows if needed, and creates a

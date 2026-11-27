@@ -236,6 +236,13 @@ public class Warrior
     /// les dés (errata p. 117) ; remis à faux une fois cette progression faite.</summary>
     public bool HasPendingSuccessorSpell { get; set; }
 
+    /// <summary>Dépendant (Ombre Cramoisie : 2-3 au jet d'après-bataille) : objet dont il lui faut une dose avant chaque
+    /// bataille, sinon il quitte la bande - rappelé au début de partie, retirable par « Corriger la fiche ».</summary>
+    public int? AddictedToEquipmentItemId { get; set; }
+
+    /// <summary>Règles spéciales gagnées en cours de campagne hors type (Champignons bonnets de fou : Stupidité permanente).</summary>
+    public List<int> GainedSpecialRuleIds { get; set; } = new();
+
     /// <summary>École de magie apprise en propre (Grimoire + Savoir Arcanique : la Magie Mineure), en plus des écoles de
     /// la bande - fait du guerrier un lanceur de sorts. Voir Core.Rules.TomeOfMagicRules.</summary>
     public int? ExtraMagicSchoolId { get; set; }

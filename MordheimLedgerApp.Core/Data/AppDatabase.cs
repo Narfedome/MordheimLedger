@@ -177,12 +177,12 @@ public partial class AppDatabase
     /// <summary>Tables rattachées à une bande jouée par WarbandId (hors WarriorEntity, supprimée guerrier par
     /// guerrier pour emporter aussi ses lignes et sa photo).</summary>
     internal static readonly string[] WarbandChildTables =
-        [nameof(HistoryEntryEntity), nameof(WarbandEquipmentEntity), nameof(WarbandDramatisPersonaCooldownEntity)];
+        [nameof(HistoryEntryEntity), nameof(WarbandEquipmentEntity), nameof(WarbandDramatisPersonaCooldownEntity), nameof(GameItemUseEntity)];
 
     /// <summary>Tables rattachées à un guerrier par WarriorId (voir WarbandService.DeleteWarriorAsync).</summary>
     internal static readonly string[] WarriorChildTables =
         [nameof(WarriorEquipmentEntity), nameof(WarriorSkillEntity), nameof(WarriorInjuryEntity),
-         nameof(WarriorHatredEntity), nameof(WarriorSpellEntity), nameof(WarriorMutationEntity)];
+         nameof(WarriorHatredEntity), nameof(WarriorSpellEntity), nameof(WarriorMutationEntity), nameof(GameItemUseEntity)];
 
     /// <summary>Jusqu'au 2026-11-14, supprimer une bande laissait son Historique, sa Réserve et ses délais de
     /// Dramatis Personae en base (WarbandService.DeleteWarbandAsync ne supprimait que les guerriers). Sans effet
@@ -455,6 +455,7 @@ public partial class AppDatabase
         await _db.CreateTableAsync<DramatisPersonaEquipmentEntity>();
         await _db.CreateTableAsync<DramatisPersonaSkillEntity>();
         await _db.CreateTableAsync<WarbandDramatisPersonaCooldownEntity>();
+        await _db.CreateTableAsync<GameItemUseEntity>();
         await _db.CreateTableAsync<ContentMetaEntity>();
         await _db.CreateTableAsync<OfficialContentHashEntity>();
         await _db.CreateTableAsync<ContentConflictEntity>();
@@ -508,6 +509,7 @@ public partial class AppDatabase
         await _db.DropTableAsync<DramatisPersonaEquipmentEntity>();
         await _db.DropTableAsync<DramatisPersonaSkillEntity>();
         await _db.DropTableAsync<WarbandDramatisPersonaCooldownEntity>();
+        await _db.DropTableAsync<GameItemUseEntity>();
         await _db.DropTableAsync<ContentMetaEntity>();
         await _db.DropTableAsync<OfficialContentHashEntity>();
         await _db.DropTableAsync<ContentConflictEntity>();

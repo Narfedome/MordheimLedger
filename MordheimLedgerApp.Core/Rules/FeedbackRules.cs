@@ -2,7 +2,7 @@ using MordheimLedgerApp.Core.Models.Feedback;
 
 namespace MordheimLedgerApp.Core.Rules;
 
-/// <summary>Règles du formulaire « Nous écrire » - mêmes limites que le relais (Tools/FeedbackRelay/src/index.ts),
+/// <summary>Règles du formulaire « Nous écrire » - mêmes limites que le relais (relay/src/index.ts du dépôt Support),
 /// qui refuse tout message qui les dépasse : les garder alignées.</summary>
 public static class FeedbackRules
 {

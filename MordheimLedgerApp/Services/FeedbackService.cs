@@ -5,11 +5,11 @@ using MordheimLedgerApp.Core.Services;
 
 namespace MordheimLedgerApp.Services;
 
-/// <summary>Côté appli du formulaire « Nous écrire » : adresse du relais (Tools/FeedbackRelay), informations
+/// <summary>Côté appli du formulaire « Nous écrire » : adresse du relais (relay/ du dépôt Support), informations
 /// techniques, captures d'écran et file hors connexion (<see cref="FeedbackOutbox"/>, vidée au lancement).</summary>
 public static class FeedbackService
 {
-    /// <summary>Adresse du relais déployé (voir Tools/FeedbackRelay/README.md). Tant qu'elle est nulle,
+    /// <summary>Adresse du relais déployé (voir relay/README.md du dépôt Support). Tant qu'elle est nulle,
     /// Paramètres ouvre encore l'ancien formulaire Google : on peut livrer l'appli avant le relais.</summary>
     public static readonly Uri? Endpoint = new("https://ancient-paper-dc0d.narfedome-support.workers.dev/report");
 

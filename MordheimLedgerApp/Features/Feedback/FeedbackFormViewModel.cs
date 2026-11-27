@@ -51,7 +51,7 @@ public partial class FeedbackFormViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
-    protected override object? EditableState => new { Kind, Summary, Details, Where, Email, Screenshots = Screenshots.Count };
+    protected override object? EditableState => new { Kind, Summary, Details, Where, Screenshots = Screenshots.Count };
 
     public IReadOnlyList<FeedbackKindOption> Kinds { get; }
 
@@ -73,10 +73,6 @@ public partial class FeedbackFormViewModel : DialogViewModel<bool>
     private string _where = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowEmailError))]
-    private string _email = string.Empty;
-
-    [ObservableProperty]
     private bool _attachTechnical = true;
 
     [ObservableProperty]
@@ -91,7 +87,6 @@ public partial class FeedbackFormViewModel : DialogViewModel<bool>
 
     public bool ShowWhere => FeedbackRules.AsksWhere(Kind);
     public bool ShowTranslationNote => Kind == FeedbackKind.Translation;
-    public bool ShowEmailError => !FeedbackRules.IsValidEmail(Email);
     public int MaxSummaryLength => FeedbackRules.MaxSummaryLength;
     public int MaxDetailsLength => FeedbackRules.MaxDetailsLength;
     public int MaxWhereLength => FeedbackRules.MaxWhereLength;
@@ -166,12 +161,6 @@ public partial class FeedbackFormViewModel : DialogViewModel<bool>
     [RelayCommand(CanExecute = nameof(CanSend))]
     private async Task Send()
     {
-        if (ShowEmailError)
-        {
-            await ShowInfoAsync(Loc["FeedbackEmailInvalidTitle"], Loc["FeedbackEmailInvalid"]);
-            return;
-        }
-
         var result = FeedbackSendResult.Rejected;
         await Loading.RunAsync(async () =>
         {
@@ -181,8 +170,6 @@ public partial class FeedbackFormViewModel : DialogViewModel<bool>
                 Summary = Summary,
                 Details = Details,
                 Where = Where,
-                Email = Email,
-                Language = LocalizationService.Instance.Culture.TwoLetterISOLanguageName,
                 Technical = AttachTechnical ? _technical ?? await FeedbackService.BuildTechnicalInfoAsync(_db) : null,
                 Screenshots = Screenshots.Select(s => s.Attachment).ToList()
             });

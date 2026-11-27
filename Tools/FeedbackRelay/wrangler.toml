@@ -11,7 +11,5 @@ id = "A_REMPLACER_PAR_L_ID_DU_NAMESPACE"   # wrangler kv namespace create FEEDBA
 SUPPORT_REPO = "Narfedome/support"
 APP_KEYS = "mordheim-ledger=mordheim,resonance=resonance"
 RATE_LIMIT_PER_HOUR = "5"
-# SUPPORT_EMAIL = "votre adresse"                                  # alerte à chaque nouveau ticket
-# MAIL_FROM = "Mordheim Ledger <support@mordheimledger.com>"       # domaine vérifié chez Resend
 
-# Secrets (jamais ici) : wrangler secret put GITHUB_TOKEN / RELEASE_TOKEN / RESEND_API_KEY
+# Secrets (jamais ici) : wrangler secret put GITHUB_TOKEN / RELEASE_TOKEN

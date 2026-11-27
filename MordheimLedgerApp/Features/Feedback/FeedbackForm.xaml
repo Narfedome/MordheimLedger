@@ -141,17 +141,6 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- E-mail facultatif -->
-            <Border Style="{StaticResource SectionCardBorderStyle}">
-                <VerticalStackLayout Spacing="2">
-                    <Label Text="{loc:Loc FeedbackEmail}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Email}" Keyboard="Email" Placeholder="{loc:Loc FeedbackEmailPh}"/>
-                    <Label Text="{loc:Loc FeedbackEmailInvalid}" FontSize="12" TextColor="{DynamicResource AppWarning}"
-                           IsVisible="{Binding ShowEmailError}"/>
-                    <Label Text="{loc:Loc FeedbackEmailHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                </VerticalStackLayout>
-            </Border>
-
             <Label Text="{loc:Loc FeedbackPrivacy}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" Margin="4,0"/>
         </VerticalStackLayout>
     </form:FormPageLayout>

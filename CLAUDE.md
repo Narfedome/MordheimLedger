@@ -246,10 +246,11 @@ Ledger et Resonance (`app:mordheim`/`app:resonance`), tri IA par `anthropics/cla
 (`Tools/FeedbackRelay/support-repo/` à y copier). Core : `Models/Feedback/FeedbackReport`, `Rules/FeedbackRules` (limites
 alignées sur le Worker), `Services/FeedbackClient` + `FeedbackOutbox` (file hors connexion vidée au lancement par
 `WarbandListViewModel`) ; tests `FeedbackTests.cs`. Type « Traduction à revoir » à part : le français vient surtout d'une
-traduction automatique de mordheimer.net. L'e-mail du joueur reste dans le KV du Worker, jamais dans le ticket ni chez le
-tri IA ; il est prévenu **à la sortie de la version** qui contient la correction, pas à la fermeture du ticket (décision de
-l'utilisateur) : étiquette `corrigé` posée à la main, puis le tag `v*` déclenche `.github/workflows/notify-release.yml` →
-`POST /released`. Tant que `FeedbackService.Endpoint` est nul, Paramètres ouvre encore le Google Form. Pas fait : copie de
+traduction automatique de mordheimer.net. **Aucune adresse e-mail demandée** (décision de l'utilisateur : envoyer des
+e-mails exigeait de vérifier un domaine chez Resend, retiré) : le joueur voit la correction dans les nouveautés. Suivi :
+étiquette `corrigé` posée à la main, puis le tag `v*` déclenche `.github/workflows/notify-release.yml` → `POST /released`
+(`livré:X.Y.Z`, ticket fermé). Relais déployé par copier-coller dans le tableau de bord Cloudflare
+(`Tools/FeedbackRelay/dashboard/worker.js`, généré par `npm run build:dashboard`). Tant que `FeedbackService.Endpoint` est nul, Paramètres ouvre encore le Google Form. Pas fait : copie de
 la bande jointe (attend l'export de la v2). Politique de confidentialité du site mise à jour (FR/EN).
 
 **Tests de mutation (Stryker.NET 5.1, 2026-11-11)** : `MordheimLedgerApp.Tests/stryker-config.json` mute les 5 services de la Fin de partie + `InjuryCatalogLookup` (95,38 %, les survivants restants sont équivalents). Local : `dotnet tool install -g dotnet-stryker` puis `dotnet stryker` depuis `MordheimLedgerApp.Tests` (~30 min ; `--since:master` pour les seuls fichiers modifiés), rapport dans `StrykerOutput/` (ignoré par git). CI : job « Mutation (Stryker) » de `.github/workflows/ci.yml` sur chaque PR, après les tests, en `--since` sur la branche cible, résumé markdown dans la page du check + rapport HTML en artefact ; casse sous 80 %. `coverage-analysis: off` (la capture de couverture rate l'async : faux « NoCoverage »). Les fichiers de requêtes sqlite-net (`AppDatabase*.cs`, `LibraryService`, `WarbandService`, `TranslationResolver`) portent `// Stryker disable all` : un mutant dans un arbre d'expression fait échouer le seed (« Cannot compile: Conditional ») et donne des scores faux. Service ajouté au mutate = l'ajouter aussi au `test-case-filter`.

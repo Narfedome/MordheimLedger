@@ -119,7 +119,7 @@ h1 { font-size:18px; margin:0 0 4px; text-wrap:balance; }
 
 <div class="intro">
   <h1>Nous écrire : formulaire de signalement</h1>
-  <p>Remplace le lien vers le Google Form (Paramètres › Signaler un bug). Aucun compte : l'appli envoie au relais, qui crée un ticket dans le dépôt privé de support, puis le tri IA ajoute type, priorité, zone et doublons.</p>
+  <p>Remplace le lien vers le Google Form (sans adresse e-mail : décidé le 27/11) (Paramètres › Signaler un bug). Aucun compte : l'appli envoie au relais, qui crée un ticket dans le dépôt privé de support, puis le tri IA ajoute type, priorité, zone et doublons.</p>
   <p>Les éléments marqués <b>à trancher</b> sont des propositions à valider.</p>
 </div>
 
@@ -216,14 +216,8 @@ Contenu      empreinte 3f9a…c21e
 Journal      40 dernières lignes d'erreur</pre>
         </div>
 
-        <div class="card">
-          <label class="field"><span>Votre e-mail <span class="muted">(facultatif)</span></span>
-            <input class="entry" type="email" id="email" autocomplete="email" placeholder="Pour être prévenu quand c'est corrigé">
-          </label>
-          <div class="hint">Utilisé seulement pour vous répondre, jamais publié ni partagé.</div>
-        </div>
 
-        <div class="hint">Votre message est lu par le développeur. Il est aussi analysé par une IA (Claude, Anthropic) pour le trier ; l'e-mail ne lui est pas transmis. <span style="text-decoration:underline">Confidentialité</span></div>
+        <div class="hint">Votre message est lu par le développeur. Il est aussi analysé par une IA (Claude, Anthropic) pour le trier. <span style="text-decoration:underline">Confidentialité</span></div>
       </form>
       <div class="fp-foot">
         <button class="btn secondary" type="button">Annuler</button>
@@ -267,7 +261,6 @@ Journal      40 dernières lignes d'erreur</pre>
               <tr><td>Version</td><td>1.5.2 (152)</td></tr>
               <tr><td>Appareil</td><td>Android 15 · Pixel 8 · fr</td></tr>
               <tr><td>Pièces jointes</td><td>capture-1.jpg, bande.json</td></tr>
-              <tr><td>Réponse</td><td>le joueur souhaite être prévenu (e-mail gardé à part, pas dans le ticket)</td></tr>
             </table>
           </div>
         </div>
@@ -338,7 +331,7 @@ Journal      40 dernières lignes d'erreur</pre>
   });
 
   var outcomes = {
-    ok:      '<div class="dlg-title">Merci !</div><div>Votre message est bien arrivé. Si vous avez laissé un e-mail, vous serez prévenu quand ce sera corrigé.</div><button class="btn primary">Fermer</button>',
+    ok:      '<div class="dlg-title">Merci !</div><div>Votre message est bien arrivé. Merci de prendre le temps de nous écrire !</div><button class="btn primary">Fermer</button>',
     offline: '<div class="dlg-title">Pas de connexion</div><div>Votre message est gardé sur l\'appareil et sera envoyé automatiquement au prochain lancement avec une connexion.</div><div class="warn">1 message en attente d\'envoi.</div><button class="btn primary">Fermer</button>',
     error:   '<div class="dlg-title">Envoi impossible</div><div>Le serveur a refusé le message (trop d\'envois en peu de temps). Réessayez dans une heure ; votre texte est conservé.</div><button class="btn primary">Fermer</button>'
   };

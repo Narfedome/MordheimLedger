@@ -1,8 +1,7 @@
-# À la publication d'une version (tag vX.Y.Z, poussé par Deploy/Release-*.ps1) : le relais « Nous écrire » livre
-# chaque ticket du dépôt de support étiqueté « corrigé » pour cette appli - joueur prévenu par e-mail s'il a laissé
-# son adresse, étiquette « livré:X.Y.Z », ticket fermé. Voir Tools/FeedbackRelay/README.md.
+# À la publication d'une version (tag vX.Y.Z) : le relais « Nous écrire » passe chaque ticket du dépôt de support
+# étiqueté « corrigé » pour cette appli à « livré:X.Y.Z » et le ferme. Voir Tools/FeedbackRelay/README.md.
 # Secrets : FEEDBACK_RELAY_URL (adresse du Worker), FEEDBACK_RELEASE_TOKEN (même valeur que RELEASE_TOKEN du Worker).
-name: Prévenir les joueurs
+name: Livrer les tickets corrigés
 
 on:
   push:

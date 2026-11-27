@@ -1,9 +1,10 @@
 // Relais « Nous écrire » (Cloudflare Worker) - reçoit les messages envoyés depuis Mordheim Ledger et Resonance, sans
-// compte joueur, et en fait des tickets dans le dépôt privé de support. Le jeton GitHub et la clé Resend ne quittent
-// jamais ce Worker (secrets Cloudflare) ; l'appli ne connaît que son identifiant public (APP_KEYS).
+// compte joueur, et en fait des tickets dans le dépôt privé de support. Le jeton GitHub ne quitte jamais ce Worker
+// (secret Cloudflare) ; l'appli ne connaît que son identifiant public (APP_KEYS). Aucun e-mail : pas d'adresse
+// demandée au joueur (décision du 2026-11-27, la vérification d'un domaine d'envoi n'en valait pas la peine).
 //
-//   POST /report    message du joueur  -> ticket + captures dans le dépôt + e-mail au développeur
-//   POST /released  tag de release     -> joueurs prévenus pour chaque ticket étiqueté « corrigé » de cette appli
+//   POST /report    message du joueur  -> ticket + captures dans le dépôt
+//   POST /released  tag de release     -> chaque ticket « corrigé » de cette appli devient « livré:X.Y.Z » et est fermé
 //
 // Limites alignées sur MordheimLedgerApp.Core/Rules/FeedbackRules.cs.
 
@@ -11,11 +12,8 @@ export interface Env {
   FEEDBACK_KV: KVNamespace;
   GITHUB_TOKEN: string;          // secret : jeton fin, droits Issues + Contents (lecture/écriture) sur le dépôt de support
   RELEASE_TOKEN: string;         // secret : partagé avec le workflow de release de chaque appli
-  RESEND_API_KEY?: string;       // secret facultatif : sans lui, aucun e-mail n'est envoyé
   SUPPORT_REPO: string;          // « Narfedome/support »
   APP_KEYS: string;              // « mordheim-ledger=mordheim,resonance=resonance »
-  SUPPORT_EMAIL?: string;        // destinataire des alertes « nouveau ticket »
-  MAIL_FROM?: string;            // « Mordheim Ledger <support@mordheimledger.com> » (domaine vérifié chez Resend)
   RATE_LIMIT_PER_HOUR?: string;  // 5 par défaut
 }
 
@@ -33,13 +31,9 @@ interface Report {
   summary: string;
   details: string;
   where?: string;
-  language?: string;
-  email?: string;
   technical?: Record<string, string | undefined>;
   screenshots?: { fileName: string; contentType: string; base64: string }[];
 }
-
-interface Contact { email: string; language: string; summary: string; createdAt: string }
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -91,20 +85,6 @@ async function handleReport(request: Request, env: Env): Promise<Response> {
   });
   const number = issue.number as number;
   await env.FEEDBACK_KV.put(seenKey, String(number), { expirationTtl: 60 * 60 * 24 * 30 });
-
-  // L'adresse du joueur reste ici, jamais dans le ticket (lu par le tri IA).
-  if (report.email) {
-    const contact: Contact = {
-      email: report.email.trim(), language: report.language === "en" ? "en" : "fr",
-      summary: report.summary.trim(), createdAt: new Date().toISOString(),
-    };
-    await env.FEEDBACK_KV.put(contactKey(app, number), JSON.stringify(contact));
-  }
-
-  if (env.SUPPORT_EMAIL) {
-    await sendMail(env, env.SUPPORT_EMAIL, `[${app}] #${number} ${report.summary.trim()}`,
-      `${KIND_LABEL[report.kind]} - ${report.details.trim().slice(0, 500)}\n\n${issue.html_url}`);
-  }
   return json({ issue: number }, 201);
 }
 
@@ -115,7 +95,6 @@ function validate(r: Report): string | null {
   if (typeof r.summary !== "string" || !r.summary.trim() || r.summary.length > LIMITS.summary) return "invalid_summary";
   if (typeof r.details !== "string" || !r.details.trim() || r.details.length > LIMITS.details) return "invalid_details";
   if (r.where != null && (typeof r.where !== "string" || r.where.length > LIMITS.where)) return "invalid_where";
-  if (r.email != null && (typeof r.email !== "string" || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email.trim()))) return "invalid_email";
   const shots = r.screenshots ?? [];
   if (!Array.isArray(shots) || shots.length > LIMITS.screenshots) return "too_many_screenshots";
   for (const s of shots) {
@@ -162,7 +141,6 @@ function issueBody(repo: string, app: string, r: Report, attachments: string[]):
   } else {
     lines.push("| Infos techniques | non jointes par le joueur |");
   }
-  lines.push(`| Réponse | ${r.email ? "le joueur sera prévenu à la sortie de la correction" : "pas d'e-mail laissé"} |`);
   if (t.logTail) {
     lines.push("", "<details><summary>Journal d'erreurs</summary>", "", "```", t.logTail.slice(-LIMITS.logTail).replace(/```/g, "ˋˋˋ"), "```", "</details>");
   }
@@ -173,7 +151,7 @@ function issueBody(repo: string, app: string, r: Report, attachments: string[]):
 // --- Sortie d'une version ------------------------------------------------------------------------------------------
 
 /** Appelé par le workflow de release de l'appli (tag vX.Y.Z) : chaque ticket de cette appli étiqueté « corrigé » est
- * livré dans cette version - joueur prévenu s'il a laissé une adresse, étiquette « livré:X.Y.Z », ticket fermé. */
+ * livré dans cette version - étiquette « livré:X.Y.Z », commentaire, ticket fermé. */
 async function handleReleased(request: Request, env: Env): Promise<Response> {
   if (request.headers.get("Authorization") !== `Bearer ${env.RELEASE_TOKEN}`) return json({ error: "unauthorized" }, 401);
   const { app, version } = (await request.json()) as { app?: string; version?: string };
@@ -182,36 +160,17 @@ async function handleReleased(request: Request, env: Env): Promise<Response> {
 
   const issues = (await github(env, "GET",
     `/repos/${env.SUPPORT_REPO}/issues?state=all&per_page=100&labels=${encodeURIComponent(`app:${app},${FIXED_LABEL}`)}`)) as any[];
-  const done: { issue: number; notified: boolean }[] = [];
+  const done: number[] = [];
   for (const issue of issues.filter((i) => !i.pull_request)) {
     const number = issue.number as number;
-    const raw = await env.FEEDBACK_KV.get(contactKey(app, number));
-    let notified = false;
-    if (raw) {
-      const contact = JSON.parse(raw) as Contact;
-      notified = await sendMail(env, contact.email, ...releaseMail(app, v, contact));
-      if (notified) await env.FEEDBACK_KV.delete(contactKey(app, number));
-    }
     const base = `/repos/${env.SUPPORT_REPO}/issues/${number}`;
-    // E-mail pas parti : « corrigé » reste, le joueur sera retenté à la prochaine version.
-    if (!raw || notified) await github(env, "DELETE", `${base}/labels/${encodeURIComponent(FIXED_LABEL)}`).catch(() => undefined);
+    await github(env, "DELETE", `${base}/labels/${encodeURIComponent(FIXED_LABEL)}`).catch(() => undefined);
     await github(env, "POST", `${base}/labels`, { labels: [`livré:${v}`] });
-    await github(env, "POST", `${base}/comments`, {
-      body: `Livré dans la version ${v}.${notified ? " Le joueur a été prévenu par e-mail." : raw ? " L'e-mail au joueur n'a pas pu partir (adresse gardée, nouvel essai à la prochaine version)." : ""}`,
-    });
+    await github(env, "POST", `${base}/comments`, { body: `Livré dans la version ${v}.` });
     if (issue.state === "open") await github(env, "PATCH", base, { state: "closed", state_reason: "completed" });
-    done.push({ issue: number, notified });
+    done.push(number);
   }
   return json({ version: v, issues: done }, 200);
-}
-
-function releaseMail(app: string, version: string, c: Contact): [string, string] {
-  const name = app === "resonance" ? "Resonance" : "Mordheim Ledger";
-  return c.language === "en"
-    ? [`${name} ${version}: your report has been addressed`,
-       `Hello,\n\nYou wrote to us about: "${c.summary}".\n\nVersion ${version} of ${name}, now available in the store, includes the fix. Thank you for taking the time to report it.\n\n${name}\n\n(You received this email once because you left your address in the app. It has now been deleted.)`]
-    : [`${name} ${version} : votre signalement est pris en compte`,
-       `Bonjour,\n\nVous nous aviez écrit à propos de : « ${c.summary} ».\n\nLa version ${version} de ${name}, disponible dans le store, contient la correction. Merci d'avoir pris le temps de le signaler.\n\n${name}\n\n(Vous recevez cet e-mail une seule fois parce que vous aviez laissé votre adresse dans l'appli. Elle vient d'être supprimée.)`];
 }
 
 // --- Outils --------------------------------------------------------------------------------------------------------
@@ -224,8 +183,6 @@ function appFromKey(env: Env, key: string | null): string | null {
   }
   return null;
 }
-
-const contactKey = (app: string, issue: number) => `contact:${app}:${issue}`;
 
 async function github(env: Env, method: string, path: string, body?: unknown): Promise<any> {
   const response = await fetch(`https://api.github.com${path}`, {
@@ -241,17 +198,6 @@ async function github(env: Env, method: string, path: string, body?: unknown): P
   });
   if (!response.ok) throw new Error(`GitHub ${method} ${path}: ${response.status} ${await response.text()}`);
   return response.status === 204 ? null : response.json();
-}
-
-async function sendMail(env: Env, to: string, subject: string, text: string): Promise<boolean> {
-  if (!env.RESEND_API_KEY || !env.MAIL_FROM) return false;
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: env.MAIL_FROM, to: [to], subject, text }),
-  });
-  if (!response.ok) console.error("Resend", response.status, await response.text());
-  return response.ok;
 }
 
 const json = (body: unknown, status: number) =>

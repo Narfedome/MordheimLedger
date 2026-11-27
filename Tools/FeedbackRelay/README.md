@@ -5,17 +5,16 @@ Les joueurs de Mordheim Ledger (et de Resonance) écrivent depuis l'appli, **san
 ```
 Appli (Paramètres › Nous écrire)
   └─ POST /report ──► Worker Cloudflare (ce dossier)
-                        ├─ ticket dans le dépôt privé de support (+ captures dans attachments/)
-                        ├─ e-mail du joueur gardé à part (KV), jamais dans le ticket
-                        └─ alerte e-mail au développeur (facultatif)
+                        └─ ticket dans le dépôt privé de support (+ captures dans attachments/)
 Dépôt de support : workflow « Tri IA » ─► type, priorité ia:P0-P3, zone, doublons, commentaire technique
 Correction mergée : vous posez l'étiquette « corrigé » sur le ticket
 Tag de release vX.Y.Z ─► .github/workflows/notify-release.yml ─► POST /released
-                        └─ e-mail au joueur, étiquette « livré:X.Y.Z », ticket fermé
+                        └─ étiquette « livré:X.Y.Z », ticket fermé
 ```
 
-Le joueur n'est donc prévenu **qu'à la sortie de la version qui contient la correction**, pas quand le ticket est
-résolu sur GitHub.
+Aucun e-mail : l'appli ne demande pas d'adresse au joueur (décidé le 2026-11-27 - envoyer des e-mails exige de
+vérifier un domaine d'expédition chez un service comme Resend, pas jugé utile). Les corrections sont annoncées dans les
+nouveautés de chaque version.
 
 ## Mise en place (une fois)
 
@@ -30,7 +29,6 @@ résolu sur GitHub.
      Les dépôts MordheimLedger et Resonance étant publics, le tri IA lit leur code sans autre jeton.
 4. Notifications : par défaut, GitHub envoie un e-mail à l'auteur d'un ticket quand quelqu'un le commente. Les
    tickets étant créés avec votre jeton, vous êtes « auteur » : vous recevez un e-mail à chaque commentaire du tri IA.
-   Pour être prévenu dès la création, renseigner aussi `SUPPORT_EMAIL` (étape 3).
 
 ### 2. Jeton GitHub du relais
 GitHub › Settings › Developer settings › Fine-grained tokens › nouveau jeton :
@@ -47,7 +45,7 @@ GitHub › Settings › Developer settings › Fine-grained tokens › nouveau j
 5. Settings › Variables and Secrets › Add :
    - Text : `SUPPORT_REPO` = `Narfedome/support`, `APP_KEYS` = `mordheim-ledger=mordheim,resonance=resonance`,
      `RATE_LIMIT_PER_HOUR` = `5` ;
-   - Secret : `GITHUB_TOKEN` (étape 2), `RELEASE_TOKEN` (un mot de passe inventé, voir étape 5).
+   - Secret : `GITHUB_TOKEN` (étape 2), `RELEASE_TOKEN` (un mot de passe inventé, voir étape 4).
 6. L'adresse du Worker est dans Settings › Domains & Routes (`https://feedback-relay.<compte>.workers.dev`).
 
 Après une modification de `src/index.ts` : `npm run build:dashboard`, puis recoller `dashboard/worker.js`. Dans ce
@@ -61,39 +59,29 @@ npm install
 npx wrangler login
 npx wrangler kv namespace create FEEDBACK_KV      # recopier l'id dans wrangler.toml
 npx wrangler secret put GITHUB_TOKEN              # le jeton de l'étape 2
-npx wrangler secret put RELEASE_TOKEN             # une longue valeur aléatoire, gardée pour l'étape 5
+npx wrangler secret put RELEASE_TOKEN             # une longue valeur aléatoire, gardée pour l'étape 4
 npx wrangler deploy                               # affiche l'adresse : https://feedback-relay.<compte>.workers.dev
 ```
 
 Vérifier `SUPPORT_REPO` dans `wrangler.toml`.
 
-### 4. E-mails (facultatif mais nécessaire pour prévenir les joueurs)
-1. Compte [Resend](https://resend.com) (gratuit : 3 000 e-mails/mois), domaine `mordheimledger.com` vérifié (quelques
-   enregistrements DNS).
-2. Dans `wrangler.toml` : décommenter `MAIL_FROM` et `SUPPORT_EMAIL`.
-3. `npx wrangler secret put RESEND_API_KEY`, puis `npx wrangler deploy`.
-
-Sans Resend, tout fonctionne sauf les e-mails : les adresses restent gardées et les joueurs seront prévenus à la
-première version publiée après sa mise en place.
-
-### 5. Appli et release
+### 4. Appli et release
 1. `MordheimLedgerApp/Services/FeedbackService.cs` et, dans Resonance, `Resonance/Services/FeedbackService.cs` :
    renseigner `Endpoint` avec `https://…workers.dev/report`. Tant qu'il est nul, Paramètres ouvre toujours l'ancien
    formulaire Google.
 2. Secrets des **deux** dépôts (MordheimLedger et Resonance) : `FEEDBACK_RELAY_URL` (`https://…workers.dev`, sans
    `/report`) et `FEEDBACK_RELEASE_TOKEN` (même valeur que `RELEASE_TOKEN`). Chaque dépôt a son
    `.github/workflows/notify-release.yml`, qui n'annonce que les tickets de son appli.
-3. Avant la sortie : remplir de nouveau la section « Sécurité des données » de la fiche Google Play (messages, e-mail
-   facultatif, informations de l'appareil, envoyés à la demande de l'utilisateur) et l'équivalent du Microsoft Store.
+3. Avant la sortie : remplir de nouveau la section « Sécurité des données » de la fiche Google Play (messages, captures,
+   informations de l'appareil, envoyés à la demande de l'utilisateur) et l'équivalent du Microsoft Store.
 
 ## Au quotidien
 
 - Un ticket arrive avec `app:mordheim`, `type:…` et `à-trier` ; le tri IA remplace `à-trier` par `ia:P0`-`ia:P3`,
   `zone:…` et commente. Les étiquettes `ia:` sont des propositions : la priorité définitive reste la vôtre.
 - Une fois la correction mergée sur `master` : étiquette **`corrigé`** sur le ticket.
-- Au tag de release (`Deploy/Release-*.ps1`) : les tickets `corrigé` deviennent `livré:X.Y.Z`, sont fermés, et les
-  joueurs qui ont laissé une adresse reçoivent un e-mail (dans la langue de leur appli). Si un e-mail échoue,
-  `corrigé` reste et l'envoi est retenté à la version suivante.
+- Au tag de release (`Deploy/Release-*.ps1`) : les tickets `corrigé` deviennent `livré:X.Y.Z`
+  et sont fermés.
 - Retrier un ticket : Actions › Tri IA › Run workflow, avec son numéro.
 
 ## Limites

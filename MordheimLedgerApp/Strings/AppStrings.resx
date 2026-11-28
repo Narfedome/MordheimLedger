@@ -297,7 +297,7 @@ Détail : {0}</value>
     <value>Trésorerie libre, recrutement/achats/édition du roster sans limite de budget, et possibilité d'assigner directement les compétences et sorts déjà appris.</value>
   </data>
   <data name="WarbandsSpellRollTitle" xml:space="preserve">
-    <value>Sort de départ</value>
+    <value>Tirer un sort</value>
   </data>
   <data name="WarbandsSpellRollPh" xml:space="preserve">
     <value>1D6</value>
@@ -806,7 +806,7 @@ Détail : {0}</value>
     <value>Nom du guerrier</value>
   </data>
   <data name="WarriorArchetypeIsHero" xml:space="preserve">
-    <value>Hero</value>
+    <value>Héros</value>
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé</value>
@@ -3499,7 +3499,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Nouveau chef</value>
   </data>
   <data name="LeaderSuccessionDeadFormat" xml:space="preserve">
-    <value>{0} ({1}) est mort.</value>
+    <value>Mort au combat : {0} ({1}).</value>
   </data>
   <data name="LeaderSuccessionNoLeader" xml:space="preserve">
     <value>La bande n'a plus de chef.</value>
@@ -3544,7 +3544,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>{0} reçoit : {1}. À sa première progression, un sort ou une prière au choix au lieu de lancer les dés.</value>
   </data>
   <data name="LeaderSuccessionNoHireNoteFormat" xml:space="preserve">
-    <value>Le livre interdit de recruter un nouveau {0} : le recrutement l'affichera en ambre.</value>
+    <value>Le livre interdit de recruter un nouveau chef ({0}) : le recrutement l'affichera en ambre.</value>
   </data>
   <data name="LeaderSuccessionRehireNoteFormat" xml:space="preserve">
     <value>Un {0} pourra être racheté après la prochaine partie : il reprendra alors la tête de la bande.</value>
@@ -3565,7 +3565,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>proposé</value>
   </data>
   <data name="RecruitLeaderNotAllowedFormat" xml:space="preserve">
-    <value>Le livre interdit de recruter un nouveau {0} : à la mort du chef, un Héros de la bande prend sa place.</value>
+    <value>Le livre interdit de recruter un nouveau chef ({0}) : à la mort du chef, un Héros de la bande prend sa place.</value>
   </data>
   <data name="RecruitLeaderRehireNextGameFormat" xml:space="preserve">
     <value>Le livre permet de racheter un {0} seulement après la prochaine partie.</value>

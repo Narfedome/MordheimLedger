@@ -123,6 +123,8 @@ public partial class EndOfGamePageViewModel
             var opening = dead is not null
                 ? string.Format(Loc["LeaderSuccessionDeadFormat"], dead.Name, ArchetypeOf(dead)?.Name ?? string.Empty)
                 : Loc["LeaderSuccessionNoLeader"];
+            // Aucun Héros candidat : la carte ambre de l'effondrement explique la suite, pas « Choisissez le Héros… ».
+            if (LeaderCandidates.Count == 0) return opening;
             var rule = _leaderProposal?.Kind == SuccessionKind.DesignatedSuccessor
                 ? Loc["LeaderSuccessionDesignatedRule"]
                 : Loc["LeaderSuccessionBookRule"];

@@ -49,6 +49,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 public partial class EndOfGamePageViewModel : BaseViewModel
 {
     private readonly ISkillPickerService _skillPicker;
+    private readonly ISpellPickerService _spellPicker;
     private readonly IMutationPickerService _mutationPicker;
     private readonly IDetailDialogService _detailDialogs;
     private readonly ILibraryService _libraryService;
@@ -658,9 +659,11 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     public EndOfGamePageViewModel(ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService,
         IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, ISellEquipmentPickerService sellEquipmentPicker,
-        IDramatisPersonaPickerService dramatisPersonaPicker, IWarbandService warbandService, IMutationPickerService mutationPicker)
+        IDramatisPersonaPickerService dramatisPersonaPicker, IWarbandService warbandService, IMutationPickerService mutationPicker,
+        ISpellPickerService spellPicker)
     {
         _skillPicker = skillPicker;
+        _spellPicker = spellPicker;
         _detailDialogs = detailDialogs;
         _libraryService = libraryService;
         _hiredSwordPicker = hiredSwordPicker;

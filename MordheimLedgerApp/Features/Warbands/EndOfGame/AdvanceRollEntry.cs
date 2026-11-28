@@ -221,7 +221,8 @@ public partial class AdvanceRollEntry : ObservableObject
     /// le texte de la table) - vide tant que rien n'est résolu.</summary>
     public string ShortSummary =>
         SelectedSkills.Count > 0 ? SelectedSkillsText
-        : HasSpellSelected ? SelectedSpell!.Name
+        // Sort déjà connu : difficulté -1, même « (−1) » que la puce de la fiche.
+        : HasSpellSelected ? (_warrior.Spells.Any(s => s.Item.Id == SelectedSpell!.Id) ? $"{SelectedSpell!.Name} (−1)" : SelectedSpell!.Name)
         : ResolvedField is not null ? $"{ResolvedFieldLabel} +1"
         : ResultText ?? string.Empty;
 

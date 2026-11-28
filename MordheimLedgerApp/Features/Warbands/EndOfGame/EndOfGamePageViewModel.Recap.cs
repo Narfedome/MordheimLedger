@@ -74,7 +74,7 @@ public partial class EndOfGamePageViewModel
     public bool HasRareItemsRecap => RareItemsWithResults.Count > 0;
 
     public IEnumerable<string> RareItemsRecapLines => RareItemsWithResults.Select(e => e.IsSearchingForCharacter
-        ? string.Format(Loc["EndOfGameRecapRareCharacterFormat"], e.HeroName, e.SelectedCharacterDisplayName)
+        ? string.Format(Loc["EndOfGameRecapRareCharacterFormat"], e.HeroName, e.SelectedCharacterDisplayName ?? e.SelectedCharacter?.Name)
         : string.Format(Loc["EndOfGameRecapRareItemFormat"], e.HeroName, e.SelectedItem?.Name,
             (e.EffectiveCost ?? 0) - HaggleSavingsAt(RareSpotId(RareItemSearchEntries.IndexOf(e)))));
 
@@ -229,7 +229,13 @@ public partial class EndOfGamePageViewModel
                 lines.Add(string.Format(Loc[row.Warrior.IsHostileThisBattle ? "HistoryDramatisPersonaCorruptedSentence" : "HistoryDramatisPersonaDepartedSentence"], row.Name));
             if (NeedsLeaderSuccession && SelectedLeaderCandidate is { } leader)
                 lines.Add(string.Format(Loc["HistoryNewLeaderSentence"], leader.Name));
+            if (HasLeaderRehireInfo) lines.Add(LeaderRehireInfoText);
+            if (NeedsLeaderSuccession && ArchiveWarbandAtFinish)
+                lines.Add(Loc["HistoryWarbandArchivedSentence"]);
             lines.AddRange(TakenItemLines.Select(line => string.Format(Loc["EndOfGameRecapItemConsumedFormat"], line)));
+            // Conséquences et pertes (Dépendance, Stupidité, Habits de soie) : mêmes phrases qu'ApplySingleUseAsync.
+            lines.AddRange(AfterBattleRolls.Where(e => e.Outcome is not null).Select(e => $"{e.Warrior.Name} ({e.Item.Name}) : {e.ResultText}"));
+            lines.AddRange(OutOfActionLosses.Where(e => e.IsLost).Select(e => string.Format(Loc["HistoryOutOfActionLossSentence"], e.Item.Name, e.Warrior.Name)));
             return lines;
         }
     }

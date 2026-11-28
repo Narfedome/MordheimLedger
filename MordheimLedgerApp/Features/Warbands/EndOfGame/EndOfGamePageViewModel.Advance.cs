@@ -98,15 +98,15 @@ public partial class EndOfGamePageViewModel
         entry.SelectedSpell = rolled;
     }
 
-    /// <summary>Nouveau chef (1.6) : sort/prière au choix au lieu de lancer les dés, dans les écoles de la bande.</summary>
+    /// <summary>Nouveau chef (1.6) : sort/prière au choix au lieu de lancer les dés, dans les écoles de la bande - le
+    /// sélecteur du Codex (une liste), pas le dialog de tirage (recette 1.6 : « au choix » s'ouvrait sur un 1D6).</summary>
     [RelayCommand]
     private async Task PickSuccessorSpell(AdvanceRollEntry entry)
     {
         var (row, _, _) = FindAdvanceOwner(entry);
-        var knownSpellIds = row.Warrior.Spells.Select(s => s.Item.Id).ToList();
-        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(row.MagicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds, allowDuplicate: true)));
-        if (rolled is null) return;
-        entry.ChooseSuccessorSpell(rolled);
+        var picked = await _spellPicker.PickSpellsAsync(row.MagicSchools.Select(s => s.Id).ToList());
+        if (picked.FirstOrDefault() is not { } spell) return;
+        entry.ChooseSuccessorSpell(spell);
     }
 
     [RelayCommand]

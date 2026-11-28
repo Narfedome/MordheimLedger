@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Components.Dialogs;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Components.FormPage;
 
@@ -48,15 +49,32 @@ public static class FormNavigator
         shell.Navigated -= OnNavigated;
         if (!removedNatively && page.Parent is not null)
         {
-            await DialogNavigationGate.RunAsync(() =>
-            {
-                var stack = page.Navigation.NavigationStack;
-                if (stack.Count > 0 && ReferenceEquals(stack[^1], page))
-                    return page.Navigation.PopAsync(animated: true);
-                page.Navigation.RemovePage(page);
-                return Task.CompletedTask;
-            }, $"FormNavigator.Pop({formName})");
+            await DialogNavigationGate.RunAsync(() => RemoveFormPageAsync(shell, page), $"FormNavigator.Pop({formName})");
         }
         return result;
+    }
+
+    /// <summary>Retire la page de formulaire de la pile de l'onglet qui la contient vraiment. Plantage remonté par
+    /// Google Play (2026-11-28) : `page.Navigation.RemovePage` sur une page qui n'était plus dans la pile de son onglet
+    /// (Shell l'avait déjà retirée sans lui ôter son Parent) remontait jusqu'à la navigation de la fenêtre, qui
+    /// refuse RemovePage (InvalidOperationException, appli fermée). On cherche donc l'onglet dont la pile contient la
+    /// page ; aucun = déjà retirée, rien à faire. Le nettoyage ne doit jamais faire planter l'appli.</summary>
+    private static async Task RemoveFormPageAsync(Shell shell, Page page)
+    {
+        try
+        {
+            var owner = shell.Items.SelectMany(item => item.Items)
+                .Select(section => section.Navigation)
+                .FirstOrDefault(navigation => navigation.NavigationStack.Contains(page));
+            if (owner is null) return;
+
+            var stack = owner.NavigationStack;
+            if (ReferenceEquals(stack[^1], page)) await owner.PopAsync(animated: true);
+            else owner.RemovePage(page);
+        }
+        catch (InvalidOperationException ex)
+        {
+            CrashLogger.LogException("FormNavigator.RemoveFormPageAsync", ex);
+        }
     }
 }

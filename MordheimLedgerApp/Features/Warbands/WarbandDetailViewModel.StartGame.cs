@@ -26,10 +26,7 @@ public partial class WarbandDetailViewModel
         var unavailableWarriors = new List<UnavailableWarriorRow>();
         foreach (var row in AllActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick))
             unavailableWarriors.Add(new UnavailableWarriorRow(row, row.SickChipText));
-        foreach (var row in RetiredWarriors)
-            unavailableWarriors.Add(new UnavailableWarriorRow(row, Loc["WarriorStatusRetired"]));
-        foreach (var row in DeadWarriors)
-            unavailableWarriors.Add(new UnavailableWarriorRow(row, Loc["WarriorStatusDead"]));
+        // Morts et partis (Mentions honorables) ne sont pas « indisponibles » : ils ont quitté la bande.
 
         // Vieille blessure (32) : seul résultat mécanisé qui exige un jet avant CHAQUE bataille plutôt
         // qu'une fois à la Fin de Partie où il a été obtenu - voir SERIOUS_INJURIES_STATUS.md. Restreint

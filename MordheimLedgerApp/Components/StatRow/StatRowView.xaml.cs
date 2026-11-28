@@ -110,6 +110,8 @@ public partial class StatRowView : ContentView
     private void Build()
     {
         _valueLabels.Clear();
+        _valueBindings.Clear();
+        _overriddenValues.Clear();
         // Grille 17 colonnes (9 stats + 8 fines colonnes séparatrices) x 3 lignes (Abrégé / filet
         // horizontal / Valeur), pour un vrai rendu "tableau" en lecture seule (demande explicite -
         // comparé à 3 pistes visuelles, celle-ci choisie). Colonne séparatrice plus large (8) que le filet
@@ -172,6 +174,7 @@ public partial class StatRowView : ContentView
             label.SetBinding(Label.TextProperty, valueBinding);
             label.SetBinding(Label.FontSizeProperty, new Binding(nameof(ValueFontSize), source: this));
             _valueLabels.Add(label);
+            _valueBindings.Add(valueBinding);
             value = label;
         }
         grid.Add(value, column, 2);
@@ -224,8 +227,16 @@ public partial class StatRowView : ContentView
         CharacteristicField.Leadership,
     ];
 
+    /// <summary>Liaison d'origine de chaque valeur : rétablie avant chaque application, sinon la valeur de la partie
+    /// restait figée après la partie ou sur la carte d'un autre guerrier (recette 1.6 : I 6 au lieu de 3).</summary>
+    private readonly List<Binding> _valueBindings = new();
+    private readonly HashSet<int> _overriddenValues = new();
+
     private void ApplyGameModifiers(Warrior? warrior)
     {
+        foreach (var i in _overriddenValues)
+            _valueLabels[i].SetBinding(Label.TextProperty, _valueBindings[i]);
+        _overriddenValues.Clear();
         if (warrior is null || GameModifiers is not { Count: > 0 } modifiers) return;
         for (var i = 0; i < _valueLabels.Count && i < Fields.Length; i++)
         {
@@ -234,6 +245,7 @@ public partial class StatRowView : ContentView
             if (CharacteristicModifier.Read(warrior, field) is not { } value) continue;
             var label = _valueLabels[i];
             label.RemoveBinding(Label.TextProperty);
+            _overriddenValues.Add(i);
             label.Text = SingleUseRules.GameValue(value, field, modifiers).ToString();
             label.SetDynamicResource(Label.TextColorProperty, "AppGameModifier");
         }

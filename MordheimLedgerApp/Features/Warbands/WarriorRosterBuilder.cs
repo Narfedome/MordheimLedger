@@ -30,14 +30,22 @@ public sealed class WarriorRosterBuilder
     /// Grimoire + Savoir Arcanique).</summary>
     private readonly IReadOnlyList<MagicSchool> _allMagicSchools;
 
-    /// <summary>La règle « Chef » du catalogue, prise sur un type de guerrier de la bande qui la porte.</summary>
-    private SpecialRule? LeaderRule => _recruitableArchetypes.SelectMany(a => a.SpecialRules)
+    /// <summary>La règle « Chef » du catalogue (passée par l'appelant), sinon prise sur un type de guerrier de la bande
+    /// qui la porte - absente des types d'une bande dont le chef a une règle à la place (Reiklander : Discipline Militaire).</summary>
+    private readonly SpecialRule? _catalogLeaderRule;
+
+    private SpecialRule? LeaderRule => _catalogLeaderRule ?? _recruitableArchetypes.SelectMany(a => a.SpecialRules)
         .FirstOrDefault(r => r.OfficialId == Core.Data.OfficialIds.LeaderRule);
+
+    /// <summary>Un successeur (chef dont le type n'est pas un type de chef) : il faut la règle Chef du catalogue.</summary>
+    public static bool HasSuccessor(IEnumerable<Warrior> warriors, IEnumerable<WarriorArchetype> archetypes) =>
+        warriors.Any(w => w.IsLeader && archetypes.FirstOrDefault(a => a.Id == w.WarriorArchetypeId)?.IsLeader != true);
 
     public WarriorRosterBuilder(List<WarriorArchetype> recruitableArchetypes, List<HiredSword> recruitableHiredSwords,
         List<DramatisPersona> recruitableDramatisPersonae, List<SpecialRule> bandWideSpecialRules, List<MagicSchool> bandMagicSchools,
-        Dictionary<int, string> warbandArchetypeNames, IReadOnlyList<MagicSchool>? allMagicSchools = null)
+        Dictionary<int, string> warbandArchetypeNames, IReadOnlyList<MagicSchool>? allMagicSchools = null, SpecialRule? leaderRule = null)
     {
+        _catalogLeaderRule = leaderRule;
         _allMagicSchools = allMagicSchools ?? Array.Empty<MagicSchool>();
         _recruitableArchetypes = recruitableArchetypes;
         _recruitableHiredSwords = recruitableHiredSwords;
@@ -98,8 +106,9 @@ public sealed class WarriorRosterBuilder
         // puce en double déjà écarté pour les Blessures le 2026-08-26 : "une fois via ... dans Blessures,
         // une fois via ... dans Règles spéciales").
         var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id);
-        // Successeur du chef (1.6) : il porte la règle Chef même si son type ne l'a pas (ex. le Nécromancien).
-        if (warrior.IsLeader && LeaderRule is { } leaderRule && mergedRules.All(r => r.Id != leaderRule.Id))
+        // Successeur du chef (1.6) : il porte la règle Chef même si son type ne l'a pas (ex. le Nécromancien). Pas pour un
+        // type de chef, dont la règle peut remplacer Chef (Capitaine Reiklander : Discipline Militaire).
+        if (warrior.IsLeader && archetype?.IsLeader != true && LeaderRule is { } leaderRule && mergedRules.All(r => r.Id != leaderRule.Id))
             mergedRules = mergedRules.Append(leaderRule);
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.

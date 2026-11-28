@@ -23,9 +23,11 @@ public enum TomeUseKind
 /// un seul guerrier et ne vaut qu'au moment où le Grimoire est trouvé : le donner ensuite à un autre n'a pas d'effet.</summary>
 public static class TomeOfMagicRules
 {
-    /// <summary>Qui peut utiliser le Grimoire, et de quelle façon. Les morts ne comptent pas (filtrés par l'appelant).</summary>
+    /// <summary>Qui peut utiliser le Grimoire, et de quelle façon. Les morts ne comptent pas (filtrés par l'appelant). Un
+    /// Dramatis Persona n'utilise que son propre équipement (décision de l'utilisateur, recette 1.6) : jamais candidat.</summary>
     public static (TomeUseKind Kind, IReadOnlyList<Warrior> Users) Users(IReadOnlyList<TomeCandidate> warband)
     {
+        warband = warband.Where(c => !c.Warrior.IsDramatisPersona).ToList();
         var casters = warband.Where(c => c.IsSpellcaster).Select(c => c.Warrior).ToList();
         if (casters.Count > 0) return (TomeUseKind.ExtraSpell, casters);
         var learners = warband.Where(c => c.HasArcaneLore).Select(c => c.Warrior).ToList();

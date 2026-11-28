@@ -61,7 +61,7 @@ public partial class EndOfGamePageViewModel
             nameof(DismissedWarriorsRecapLines), nameof(HasEquipmentTradingRecap), nameof(EquipmentTradingPurchasedRecapLines),
             nameof(EquipmentTradingSoldRecapLines), nameof(HasRecruitmentRecap), nameof(RecruitedHeroesRecapLines),
             nameof(RecruitedHenchmenRecapLines), nameof(VeteranTopUpsRecapLines), nameof(ExplorationJoinRecapLines),
-            nameof(ProjectedWarbandRatingDisplay), nameof(RecapWarriorRows),
+            nameof(ProjectedWarbandRatingDisplay), nameof(RecapWarriorRows), nameof(RosterChangesRecapLines), nameof(HasRosterChangesRecap),
         })
             OnPropertyChanged(name);
         foreach (var row in AllOutcomeRows) row.NotifySummaryChanged();
@@ -159,7 +159,8 @@ public partial class EndOfGamePageViewModel
         get
         {
             var total = 0;
-            foreach (var row in WarriorRows.Where(r => !r.IsDead && !r.Warrior.IsHostileThisBattle))
+            // Vagabond (Bertha...) : repart à Terminer, ne compte plus (161 projetés pour 56 réels, recette 1.6).
+            foreach (var row in WarriorRows.Where(r => !r.IsDead && !r.Warrior.IsHostileThisBattle && !IsDepartingWanderer(r)))
             {
                 var headCount = row.SurvivingHeadCount - row.EffectiveDismissCount;
                 if (headCount <= 0) continue;
@@ -205,6 +206,35 @@ public partial class EndOfGamePageViewModel
             return total;
         }
     }
+
+    /// <summary>Vagabond qui repart après la bataille - même règle qu'ApplyWandererDeparturesAsync.</summary>
+    private bool IsDepartingWanderer(WarriorOutcomeRow row) =>
+        row.Warrior.IsDramatisPersona && !row.IsDead && row.Warrior.Status is not (Core.Models.WarriorStatus.Dead or Core.Models.WarriorStatus.Retired)
+        && _dramatisPersonaCatalog.FirstOrDefault(p => p.Id == row.Warrior.DramatisPersonaId) is { IsWanderer: true };
+
+    /// <summary>Ce que Terminer écrit en plus (recette 1.6) : départ des Vagabonds, nouveau chef, sort du Grimoire, objets à
+    /// usage unique consommés - mêmes phrases que l'Historique.</summary>
+    public List<string> RosterChangesRecapLines
+    {
+        get
+        {
+            var lines = new List<string>();
+            foreach (var entry in TomeEntries)
+            {
+                if (entry.IsNobody) lines.Add(Loc["HistoryTomeUnusedSentence"]);
+                else if (entry.SelectedUser is { } user && entry.ResolvedSpell is { } spell)
+                    lines.Add(string.Format(Loc[entry.IsArcaneLore ? "HistoryTomeLesserMagicSentence" : "HistoryTomeSpellSentence"], user.Name, spell.Name));
+            }
+            foreach (var row in WarriorRows.Where(IsDepartingWanderer))
+                lines.Add(string.Format(Loc[row.Warrior.IsHostileThisBattle ? "HistoryDramatisPersonaCorruptedSentence" : "HistoryDramatisPersonaDepartedSentence"], row.Name));
+            if (NeedsLeaderSuccession && SelectedLeaderCandidate is { } leader)
+                lines.Add(string.Format(Loc["HistoryNewLeaderSentence"], leader.Name));
+            lines.AddRange(TakenItemLines.Select(line => string.Format(Loc["EndOfGameRecapItemConsumedFormat"], line)));
+            return lines;
+        }
+    }
+
+    public bool HasRosterChangesRecap => RosterChangesRecapLines.Count > 0;
 
     private static int GroupExperienceAfterBattle(WarriorOutcomeRow row) =>
         row.Warrior.Experience + row.ExperienceGained + row.SeriousInjuryBonusExperience + row.ExplorationBonusExperience;

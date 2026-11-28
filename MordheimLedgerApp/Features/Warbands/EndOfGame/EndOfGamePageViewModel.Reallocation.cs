@@ -86,7 +86,7 @@ public partial class EndOfGamePageViewModel
         get
         {
             yield return ReallocationCarrier.ForReserve(BuildReserve(ReserveStage.Final).Lines.ToList(), Loc["EndOfGameEquipmentTradingStashSource"]);
-            foreach (var row in WarriorRows.Where(r => r.IsHero && !r.IsFullyDismissed && !r.IsDead))
+            foreach (var row in WarriorRows.Where(IsReallocationHero))
                 yield return WithOutOfListWarning(ReallocationCarrier.ForHero(row));
             foreach (var slot in RecruitedHeroRows.SelectMany(r => r.NameSlots))
                 yield return WithOutOfListWarning(ReallocationCarrier.ForRecruit(slot));
@@ -100,7 +100,12 @@ public partial class EndOfGamePageViewModel
         return carrier;
     }
 
-    public bool HasEligibleReallocationCarriers => WarriorRows.Any(r => r.IsHero && !r.IsFullyDismissed && !r.IsDead) || RecruitedHeroRows.Any();
+    public bool HasEligibleReallocationCarriers => WarriorRows.Any(IsReallocationHero) || RecruitedHeroRows.Any();
+
+    /// <summary>Un Dramatis Persona n'utilise que son propre équipement (décision de l'utilisateur, recette 1.6) : ni
+    /// donneur ni receveur dans Réallouer.</summary>
+    private static bool IsReallocationHero(WarriorOutcomeRow r) =>
+        r.IsHero && !r.IsFullyDismissed && !r.IsDead && !r.Warrior.IsDramatisPersona;
 
     [RelayCommand]
     private Task ShowReallocationItemDetail(ReallocatableItem item) =>

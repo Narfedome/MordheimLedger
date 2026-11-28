@@ -27,6 +27,7 @@ public partial class WarbandListViewModel : BaseViewModel
     private ObservableCollection<WarbandRow> rows = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
     private bool hasWarbands;
 
     /// <summary>Onglet « Archivées » (1.6) : bandes archivées, consultables en lecture seule et désarchivables.

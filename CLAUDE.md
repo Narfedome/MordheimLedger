@@ -295,6 +295,9 @@ Les valeurs de la partie s'affichent en bleu `AppGameModifier` (bleu de sélecti
 clair ; `StatRowView.GameModifiers`) : pas l'accent, trop proche du vert « a progressé » dans la palette wyrdstone.
 Habits de soie : `EquipmentItem.LostAfterOutOfActionOn`/`LostAfterOutOfActionLeaderOnly` (1D6 ≤ 3 si le chef a été mis hors
 de combat), carte dans la même étape de Fin de partie. Le reroll de Déroute n'est pas géré (déroute écartée).
+**Dramatis Personae hors du périmètre de l'équipement** (décision de l'utilisateur, recette du 2026-11-28) : ils n'utilisent
+que leur propre équipement - jamais utilisateurs d'un Grimoire (`TomeOfMagicRules.Users`), ni porteurs dans Réallouer,
+« Équiper » de l'inventaire ou la ligne « qui peut l'équiper » de l'Achat.
 Tout est éditable dans l'onglet Règles du formulaire d'objet (`StatModifierEditRow`/`AfterBattleEditRow`, aperçu et messages
 ambre via `SingleUseRules.FirstOverlap`/`IsOutsideDice`, jamais bloquants) ; une règle gagnée est gardée par id officiel, ou
 `AfterBattleOutcome.SpecialRuleLocalId` pour une règle créée dans le Codex. Textes partagés (récap, conflits de synchro, Fin de

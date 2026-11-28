@@ -1605,6 +1605,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRecapHiredSwordHiredFormat" xml:space="preserve">
     <value>Engagé : {0} ({1} CO)</value>
   </data>
+  <data name="EndOfGameRecapRosterChangesHeading" xml:space="preserve">
+    <value>Changements de l'effectif</value>
+  </data>
+  <data name="EndOfGameRecapItemConsumedFormat" xml:space="preserve">
+    <value>{0} : consommé.</value>
+  </data>
   <data name="EndOfGameRecapDismissedHeading" xml:space="preserve">
     <value>Renvoyés</value>
   </data>

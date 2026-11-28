@@ -93,9 +93,10 @@ public partial class EndOfGamePageViewModel : IHaggleHost
         return listId is { } id ? _equipmentListItemIds.GetValueOrDefault(id) : null;
     }
 
-    /// <summary>La bande telle qu'elle est à l'achat : guerriers encore là, avec leurs compétences.</summary>
+    /// <summary>La bande telle qu'elle est à l'achat : guerriers encore là, avec leurs compétences. Sans les Dramatis
+    /// Personae, qui n'utilisent que leur propre équipement (décision de l'utilisateur, recette 1.6).</summary>
     private List<EquipmentCarrier> RosterCarriers() =>
-        LivingRows.Select(r => new EquipmentCarrier(r.Warrior, EquipmentListItemIdsFor(r.Warrior))).ToList();
+        LivingRows.Where(r => !r.Warrior.IsDramatisPersona).Select(r => new EquipmentCarrier(r.Warrior, EquipmentListItemIdsFor(r.Warrior))).ToList();
 
     private async Task RefreshReallocationAfterListsLoadAsync()
     {

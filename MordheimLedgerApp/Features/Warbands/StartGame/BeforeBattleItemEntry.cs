@@ -14,6 +14,9 @@ public partial class DiceModifierEntry : ObservableObject
     public GameStatModifier Modifier { get; }
     public string Label { get; }
 
+    /// <summary>« D3 » plutôt que le « D6 » générique.</summary>
+    public string DicePlaceholder => $"D{Modifier.DiceSides}";
+
     [ObservableProperty]
     private string roll = string.Empty;
 

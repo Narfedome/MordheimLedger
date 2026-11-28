@@ -2565,6 +2565,16 @@ public class RulesTests
     }
 
     [Fact]
+    public void TomeOfMagic_Users_DramatisPersonaNeverUsesIt()
+    {
+        var bertha = new Warrior { Id = 1, Name = "Bertha", DramatisPersonaId = 7 };
+        var (kind, users) = TomeOfMagicRules.Users(new[] { new TomeCandidate(bertha, IsSpellcaster: true, HasArcaneLore: false) });
+
+        Assert.Equal(TomeUseKind.Nobody, kind);
+        Assert.Empty(users);
+    }
+
+    [Fact]
     public void TomeOfMagic_Users_ArcaneLoreWithoutWizard()
     {
         var scholar = new Warrior { Id = 2 };

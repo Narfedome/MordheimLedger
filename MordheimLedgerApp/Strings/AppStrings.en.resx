@@ -1605,6 +1605,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRecapHiredSwordHiredFormat" xml:space="preserve">
     <value>Hired: {0} ({1} gc)</value>
   </data>
+  <data name="EndOfGameRecapRosterChangesHeading" xml:space="preserve">
+    <value>Roster changes</value>
+  </data>
+  <data name="EndOfGameRecapItemConsumedFormat" xml:space="preserve">
+    <value>{0}: used up.</value>
+  </data>
   <data name="EndOfGameRecapDismissedHeading" xml:space="preserve">
     <value>Dismissed</value>
   </data>

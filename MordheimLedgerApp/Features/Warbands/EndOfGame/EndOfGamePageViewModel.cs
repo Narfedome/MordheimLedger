@@ -890,7 +890,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         var cooldownDramatisPersonaIds = await _warbandService.GetDramatisPersonaCooldownIdsAsync(warband.Id);
 
         var rosterBuilder = new WarriorRosterBuilder(localizedWarriorArchetypes, localizedHiredSwords, dramatisPersonaCatalog,
-            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, await _libraryService.GetMagicSchoolsAsync(language));
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, await _libraryService.GetMagicSchoolsAsync(language),
+            specialRulesByOfficialId.GetValueOrDefault(OfficialIds.LeaderRule));
         var allWarriors = await _warbandService.GetWarriorsAsync(warbandId, language);
         var allRows = rosterBuilder.BuildRows(allWarriors);
         return new EndOfGameData(warband, explorationResults, localizedEquipment, equipmentItemsByOfficialId, specialRulesByOfficialId,

@@ -125,6 +125,19 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasRosterChangesRecap}">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{loc:Loc EndOfGameRecapRosterChangesHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RosterChangesRecapLines}" Spacing="2">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Label Text="{Binding .}" FontSize="13"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
                 <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasDismissedWarriorsRecap}">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{loc:Loc EndOfGameRecapDismissedHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>

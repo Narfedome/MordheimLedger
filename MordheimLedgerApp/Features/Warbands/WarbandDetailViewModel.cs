@@ -329,8 +329,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
 
         var loaded = await _warbandService.GetWarriorsAsync(id, language);
+        var leaderRule = WarriorRosterBuilder.HasSuccessor(loaded, recruitableArchetypes)
+            ? (await _libraryService.GetSpecialRulesAsync(language)).FirstOrDefault(r => r.OfficialId == Core.Data.OfficialIds.LeaderRule)
+            : null;
         var rosterBuilder = new WarriorRosterBuilder(recruitableArchetypes, recruitableHiredSwords, recruitableDramatisPersonae,
-            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, await _libraryService.GetMagicSchoolsAsync(language));
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, await _libraryService.GetMagicSchoolsAsync(language), leaderRule);
         var rows = rosterBuilder.BuildRows(loaded);
 
         var inventory = await _warbandService.GetWarbandEquipmentAsync(id, language);
@@ -349,7 +352,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task ShowInventory()
     {
-        var candidates = AllActiveWarriorRows.ToList();
+        // Un Dramatis Persona n'utilise que son propre équipement (décision de l'utilisateur, recette 1.6).
+        var candidates = AllActiveWarriorRows.Where(r => !r.Warrior.IsDramatisPersona).ToList();
         var dialogViewModel = new WarbandInventoryDialogViewModel(Inventory, candidates, _warbandService);
         await ShowDialogAsync(new WarbandInventoryDialog(dialogViewModel));
         await LoadAsync(WarbandId);

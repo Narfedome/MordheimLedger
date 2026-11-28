@@ -37,6 +37,9 @@ public partial class AfterBattleRollEntry : ObservableObject
     public int DiceSides { get; }
     public string Label { get; }
 
+    /// <summary>« 2D6 » plutôt que le « D6 » générique des jets d'Hommes de main.</summary>
+    public string DicePlaceholder => $"{(DiceCount > 1 ? DiceCount.ToString() : string.Empty)}D{DiceSides}";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Outcome), nameof(ResultText), nameof(HasResult))]
     private string roll = string.Empty;
